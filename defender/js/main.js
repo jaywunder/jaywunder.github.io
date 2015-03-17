@@ -1,5 +1,5 @@
 (function() {
-  var Attacker, Defender, Entity, FRICTION,
+  var Attacker, Defender, Entity, FRICTION, e, onFrame, path,
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -12,14 +12,15 @@
       this.v = new Point(vx, vy);
       this.a = new Point(ax, ay);
       this.alive = true;
-      this.makeSelf();
+      this.strokeColor = '#bab8b5';
+      this.makeBody();
     }
 
-    Entity.prototype.makeSelf = function() {
-      var body;
-      return body = new Rectangle({
-        size: [this.size, this.size],
-        center: [this.pos.x, this.pos.y]
+    Entity.prototype.makeBody = function() {
+      return this.body = new Path.Circle({
+        center: [this.pos.x, this.pos.y],
+        radius: this.size,
+        strokeColor: this.strokeColor
       });
     };
 
@@ -43,7 +44,7 @@
       Defender.__super__.constructor.call(this, size, x, y, vx, vy, ax, ay);
     }
 
-    Defender.prototype.makeSelf = function() {};
+    Defender.prototype.body = null;
 
     Defender.prototype.update = function() {
       this.draw;
@@ -61,26 +62,24 @@
   Attacker = (function(_super) {
     __extends(Attacker, _super);
 
-    function Attacker(size, x, y, vx, vy, ax, ay) {
-      Attacker.__super__.constructor.call(this, size, x, y, vx, vy, ax, ay);
+    function Attacker() {
+      return Attacker.__super__.constructor.apply(this, arguments);
     }
-
-    Attacker.prototype.update = function() {
-      this.draw;
-      return this.move;
-    };
-
-    Attacker.prototype.draw = function() {};
-
-    Attacker.prototype.move = function() {
-      this.x += this.vx;
-      return this.y += this.vy;
-    };
 
     return Attacker;
 
   })(Entity);
 
-  new Entity(10, 0, 0, 0, 0, 0, 0);
+  e = new Attacker(50, 0, 0, 0, 0, 0, 0);
+
+  onFrame = function() {
+    return console.log("wot, m8?");
+  };
+
+  path = new Path.Circle({
+    center: view.center,
+    radius: 30,
+    strokeColor: 'white'
+  });
 
 }).call(this);

@@ -4,19 +4,22 @@ class Entity
     constructor: (size, x, y, vx, vy, ax, ay) ->
         @size = size
 
-        @pos = new Point x, y
-        @v = new Point vx, vy
-        @a = new Point ax, ay
+        @pos = new Point(x, y)
+        @v = new Point(vx, vy)
+        @a = new Point(ax, ay)
 
         @alive = true
 
-        @makeSelf()
+        @strokeColor = '#bab8b5'
 
-    makeSelf: ->
-        body = new Rectangle {
-            size: [@size, @size],
-            center: [@pos.x, @pos.y]
-        }
+        @makeBody()
+
+    makeBody: () ->
+        @body = new Path.Circle({
+            center: [@pos.x, @pos.y],
+            radius: @size,
+            strokeColor: @strokeColor
+        })
 
     update: ->
         @draw()
@@ -31,8 +34,7 @@ class Defender extends Entity
     constructor: (size, x, y, vx, vy, ax, ay) ->
         super size, x, y, vx, vy, ax, ay
 
-    makeSelf: ->
-
+    body: null
 
     update: ->
         @draw
@@ -45,18 +47,16 @@ class Defender extends Entity
 
 
 class Attacker extends Entity
-    constructor: (size, x, y, vx, vy, ax, ay) ->
-        super size, x, y, vx, vy, ax, ay
-
-    update: ->
-        @draw
-        @move
-
-    draw: ->
 
 
-    move: ->
-        @x += @vx
-        @y += @vy
+e = new Attacker(50, 0, 0, 0, 0, 0, 0);
 
-new Entity(10, 0, 0, 0, 0, 0, 0);
+onFrame = () ->
+    console.log("wot, m8?")
+
+
+path = new Path.Circle({
+    center: view.center,
+    radius: 30,
+    strokeColor: 'white'
+})

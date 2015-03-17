@@ -162,7 +162,7 @@ function Fish() {
     }
 }
 
-var fishAmount = 10;
+var fishAmount = 1;
 var fishes = [];
 for (var i = 0; i < fishAmount; i++) {
     fishes.push(new Fish());
@@ -177,3 +177,8 @@ function onFrame() {
 function onMouseDown() {
 
 }
+
+
+$(window).on("keydown", function() {
+	console.log("hey there")
+});
