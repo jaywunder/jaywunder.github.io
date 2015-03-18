@@ -45,6 +45,7 @@
       Defender.__super__.constructor.call(this, size, x, y, vx, vy, ax, ay);
       this.armSize = 1.5;
       this.strokeWidth = this.size / 7;
+      this.frame = 0;
       this.primaryColor = "#00b3ff";
       this.secondaryColor = "#23e96b";
       this.makeBody();
@@ -75,19 +76,26 @@
         strokeColor: this.secondaryColor,
         strokeWidth: this.strokeWidth
       });
-      this.circle = new Path.Circle({
-        center: [this.pos.x, this.pos.y],
+      this.outerCircle = new Path.Circle({
+        center: this.pos,
         radius: this.size,
         strokeColor: this.primaryColor,
         strokeWidth: this.strokeWidth
       });
-      return this.body = new Group([this.arm0, this.arm1, this.arm2, this.arm3, this.circle]);
+      this.innerCircle = new Path.Circle({
+        center: this.pos,
+        radius: 10,
+        strokeColor: this.secondaryColor,
+        strokeWidth: this.strokeWidth
+      });
+      return this.body = new Group([this.arm0, this.arm1, this.arm2, this.arm3, this.outerCircle, this.innerCircle]);
     };
 
     Defender.prototype.update = function() {
       this.draw();
       this.move();
-      return this.rotate(1);
+      this.rotate(1);
+      return this.innerCircle.radius += 20;
     };
 
     Defender.prototype.draw = function() {};
@@ -105,23 +113,84 @@
   Attacker = (function(_super) {
     __extends(Attacker, _super);
 
-    function Attacker() {
-      return Attacker.__super__.constructor.apply(this, arguments);
+    function Attacker(size, x, y, vx, vy, ax, ay) {
+      Attacker.__super__.constructor.call(this, size, x, y, vx, vy, ax, ay);
+      this.strokeColor = "#f24e3f";
+      this.strokeWidth = this.size / 10;
+      this.makeBody();
     }
+
+    Attacker.prototype.makeBody = function() {
+      this.body = new Path({
+        segments: [
+          new Segment({
+            point: [this.pos.x + this.size, this.pos.y - this.size]
+          }), new Segment({
+            point: [this.pos.x - this.size, this.pos.y - this.size]
+          }), new Segment({
+            point: [this.pos.x, this.pos.y + this.size]
+          })
+        ],
+        strokeColor: this.strokeColor,
+        strokeWidth: this.strokeWidth,
+        closed: true
+      });
+      return console.log(this.body);
+    };
+
+    Attacker.prototype.update = function() {
+      this.move();
+      this.rotate();
+      return this.keepInBounds();
+    };
+
+    Attacker.prototype.move = function() {
+      this.v += this.a;
+      this.pos += this.v;
+      return this.body.position = this.pos;
+    };
+
+    Attacker.prototype.rotate = function() {
+      var theta;
+      theta = Math.atan(this.v.y / this.v.x) * (180 / Math.PI) - 90;
+      if (this.v.x < 0) {
+        theta += 180;
+      }
+      if (theta !== this.body.data.rotation) {
+        this.body.rotation = theta;
+      }
+      return this.body.data.rotation = theta;
+    };
+
+    Attacker.prototype.keepInBounds = function() {
+      if (this.pos.x > view.bounds.width + (this.size * 2)) {
+        this.pos.x = -this.size * 1.5;
+      }
+      if (this.pos.y > view.bounds.height + (this.size * 2)) {
+        this.pos.y = -this.size * 1.5;
+      }
+      if (this.pos.x < -this.size * 2) {
+        this.pos.x = view.bounds.width + (this.size * 1.5);
+      }
+      if (this.pos.y < -this.size * 2) {
+        return this.pos.y = view.bounds.height + (this.size * 1.5);
+      }
+    };
 
     return Attacker;
 
   })(Entity);
 
-  defender = new Defender(100, view.center.x, view.center.y, 0, 0, 0, 0);
+  defender = new Attacker(50, view.center.x, view.center.y, 5, -5, 0, 0);
 
   onFrame = function() {
-    console.log("wot, m8?");
     defender.update();
     return view.draw();
   };
 
   setInterval(onFrame, 10 / 6);
+
+  console.log(view);
 
   path = new Path.Circle({
     center: view.center + 300,
