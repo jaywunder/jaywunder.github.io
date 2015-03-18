@@ -1,5 +1,8 @@
 FRICTION = 0.6
 
+################################################################################
+#ENTITY#########################################################################
+################################################################################
 class Entity
     constructor: (size, x, y, vx, vy, ax, ay) ->
         @size = size
@@ -10,9 +13,7 @@ class Entity
 
         @alive = true
 
-        @strokeColor = '#bab8b5'
-
-        @makeBody()
+        @primaryColor = '#bab8b5'
 
     makeBody: () ->
         @body = new Path.Circle({
@@ -29,16 +30,66 @@ class Entity
 
     move: ->
 
+    rotate: ->
 
+################################################################################
+#DEFENDER#######################################################################
+################################################################################
 class Defender extends Entity
     constructor: (size, x, y, vx, vy, ax, ay) ->
         super size, x, y, vx, vy, ax, ay
 
-    body: null
+        @armSize = 1.5
+        @strokeWidth = 6
+
+        @primaryColor = "#00b3ff"
+        @secondaryColor = "#23e96b"
+
+        @makeBody()
+
+    makeBody: ->
+        #Bottom Right
+        @arm0 = new Path.Line({
+                from: @pos + @size
+                to: @pos + (@size * @armSize)
+                strokeColor: @secondaryColor
+                strokeWidth: @strokeWidth
+            })
+        #Top Right
+        @arm1 = new Path.Line({
+                from: [@pos.x + @size, @pos.y - @size]
+                to: [@pos.x + (@size * @armSize), @pos.y - (@size * @armSize)]
+                strokeColor: @secondaryColor
+                strokeWidth: @strokeWidth
+            })
+        #Top Left
+        @arm2 = new Path.Line({
+                from: @pos - @size
+                to: @pos + (@size * @armSize * -1)
+                strokeColor: @secondaryColor
+                strokeWidth: @strokeWidth
+            })
+        #Bottom Left
+        @arm3 = new Path.Line({
+                from: [@pos.x - @size, @pos.y + @size]
+                to: [@pos.x - (@size * @armSize), @pos.y + (@size * @armSize)]
+                strokeColor: @secondaryColor
+                strokeWidth: @strokeWidth
+            })
+        @circle = new Path.Circle({
+                center: [@pos.x, @pos.y]
+                radius: @size
+                strokeColor: @primaryColor
+                strokeWidth: @strokeWidth
+            })
+
+        @body = new Group([@arm0, @arm1, @arm2, @arm3, @circle])
+        return @body
 
     update: ->
-        @draw
-        @move
+        @draw()
+        @move()
+        @rotate()
 
     draw: ->
 
@@ -46,17 +97,26 @@ class Defender extends Entity
     move: ->
 
 
+    rotate: ->
+        
+
+
+################################################################################
+#ATTACKER#######################################################################
+################################################################################
 class Attacker extends Entity
 
-
-e = new Attacker(50, 0, 0, 0, 0, 0, 0);
+################################################################################
+#MAIN###########################################################################
+################################################################################
+defender = new Defender(50, view.center.x, view.center.y, 0, 0, 0, 0);
 
 onFrame = () ->
     console.log("wot, m8?")
 
 
 path = new Path.Circle({
-    center: view.center,
+    center: view.center + 300,
     radius: 30,
     strokeColor: 'white'
 })
