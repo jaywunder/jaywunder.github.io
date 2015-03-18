@@ -40,7 +40,7 @@ class Defender extends Entity
         super size, x, y, vx, vy, ax, ay
 
         @armSize = 1.5
-        @strokeWidth = 6
+        @strokeWidth = @size / 7
 
         @primaryColor = "#00b3ff"
         @secondaryColor = "#23e96b"
@@ -84,12 +84,11 @@ class Defender extends Entity
             })
 
         @body = new Group([@arm0, @arm1, @arm2, @arm3, @circle])
-        return @body
 
     update: ->
         @draw()
         @move()
-        @rotate()
+        @rotate(1)
 
     draw: ->
 
@@ -98,7 +97,8 @@ class Defender extends Entity
 
 
     rotate: ->
-        
+        @body.rotate(1)
+
 
 
 ################################################################################
@@ -109,11 +109,14 @@ class Attacker extends Entity
 ################################################################################
 #MAIN###########################################################################
 ################################################################################
-defender = new Defender(50, view.center.x, view.center.y, 0, 0, 0, 0);
+defender = new Defender(100, view.center.x, view.center.y, 0, 0, 0, 0);
 
 onFrame = () ->
     console.log("wot, m8?")
+    defender.update()
+    view.draw()
 
+setInterval(onFrame, 10/6)
 
 path = new Path.Circle({
     center: view.center + 300,

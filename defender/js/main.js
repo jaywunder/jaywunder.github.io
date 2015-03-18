@@ -44,7 +44,7 @@
     function Defender(size, x, y, vx, vy, ax, ay) {
       Defender.__super__.constructor.call(this, size, x, y, vx, vy, ax, ay);
       this.armSize = 1.5;
-      this.strokeWidth = 6;
+      this.strokeWidth = this.size / 7;
       this.primaryColor = "#00b3ff";
       this.secondaryColor = "#23e96b";
       this.makeBody();
@@ -81,21 +81,22 @@
         strokeColor: this.primaryColor,
         strokeWidth: this.strokeWidth
       });
-      this.body = new Group([this.arm0, this.arm1, this.arm2, this.arm3, this.circle]);
-      return this.body;
+      return this.body = new Group([this.arm0, this.arm1, this.arm2, this.arm3, this.circle]);
     };
 
     Defender.prototype.update = function() {
       this.draw();
       this.move();
-      return this.rotate();
+      return this.rotate(1);
     };
 
     Defender.prototype.draw = function() {};
 
     Defender.prototype.move = function() {};
 
-    Defender.prototype.rotate = function() {};
+    Defender.prototype.rotate = function() {
+      return this.body.rotate(1);
+    };
 
     return Defender;
 
@@ -112,11 +113,15 @@
 
   })(Entity);
 
-  defender = new Defender(50, view.center.x, view.center.y, 0, 0, 0, 0);
+  defender = new Defender(100, view.center.x, view.center.y, 0, 0, 0, 0);
 
   onFrame = function() {
-    return console.log("wot, m8?");
+    console.log("wot, m8?");
+    defender.update();
+    return view.draw();
   };
+
+  setInterval(onFrame, 10 / 6);
 
   path = new Path.Circle({
     center: view.center + 300,
