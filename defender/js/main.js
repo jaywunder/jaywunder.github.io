@@ -1,5 +1,5 @@
 (function() {
-  var ATTACKER_SIZE, Attacker, DEFENDER_SIZE, Defender, Entity, FRICTION, Game, game, onFrame, path,
+  var ATTACKER_SIZE, Attacker, DEFENDER_SIZE, Defender, Entity, FRICTION, Game, TRACKING, game, onFrame, path,
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -8,6 +8,8 @@
   DEFENDER_SIZE = $(window).width() / 25;
 
   ATTACKER_SIZE = $(window).width() / 25;
+
+  TRACKING = false;
 
   Entity = (function() {
     function Entity(size, x, y, vx, vy, ax, ay) {
@@ -45,12 +47,12 @@
 
     function Defender(size, x, y) {
       Defender.__super__.constructor.call(this, size, x, y, 0, 0, 0, 0);
+      this.name = "defender";
       this.armSize = 1.5;
       this.strokeWidth = this.size / 7;
-      this.frame = 0;
       this.primaryColor = "#00b3ff";
       this.secondaryColor = "#23e96b";
-      this.maxVelocity = 2;
+      this.maxVelocity = 5;
       this.makeBody();
     }
 
@@ -103,12 +105,10 @@
     Defender.prototype.move = function() {
       this.v += this.a;
       this.pos += this.v;
-      this.keepInBounds();
       return this.body.position = this.pos;
     };
 
     Defender.prototype.keyBoard = function(e) {
-      console.log(e.type);
       if (e.type === 'keydown') {
         return this.keyDown(e);
       }
@@ -139,30 +139,16 @@
         }
       }
       if (key === 32) {
-        return console.log("space");
+        this.v = this.a = new Point(0, 0);
+        console.log("space");
+      }
+      if (key === 16) {
+        TRACKING = !TRACKING;
+        return console.log(TRACKING);
       }
     };
 
     Defender.prototype.keyUp = function(e) {};
-
-    Defender.prototype.isInBounds = function() {
-      return true;
-    };
-
-    Defender.prototype.keepInBounds = function() {
-      if (this.pos.x > view.bounds.width + (this.size * 2)) {
-        this.pos.x = -this.size * 1.5;
-      }
-      if (this.pos.y > view.bounds.height + (this.size * 2)) {
-        this.pos.y = -this.size * 1.5;
-      }
-      if (this.pos.x < -this.size * 2) {
-        this.pos.x = view.bounds.width + (this.size * 1.5);
-      }
-      if (this.pos.y < -this.size * 2) {
-        return this.pos.y = view.bounds.height + (this.size * 1.5);
-      }
-    };
 
     Defender.prototype.rotate = function() {
       return this.body.rotate(0.6);
@@ -176,7 +162,8 @@
     __extends(Attacker, _super);
 
     function Attacker(size, x, y, target) {
-      Attacker.__super__.constructor.call(this, size, x, y, 0, 0, 0, 0);
+      Attacker.__super__.constructor.call(this, size, x, y, _.random(-5, 5), _.random(-5, 5), 0, 0);
+      this.name = "attacker";
       this.target = target;
       this.strokeColor = "#f24e3f";
       this.strokeWidth = this.size / 10;
@@ -203,8 +190,7 @@
 
     Attacker.prototype.update = function() {
       this.move();
-      this.rotate();
-      return this.keepInBounds();
+      return this.rotate();
     };
 
     Attacker.prototype.trackTarget = function() {
@@ -240,21 +226,6 @@
       return this.body.data.rotation = theta;
     };
 
-    Attacker.prototype.keepInBounds = function() {
-      if (this.pos.x > view.bounds.width + (this.size * 2)) {
-        this.pos.x = -this.size * 1.5;
-      }
-      if (this.pos.y > view.bounds.height + (this.size * 2)) {
-        this.pos.y = -this.size * 1.5;
-      }
-      if (this.pos.x < -this.size * 2) {
-        this.pos.x = view.bounds.width + (this.size * 1.5);
-      }
-      if (this.pos.y < -this.size * 2) {
-        return this.pos.y = view.bounds.height + (this.size * 1.5);
-      }
-    };
-
     return Attacker;
 
   })(Entity);
@@ -265,10 +236,12 @@
       this.difficulty = 1;
       this.attackerAmount = Math.floor(this.difficulty * 3);
       this.makeEntities();
+      this.attackerpos = new Path.Circle(new Point(0, 0), 20);
+      this.attackerpos.fillColor = "#FFFFFF";
     }
 
     Game.prototype.makeEntities = function() {
-      var def, i, _i, _ref, _results;
+      var def, i, _i, _ref;
       def = new Defender(DEFENDER_SIZE, view.center.x, view.center.y);
       $(window).on('keydown', function(e) {
         return def.keyBoard(e);
@@ -276,15 +249,17 @@
         return def.keyBoard(e);
       });
       this.entities.push(def);
-      _results = [];
-      for (i = _i = 0, _ref = this.attackerAmount; _i < _ref; i = _i += 1) {
-        _results.push(this.entities.push(new Attacker(ATTACKER_SIZE, view.center.x, view.center.y)));
+      for (i = _i = 0, _ref = this.attackerAmount; _i <= _ref; i = _i += 1) {
+        this.entities.push(new Attacker(ATTACKER_SIZE, view.center.x, view.center.y, def));
       }
-      return _results;
+      return console.log(this.entities);
     };
 
     Game.prototype.mainloop = function() {
-      return this.updateEntities();
+      this.updateEntities();
+      this.checkCollisions();
+      this.keepInBounds();
+      return view.draw();
     };
 
     Game.prototype.updateEntities = function() {
@@ -298,8 +273,45 @@
       return _results;
     };
 
-    Game.prototype.collideEntities = function(index) {
-      return collideEntities(index + 1);
+    Game.prototype.collide = function(e1, e2) {};
+
+    Game.prototype.checkCollisions = function(index) {
+      var e, _i, _ref, _ref1;
+      if (index == null) {
+        index = 0;
+      }
+      for (e = _i = _ref = index + 1, _ref1 = this.entities.length; _i < _ref1; e = _i += 1) {
+        if (this.entities[index].pos.getDistance(this.entities[e].pos) <= this.entities[index].size + this.entities[e].size) {
+          this.collide(this.entities[index], this.entities[e]);
+        }
+      }
+      if (index + 1 < this.entities.length) {
+        return this.checkCollisions(index + 1);
+      }
+    };
+
+    Game.prototype.keepInBounds = function() {
+      var entity, _i, _len, _ref, _results;
+      _ref = this.entities;
+      _results = [];
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        entity = _ref[_i];
+        if (entity.pos.x > view.bounds.width + (entity.size * 2)) {
+          entity.pos.x = -entity.size * 1.5;
+        }
+        if (entity.pos.y > view.bounds.height + (entity.size * 2)) {
+          entity.pos.y = -entity.size * 1.5;
+        }
+        if (entity.pos.x < -entity.size * 2) {
+          entity.pos.x = view.bounds.width + (entity.size * 1.5);
+        }
+        if (entity.pos.y < -entity.size * 2) {
+          _results.push(entity.pos.y = view.bounds.height + (entity.size * 1.5));
+        } else {
+          _results.push(void 0);
+        }
+      }
+      return _results;
     };
 
     return Game;
@@ -309,11 +321,10 @@
   game = new Game();
 
   onFrame = function() {
-    game.mainloop();
-    return view.draw();
+    return game.mainloop();
   };
 
-  setInterval(onFrame, 10 / 6);
+  setInterval(onFrame, 100 / 6);
 
   path = new Path.Circle({
     center: view.center + 300,

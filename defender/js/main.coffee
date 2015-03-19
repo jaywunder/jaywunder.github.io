@@ -1,7 +1,7 @@
 FRICTION = 0.6
 DEFENDER_SIZE = $(window).width() / 25
 ATTACKER_SIZE = $(window).width() / 25
-
+TRACKING = false
 
 ################################################################################
 #ENTITY#########################################################################
@@ -40,12 +40,12 @@ class Defender extends Entity
     constructor: (size, x, y) ->
         super size, x, y, 0, 0, 0, 0
 
+        @name = "defender"
         @armSize = 1.5
         @strokeWidth = @size / 7
-        @frame = 0
         @primaryColor = "#00b3ff"
         @secondaryColor = "#23e96b"
-        @maxVelocity = 2
+        @maxVelocity = 5
 
         @makeBody()
 
@@ -96,19 +96,17 @@ class Defender extends Entity
     update: () ->
         @move()
         @rotate()
-        # @keepInBounds()
         @innerCircle.radius += 20
 
     move: () ->
         #velocity changes
         @v   += @a
         @pos += @v #if @isInBounds()
-        @keepInBounds()
         #move @body to @pos
         @body.position = @pos
 
     keyBoard: (e) ->
-        console.log(e.type)
+        # console.log(e.type)
         if e.type is 'keydown'
             @keyDown(e)
 
@@ -128,20 +126,14 @@ class Defender extends Entity
             # console.log("down")
             @v.y += accel if @v.y < @maxVelocity
         if key is 32
+            @v = @a = new Point(0, 0)
             console.log("space")
+        if key is 16
+            TRACKING = !TRACKING
+            console.log(TRACKING)
 
     keyUp: (e) ->
-
-
-    isInBounds: () ->
-        # TODO: fix isInBounds method
-        return true
-
-    keepInBounds: () ->
-        @pos.x = -@size * 1.5 if @pos.x > view.bounds.width  + (@size * 2)
-        @pos.y = -@size * 1.5 if @pos.y > view.bounds.height + (@size * 2)
-        @pos.x = view.bounds.width  + (@size * 1.5) if @pos.x < -@size * 2
-        @pos.y = view.bounds.height + (@size * 1.5) if @pos.y < -@size * 2
+        #TODO: slow down defender on keyup?
 
     rotate: () ->
         @body.rotate(0.6)
@@ -153,7 +145,9 @@ class Defender extends Entity
 ################################################################################
 class Attacker extends Entity
     constructor: (size, x, y, target) ->
-        super size, x, y, 0, 0, 0, 0
+        super size, x, y, _.random(-5, 5), _.random(-5, 5), 0, 0
+
+        @name = "attacker"
 
         @target = target
         @strokeColor = "#f24e3f"
@@ -181,12 +175,12 @@ class Attacker extends Entity
         console.log(@body)
 
     update: () ->
+        # if TRACKING is true
+        # @trackTarget()
         @move()
         @rotate()
-        @keepInBounds()
 
     trackTarget: () ->
-        #TODO: track the defender
         @v.x -= @a.x if @target.pos.x < @pos.x # defender to the left
         @v.y -= @a.y if @target.pos.y < @pos.y # defender is above
         @v.x += @a.x if @target.pos.x > @pos.x # defender to the right
@@ -206,13 +200,6 @@ class Attacker extends Entity
         @body.rotation = theta if theta != @body.data.rotation
         @body.data.rotation = theta
 
-    keepInBounds: () ->
-        @pos.x = -@size * 1.5 if @pos.x > view.bounds.width + (@size * 2)
-        @pos.y = -@size * 1.5 if @pos.y > view.bounds.height + (@size * 2)
-        @pos.x = view.bounds.width  + (@size * 1.5) if @pos.x < -@size * 2
-        @pos.y = view.bounds.height + (@size * 1.5) if @pos.y < -@size * 2
-
-
 ################################################################################
 #GAME###########################################################################
 ################################################################################
@@ -224,6 +211,8 @@ class Game
         @attackerAmount = Math.floor(@difficulty * 3)
 
         @makeEntities()
+        @attackerpos = new Path.Circle(new Point(0, 0), 20)
+        @attackerpos.fillColor = "#FFFFFF"
 
     makeEntities: () ->
         def = new Defender(DEFENDER_SIZE, view.center.x, view.center.y)
@@ -234,23 +223,42 @@ class Game
             def.keyBoard(e)
         )
         @entities.push def
-        for i in [0...@attackerAmount] by 1
-            @entities.push new Attacker(ATTACKER_SIZE, view.center.x, view.center.y)
+        for i in [0..@attackerAmount] by 1
+            @entities.push new Attacker(ATTACKER_SIZE, view.center.x, view.center.y, def)
+
+        console.log @entities
 
     mainloop: () ->
         @updateEntities()
-        # @collideEntities(0)
+        @checkCollisions()
+        @keepInBounds()
+        # @attackerpos.position = @entities[3].body.position
+        view.draw()
 
     updateEntities: () ->
         for entity in @entities
-            #console.log(entity)
             entity.update()
 
-    collideEntities: (index) ->
-        #for e in [index...@entities.length] by 1
-            #console.log(@entities[e])
+    collide: (e1, e2) ->
+        # console.log(e1.name + " just collided with " + e2.name)
 
-        collideEntities(index + 1)
+    checkCollisions: (index) ->
+        index ?= 0
+
+        for e in [index + 1...@entities.length] by 1
+            # console.log @entities[e].pos
+            if @entities[index].pos.getDistance(@entities[e].pos) <= @entities[index].size + @entities[e].size
+                @collide(@entities[index], @entities[e])
+
+        if index + 1 < @entities.length
+            @checkCollisions(index + 1)
+
+    keepInBounds: () ->
+        for entity in @entities
+            entity.pos.x = -entity.size * 1.5 if entity.pos.x > view.bounds.width  + (entity.size * 2)
+            entity.pos.y = -entity.size * 1.5 if entity.pos.y > view.bounds.height + (entity.size * 2)
+            entity.pos.x = view.bounds.width  + (entity.size * 1.5) if entity.pos.x < -entity.size * 2
+            entity.pos.y = view.bounds.height + (entity.size * 1.5) if entity.pos.y < -entity.size * 2
 
 
 ################################################################################
@@ -263,9 +271,8 @@ game = new Game()
 onFrame = () ->
     # defender.update()
     game.mainloop()
-    view.draw()
 
-setInterval(onFrame, 10/6)
+setInterval(onFrame, 100/6)
 
 
 
