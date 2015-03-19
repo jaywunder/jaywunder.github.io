@@ -108,22 +108,30 @@ class Defender extends Entity
         @body.position = @pos
 
     keyBoard: (e) ->
+        console.log(e.type)
+        if e.type is 'keydown'
+            @keyDown(e)
+
+    keyDown: (e) ->
         accel = 0.5
-        key = e.keyCode
-        if key is 97 # left
+        key = e.which
+        if key is 65 or key is 37 # left
             # console.log("left")
             @v.x -= accel if @v.x > -@maxVelocity
-        if key is 119 # up
+        if key is 87 or key is 38 # up
             # console.log("up")
             @v.y -= accel if @v.y > -@maxVelocity
-        if key is 100 # right
+        if key is 68 or key is 39 # right
             # console.log("right")
             @v.x += accel if @v.x < @maxVelocity
-        if key is 115 # down
+        if key is 83 or key is 40 # down
             # console.log("down")
             @v.y += accel if @v.y < @maxVelocity
         if key is 32
             console.log("space")
+
+    keyUp: (e) ->
+
 
     isInBounds: () ->
         # TODO: fix isInBounds method
@@ -138,6 +146,7 @@ class Defender extends Entity
     rotate: () ->
         @body.rotate(0.6)
 
+#TODO: make a laser class
 
 ################################################################################
 #ATTACKER#######################################################################
@@ -176,7 +185,7 @@ class Attacker extends Entity
         @rotate()
         @keepInBounds()
 
-    trackDefender: () ->
+    trackTarget: () ->
         #TODO: track the defender
         @v.x -= @a.x if @target.pos.x < @pos.x # defender to the left
         @v.y -= @a.y if @target.pos.y < @pos.y # defender is above
@@ -218,9 +227,11 @@ class Game
 
     makeEntities: () ->
         def = new Defender(DEFENDER_SIZE, view.center.x, view.center.y)
-        $(window).on('keypress', (e) ->
+        $(window)
+        .on('keydown', (e) ->
             def.keyBoard(e)
-            console.log(e)
+        ).on('keyup', (e) ->
+            def.keyBoard(e)
         )
         @entities.push def
         for i in [0...@attackerAmount] by 1
@@ -232,12 +243,12 @@ class Game
 
     updateEntities: () ->
         for entity in @entities
-            console.log(entity)
+            #console.log(entity)
             entity.update()
 
     collideEntities: (index) ->
-        for e in [index...@entities.length] by 1
-            console.log(@entities[e])
+        #for e in [index...@entities.length] by 1
+            #console.log(@entities[e])
 
         collideEntities(index + 1)
 
@@ -255,11 +266,6 @@ onFrame = () ->
     view.draw()
 
 setInterval(onFrame, 10/6)
-
-# $(window).on("keypress",(e) ->
-#     # defender.keyBoard(e)
-#     # console.log(e)
-#     )
 
 
 

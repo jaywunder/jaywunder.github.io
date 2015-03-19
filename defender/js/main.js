@@ -108,25 +108,32 @@
     };
 
     Defender.prototype.keyBoard = function(e) {
+      console.log(e.type);
+      if (e.type === 'keydown') {
+        return this.keyDown(e);
+      }
+    };
+
+    Defender.prototype.keyDown = function(e) {
       var accel, key;
       accel = 0.5;
-      key = e.keyCode;
-      if (key === 97) {
+      key = e.which;
+      if (key === 65 || key === 37) {
         if (this.v.x > -this.maxVelocity) {
           this.v.x -= accel;
         }
       }
-      if (key === 119) {
+      if (key === 87 || key === 38) {
         if (this.v.y > -this.maxVelocity) {
           this.v.y -= accel;
         }
       }
-      if (key === 100) {
+      if (key === 68 || key === 39) {
         if (this.v.x < this.maxVelocity) {
           this.v.x += accel;
         }
       }
-      if (key === 115) {
+      if (key === 83 || key === 40) {
         if (this.v.y < this.maxVelocity) {
           this.v.y += accel;
         }
@@ -135,6 +142,8 @@
         return console.log("space");
       }
     };
+
+    Defender.prototype.keyUp = function(e) {};
 
     Defender.prototype.isInBounds = function() {
       return true;
@@ -198,7 +207,7 @@
       return this.keepInBounds();
     };
 
-    Attacker.prototype.trackDefender = function() {
+    Attacker.prototype.trackTarget = function() {
       if (this.target.pos.x < this.pos.x) {
         this.v.x -= this.a.x;
       }
@@ -261,9 +270,10 @@
     Game.prototype.makeEntities = function() {
       var def, i, _i, _ref, _results;
       def = new Defender(DEFENDER_SIZE, view.center.x, view.center.y);
-      $(window).on('keypress', function(e) {
-        def.keyBoard(e);
-        return console.log(e);
+      $(window).on('keydown', function(e) {
+        return def.keyBoard(e);
+      }).on('keyup', function(e) {
+        return def.keyBoard(e);
       });
       this.entities.push(def);
       _results = [];
@@ -283,17 +293,12 @@
       _results = [];
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         entity = _ref[_i];
-        console.log(entity);
         _results.push(entity.update());
       }
       return _results;
     };
 
     Game.prototype.collideEntities = function(index) {
-      var e, _i, _ref;
-      for (e = _i = index, _ref = this.entities.length; _i < _ref; e = _i += 1) {
-        console.log(this.entities[e]);
-      }
       return collideEntities(index + 1);
     };
 
