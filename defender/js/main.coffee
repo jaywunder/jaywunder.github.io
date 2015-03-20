@@ -1,4 +1,5 @@
 FRICTION = 0.6
+SPRING = 0.6
 DEFENDER_SIZE = $(window).width() / 25
 ATTACKER_SIZE = $(window).width() / 25
 TRACKING = false
@@ -99,38 +100,29 @@ class Defender extends Entity
         @innerCircle.radius += 20
 
     move: () ->
-        #velocity changes
-        @v   += @a
-        @pos += @v #if @isInBounds()
-        #move @body to @pos
-        @body.position = @pos
+        @v   += @a # add acceleration to velocity
+        @pos += @v # add velocity to position
+
+        @body.position = @pos # move @body to @pos
 
     keyBoard: (e) ->
-        # console.log(e.type)
         if e.type is 'keydown'
             @keyDown(e)
 
     keyDown: (e) ->
-        accel = 0.5
         key = e.which
+        accel = 3
         if key is 65 or key is 37 # left
-            # console.log("left")
             @v.x -= accel if @v.x > -@maxVelocity
         if key is 87 or key is 38 # up
-            # console.log("up")
             @v.y -= accel if @v.y > -@maxVelocity
         if key is 68 or key is 39 # right
-            # console.log("right")
             @v.x += accel if @v.x < @maxVelocity
         if key is 83 or key is 40 # down
-            # console.log("down")
             @v.y += accel if @v.y < @maxVelocity
-        if key is 32
-            @v = @a = new Point(0, 0)
-            console.log("space")
-        if key is 16
-            TRACKING = !TRACKING
-            console.log(TRACKING)
+
+        if key is 32 # space key this is temporary
+            @v = @a = new Point(0, 0) # stop defender
 
     keyUp: (e) ->
         #TODO: slow down defender on keyup?
@@ -145,12 +137,12 @@ class Defender extends Entity
 ################################################################################
 class Attacker extends Entity
     constructor: (size, x, y, target) ->
-        super size, x, y, _.random(-5, 5), _.random(-5, 5), 0, 0
+        super size, x, y, _.random(-5, 5), _.random(-5, 5), 1, 1
 
         @name = "attacker"
 
         @target = target
-        @strokeColor = "#f24e3f"
+        @primaryColor = "#f24e3f"
         @strokeWidth = @size / 10
 
         @makeBody()
@@ -168,7 +160,7 @@ class Attacker extends Entity
                         point: [@pos.x, @pos.y + @size]
                     })
                 ]
-                strokeColor: @strokeColor
+                strokeColor: @primaryColor
                 strokeWidth: @strokeWidth
                 closed: true
             })
@@ -176,7 +168,7 @@ class Attacker extends Entity
 
     update: () ->
         # if TRACKING is true
-        # @trackTarget()
+        @trackTarget()
         @move()
         @rotate()
 
@@ -211,8 +203,6 @@ class Game
         @attackerAmount = Math.floor(@difficulty * 3)
 
         @makeEntities()
-        @attackerpos = new Path.Circle(new Point(0, 0), 20)
-        @attackerpos.fillColor = "#FFFFFF"
 
     makeEntities: () ->
         def = new Defender(DEFENDER_SIZE, view.center.x, view.center.y)
@@ -232,7 +222,6 @@ class Game
         @updateEntities()
         @checkCollisions()
         @keepInBounds()
-        # @attackerpos.position = @entities[3].body.position
         view.draw()
 
     updateEntities: () ->
@@ -240,6 +229,8 @@ class Game
             entity.update()
 
     collide: (e1, e2) ->
+        # e1.v *= new Point -1 -1
+        # e2.v *= new Point -1 -1
         # console.log(e1.name + " just collided with " + e2.name)
 
     checkCollisions: (index) ->
@@ -255,56 +246,43 @@ class Game
 
     keepInBounds: () ->
         for entity in @entities
-            entity.pos.x = -entity.size * 1.5 if entity.pos.x > view.bounds.width  + (entity.size * 2)
-            entity.pos.y = -entity.size * 1.5 if entity.pos.y > view.bounds.height + (entity.size * 2)
-            entity.pos.x = view.bounds.width  + (entity.size * 1.5) if entity.pos.x < -entity.size * 2
-            entity.pos.y = view.bounds.height + (entity.size * 1.5) if entity.pos.y < -entity.size * 2
+            # entity.pos.x = -entity.size * 1.5
+            # entity.pos.y = -entity.size * 1.5
+            # entity.pos.x = view.bounds.width  + (entity.size * 1.5)
+            # entity.pos.y = view.bounds.height + (entity.size * 1.5)
+            if entity.pos.x < entity.size
+                #collide on left wall # console.log(entity.name + " collided on the left wall @ " + entity.pos.x + " with size " + entity.size)
+                entity.v *= new Point -SPRING, SPRING
+                entity.pos.x = entity.size
+            if entity.pos.y < entity.size
+                #collide on top wall # console.log(entity.name + " collided on the top wall @ " + entity.pos.y + " with size " + entity.size)
+                entity.v *= new Point SPRING, -SPRING
+                entity.pos.y = entity.size
+            if entity.pos.x > view.bounds.width - entity.size
+                #collide on right wall # console.log(entity.name + " collided on the right wall @ " + entity.pos.x + " with size " + entity.size)
+                entity.v *= new Point -SPRING, SPRING
+                entity.pos.x = view.bounds.width - entity.size
+            if entity.pos.y > view.bounds.height - entity.size
+                #collide on bottom wall # console.log(entity.name + " collided on the bottom wall @ " + entity.pos.y + " with size " + entity.size)
+                entity.v *= new Point SPRING, -SPRING
+                entity.pos.y = view.bounds.height - entity.size
 
 
 ################################################################################
 #MAIN###########################################################################
 ################################################################################
-# defender = new Defender(50, view.center.x, view.center.y);
 
 game = new Game()
 
 onFrame = () ->
-    # defender.update()
     game.mainloop()
 
 setInterval(onFrame, 100/6)
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-path = new Path.Circle({
-    center: view.center + 300,
-    radius: 30,
-    strokeColor: 'white'
-})
+# path = new Path.Circle({
+#     center: view.center + 300,
+#     radius: 30,
+#     strokeColor: 'white'
+# })

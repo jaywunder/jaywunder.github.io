@@ -1,9 +1,11 @@
 (function() {
-  var ATTACKER_SIZE, Attacker, DEFENDER_SIZE, Defender, Entity, FRICTION, Game, TRACKING, game, onFrame, path,
+  var ATTACKER_SIZE, Attacker, DEFENDER_SIZE, Defender, Entity, FRICTION, Game, SPRING, TRACKING, game, onFrame,
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
   FRICTION = 0.6;
+
+  SPRING = 0.6;
 
   DEFENDER_SIZE = $(window).width() / 25;
 
@@ -116,8 +118,8 @@
 
     Defender.prototype.keyDown = function(e) {
       var accel, key;
-      accel = 0.5;
       key = e.which;
+      accel = 3;
       if (key === 65 || key === 37) {
         if (this.v.x > -this.maxVelocity) {
           this.v.x -= accel;
@@ -139,12 +141,7 @@
         }
       }
       if (key === 32) {
-        this.v = this.a = new Point(0, 0);
-        console.log("space");
-      }
-      if (key === 16) {
-        TRACKING = !TRACKING;
-        return console.log(TRACKING);
+        return this.v = this.a = new Point(0, 0);
       }
     };
 
@@ -162,10 +159,10 @@
     __extends(Attacker, _super);
 
     function Attacker(size, x, y, target) {
-      Attacker.__super__.constructor.call(this, size, x, y, _.random(-5, 5), _.random(-5, 5), 0, 0);
+      Attacker.__super__.constructor.call(this, size, x, y, _.random(-5, 5), _.random(-5, 5), 1, 1);
       this.name = "attacker";
       this.target = target;
-      this.strokeColor = "#f24e3f";
+      this.primaryColor = "#f24e3f";
       this.strokeWidth = this.size / 10;
       this.makeBody();
     }
@@ -181,7 +178,7 @@
             point: [this.pos.x, this.pos.y + this.size]
           })
         ],
-        strokeColor: this.strokeColor,
+        strokeColor: this.primaryColor,
         strokeWidth: this.strokeWidth,
         closed: true
       });
@@ -189,6 +186,7 @@
     };
 
     Attacker.prototype.update = function() {
+      this.trackTarget();
       this.move();
       return this.rotate();
     };
@@ -236,8 +234,6 @@
       this.difficulty = 1;
       this.attackerAmount = Math.floor(this.difficulty * 3);
       this.makeEntities();
-      this.attackerpos = new Path.Circle(new Point(0, 0), 20);
-      this.attackerpos.fillColor = "#FFFFFF";
     }
 
     Game.prototype.makeEntities = function() {
@@ -296,17 +292,21 @@
       _results = [];
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         entity = _ref[_i];
-        if (entity.pos.x > view.bounds.width + (entity.size * 2)) {
-          entity.pos.x = -entity.size * 1.5;
+        if (entity.pos.x < entity.size) {
+          entity.v *= new Point(-SPRING, SPRING);
+          entity.pos.x = entity.size;
         }
-        if (entity.pos.y > view.bounds.height + (entity.size * 2)) {
-          entity.pos.y = -entity.size * 1.5;
+        if (entity.pos.y < entity.size) {
+          entity.v *= new Point(SPRING, -SPRING);
+          entity.pos.y = entity.size;
         }
-        if (entity.pos.x < -entity.size * 2) {
-          entity.pos.x = view.bounds.width + (entity.size * 1.5);
+        if (entity.pos.x > view.bounds.width - entity.size) {
+          entity.v *= new Point(-SPRING, SPRING);
+          entity.pos.x = view.bounds.width - entity.size;
         }
-        if (entity.pos.y < -entity.size * 2) {
-          _results.push(entity.pos.y = view.bounds.height + (entity.size * 1.5));
+        if (entity.pos.y > view.bounds.height - entity.size) {
+          entity.v *= new Point(SPRING, -SPRING);
+          _results.push(entity.pos.y = view.bounds.height - entity.size);
         } else {
           _results.push(void 0);
         }
@@ -325,11 +325,5 @@
   };
 
   setInterval(onFrame, 100 / 6);
-
-  path = new Path.Circle({
-    center: view.center + 300,
-    radius: 30,
-    strokeColor: 'white'
-  });
 
 }).call(this);
