@@ -1,9 +1,11 @@
 (function() {
-  var ATTACKER_SIZE, Attacker, DEFENDER_SIZE, Defender, Entity, FRICTION, Game, TRACKING, game, onFrame, path,
+  var ATTACKER_SIZE, Attacker, DEFENDER_SIZE, Defender, Entity, FRICTION, Game, SPRING, TRACKING, game, onFrame,
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
   FRICTION = 0.6;
+
+  SPRING = 0.6;
 
   DEFENDER_SIZE = $(window).width() / 25;
 
@@ -232,8 +234,6 @@
       this.difficulty = 1;
       this.attackerAmount = Math.floor(this.difficulty * 3);
       this.makeEntities();
-      this.attackerpos = new Path.Circle(new Point(0, 0), 20);
-      this.attackerpos.fillColor = "#FFFFFF";
     }
 
     Game.prototype.makeEntities = function() {
@@ -255,7 +255,6 @@
       this.updateEntities();
       this.checkCollisions();
       this.keepInBounds();
-      this.attackerpos.position = this.entities[3].body.position;
       return view.draw();
     };
 
@@ -293,17 +292,21 @@
       _results = [];
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         entity = _ref[_i];
-        if (entity.pos.x > view.bounds.width + (entity.size * 2)) {
-          entity.pos.x = -entity.size * 1.5;
+        if (entity.pos.x < entity.size) {
+          entity.v *= new Point(-SPRING, SPRING);
+          entity.pos.x = entity.size;
         }
-        if (entity.pos.y > view.bounds.height + (entity.size * 2)) {
-          entity.pos.y = -entity.size * 1.5;
+        if (entity.pos.y < entity.size) {
+          entity.v *= new Point(SPRING, -SPRING);
+          entity.pos.y = entity.size;
         }
-        if (entity.pos.x < -entity.size * 2) {
-          entity.pos.x = view.bounds.width + (entity.size * 1.5);
+        if (entity.pos.x > view.bounds.width - entity.size) {
+          entity.v *= new Point(-SPRING, SPRING);
+          entity.pos.x = view.bounds.width - entity.size;
         }
-        if (entity.pos.y < -entity.size * 2) {
-          _results.push(entity.pos.y = view.bounds.height + (entity.size * 1.5));
+        if (entity.pos.y > view.bounds.height - entity.size) {
+          entity.v *= new Point(SPRING, -SPRING);
+          _results.push(entity.pos.y = view.bounds.height - entity.size);
         } else {
           _results.push(void 0);
         }
@@ -322,11 +325,5 @@
   };
 
   setInterval(onFrame, 100 / 6);
-
-  path = new Path.Circle({
-    center: view.center + 300,
-    radius: 30,
-    strokeColor: 'white'
-  });
 
 }).call(this);

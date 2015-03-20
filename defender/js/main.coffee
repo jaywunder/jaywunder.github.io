@@ -1,4 +1,5 @@
 FRICTION = 0.6
+SPRING = 0.6
 DEFENDER_SIZE = $(window).width() / 25
 ATTACKER_SIZE = $(window).width() / 25
 TRACKING = false
@@ -202,8 +203,6 @@ class Game
         @attackerAmount = Math.floor(@difficulty * 3)
 
         @makeEntities()
-        @attackerpos = new Path.Circle(new Point(0, 0), 20)
-        @attackerpos.fillColor = "#FFFFFF"
 
     makeEntities: () ->
         def = new Defender(DEFENDER_SIZE, view.center.x, view.center.y)
@@ -223,7 +222,6 @@ class Game
         @updateEntities()
         @checkCollisions()
         @keepInBounds()
-        @attackerpos.position = @entities[3].body.position
         view.draw()
 
     updateEntities: () ->
@@ -248,10 +246,26 @@ class Game
 
     keepInBounds: () ->
         for entity in @entities
-            entity.pos.x = -entity.size * 1.5 if entity.pos.x > view.bounds.width  + (entity.size * 2)
-            entity.pos.y = -entity.size * 1.5 if entity.pos.y > view.bounds.height + (entity.size * 2)
-            entity.pos.x = view.bounds.width  + (entity.size * 1.5) if entity.pos.x < -entity.size * 2
-            entity.pos.y = view.bounds.height + (entity.size * 1.5) if entity.pos.y < -entity.size * 2
+            # entity.pos.x = -entity.size * 1.5
+            # entity.pos.y = -entity.size * 1.5
+            # entity.pos.x = view.bounds.width  + (entity.size * 1.5)
+            # entity.pos.y = view.bounds.height + (entity.size * 1.5)
+            if entity.pos.x < entity.size
+                #collide on left wall # console.log(entity.name + " collided on the left wall @ " + entity.pos.x + " with size " + entity.size)
+                entity.v *= new Point -SPRING, SPRING
+                entity.pos.x = entity.size
+            if entity.pos.y < entity.size
+                #collide on top wall # console.log(entity.name + " collided on the top wall @ " + entity.pos.y + " with size " + entity.size)
+                entity.v *= new Point SPRING, -SPRING
+                entity.pos.y = entity.size
+            if entity.pos.x > view.bounds.width - entity.size
+                #collide on right wall # console.log(entity.name + " collided on the right wall @ " + entity.pos.x + " with size " + entity.size)
+                entity.v *= new Point -SPRING, SPRING
+                entity.pos.x = view.bounds.width - entity.size
+            if entity.pos.y > view.bounds.height - entity.size
+                #collide on bottom wall # console.log(entity.name + " collided on the bottom wall @ " + entity.pos.y + " with size " + entity.size)
+                entity.v *= new Point SPRING, -SPRING
+                entity.pos.y = view.bounds.height - entity.size
 
 
 ################################################################################
@@ -267,35 +281,8 @@ setInterval(onFrame, 100/6)
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-path = new Path.Circle({
-    center: view.center + 300,
-    radius: 30,
-    strokeColor: 'white'
-})
+# path = new Path.Circle({
+#     center: view.center + 300,
+#     radius: 30,
+#     strokeColor: 'white'
+# })
