@@ -116,8 +116,8 @@
 
     Defender.prototype.keyDown = function(e) {
       var accel, key;
-      accel = 0.5;
       key = e.which;
+      accel = 3;
       if (key === 65 || key === 37) {
         if (this.v.x > -this.maxVelocity) {
           this.v.x -= accel;
@@ -139,12 +139,7 @@
         }
       }
       if (key === 32) {
-        this.v = this.a = new Point(0, 0);
-        console.log("space");
-      }
-      if (key === 16) {
-        TRACKING = !TRACKING;
-        return console.log(TRACKING);
+        return this.v = this.a = new Point(0, 0);
       }
     };
 
@@ -162,10 +157,10 @@
     __extends(Attacker, _super);
 
     function Attacker(size, x, y, target) {
-      Attacker.__super__.constructor.call(this, size, x, y, _.random(-5, 5), _.random(-5, 5), 0, 0);
+      Attacker.__super__.constructor.call(this, size, x, y, _.random(-5, 5), _.random(-5, 5), 1, 1);
       this.name = "attacker";
       this.target = target;
-      this.strokeColor = "#f24e3f";
+      this.primaryColor = "#f24e3f";
       this.strokeWidth = this.size / 10;
       this.makeBody();
     }
@@ -181,7 +176,7 @@
             point: [this.pos.x, this.pos.y + this.size]
           })
         ],
-        strokeColor: this.strokeColor,
+        strokeColor: this.primaryColor,
         strokeWidth: this.strokeWidth,
         closed: true
       });
@@ -189,6 +184,7 @@
     };
 
     Attacker.prototype.update = function() {
+      this.trackTarget();
       this.move();
       return this.rotate();
     };
@@ -259,6 +255,7 @@
       this.updateEntities();
       this.checkCollisions();
       this.keepInBounds();
+      this.attackerpos.position = this.entities[3].body.position;
       return view.draw();
     };
 
