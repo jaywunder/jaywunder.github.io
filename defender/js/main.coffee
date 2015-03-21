@@ -112,13 +112,13 @@ class Defender extends Entity
     keyDown: (e) ->
         key = e.which
         accel = 3
-        if key is 65 or key is 37 # left
+        if Key.isDown("a") or Key.isDown("left") # left
             @v.x -= accel if @v.x > -@maxVelocity
-        if key is 87 or key is 38 # up
+        if Key.isDown("w") or Key.isDown("up") # up
             @v.y -= accel if @v.y > -@maxVelocity
-        if key is 68 or key is 39 # right
+        if Key.isDown("d") or Key.isDown("right") # right
             @v.x += accel if @v.x < @maxVelocity
-        if key is 83 or key is 40 # down
+        if Key.isDown("s") or Key.isDown("down") # down
             @v.y += accel if @v.y < @maxVelocity
 
         if key is 32 # space key this is temporary
