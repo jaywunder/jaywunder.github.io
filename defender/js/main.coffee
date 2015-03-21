@@ -137,10 +137,11 @@ class Defender extends Entity
 ################################################################################
 class Attacker extends Entity
     constructor: (size, x, y, target) ->
-        super size, x, y, _.random(-5, 5), _.random(-5, 5), 1, 1
+        super size, x, y, 0, 0, 0, 0
 
         @name = "attacker"
 
+        @maxVelocity = 10
         @target = target
         @primaryColor = "#f24e3f"
         @strokeWidth = @size / 10
@@ -167,20 +168,40 @@ class Attacker extends Entity
         console.log(@body)
 
     update: () ->
-        # if TRACKING is true
         @trackTarget()
         @move()
         @rotate()
 
     trackTarget: () ->
-        @v.x -= @a.x if @target.pos.x < @pos.x # defender to the left
-        @v.y -= @a.y if @target.pos.y < @pos.y # defender is above
-        @v.x += @a.x if @target.pos.x > @pos.x # defender to the right
-        @v.x += @a.y if @target.pos.y > @pos.y # defender is below
+        accel = 10
+        console.log "------"
+        if @target.pos.x <= @pos.x # defender to the left
+            console.log @v.x
+            @v.x -= accel
+            console.log @v.x
+            # console.log @target.pos.x + " twat " + Math.floor(@pos.x)
+
+        if @target.pos.y <= @pos.y # defender is above
+            console.log @v.y
+            @v.y -= accel
+            console.log @v.y
+            # console.log @target.pos.y + " piss " +  Math.floor(@pos.y)
+
+        if @target.pos.x > @pos.x # defender to the right
+            console.log @v.x
+            @v.x += accel
+            console.log @v.x
+            # console.log @target.pos.x + " shit " + Math.floor(@pos.x)
+
+        if @target.pos.y > @pos.y # defender is below
+            console.log @v.y
+            @v.x += accel
+            console.log @v.y
+            # console.log @target.pos.y + " fuck " +  Math.floor(@pos.y)
 
     move: () ->
         #velocity changes
-        @v   += @a
+        # @v   += @a
         @pos += @v
         #body changes
         @body.position = @pos
