@@ -159,12 +159,13 @@
     __extends(Attacker, _super);
 
     function Attacker(size, x, y, target) {
-      Attacker.__super__.constructor.call(this, size, x, y, 0, 0, 0, 0);
+      Attacker.__super__.constructor.call(this, size, x, y, _.random(-5, 5), _.random(-5, 5), 0, 0);
+      this.rotation = 0;
+      this.target = target;
       this.name = "attacker";
       this.maxVelocity = 10;
-      this.target = target;
-      this.primaryColor = "#f24e3f";
       this.strokeWidth = this.size / 10;
+      this.primaryColor = "#f24e3f";
       this.makeBody();
     }
 
@@ -188,37 +189,28 @@
 
     Attacker.prototype.update = function() {
       this.trackTarget();
-      this.move();
-      return this.rotate();
+      return this.move();
     };
 
     Attacker.prototype.trackTarget = function() {
       var accel;
-      accel = 10;
-      console.log("------");
+      accel = 0.1;
       if (this.target.pos.x <= this.pos.x) {
-        console.log(this.v.x);
         this.v.x -= accel;
-        console.log(this.v.x);
       }
       if (this.target.pos.y <= this.pos.y) {
-        console.log(this.v.y);
         this.v.y -= accel;
-        console.log(this.v.y);
       }
       if (this.target.pos.x > this.pos.x) {
-        console.log(this.v.x);
         this.v.x += accel;
-        console.log(this.v.x);
       }
       if (this.target.pos.y > this.pos.y) {
-        console.log(this.v.y);
-        this.v.x += accel;
-        return console.log(this.v.y);
+        return this.v.x += accel;
       }
     };
 
     Attacker.prototype.move = function() {
+      this.v += this.a;
       this.pos += this.v;
       return this.body.position = this.pos;
     };

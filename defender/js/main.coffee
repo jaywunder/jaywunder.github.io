@@ -137,14 +137,14 @@ class Defender extends Entity
 ################################################################################
 class Attacker extends Entity
     constructor: (size, x, y, target) ->
-        super size, x, y, 0, 0, 0, 0
+        super size, x, y, _.random(-5, 5), _.random(-5, 5), 0, 0
 
-        @name = "attacker"
-
-        @maxVelocity = 10
+        @rotation = 0
         @target = target
-        @primaryColor = "#f24e3f"
+        @name = "attacker"
+        @maxVelocity = 10
         @strokeWidth = @size / 10
+        @primaryColor = "#f24e3f"
 
         @makeBody()
 
@@ -170,38 +170,30 @@ class Attacker extends Entity
     update: () ->
         @trackTarget()
         @move()
-        @rotate()
+        # @rotate()
 
     trackTarget: () ->
-        accel = 10
-        console.log "------"
+        accel = 0.1
+        # console.log "------"
         if @target.pos.x <= @pos.x # defender to the left
-            console.log @v.x
+            # console.log "left"
             @v.x -= accel
-            console.log @v.x
-            # console.log @target.pos.x + " twat " + Math.floor(@pos.x)
 
         if @target.pos.y <= @pos.y # defender is above
-            console.log @v.y
+            # console.log "up"
             @v.y -= accel
-            console.log @v.y
-            # console.log @target.pos.y + " piss " +  Math.floor(@pos.y)
 
         if @target.pos.x > @pos.x # defender to the right
-            console.log @v.x
+            # console.log "right"
             @v.x += accel
-            console.log @v.x
-            # console.log @target.pos.x + " shit " + Math.floor(@pos.x)
 
         if @target.pos.y > @pos.y # defender is below
-            console.log @v.y
+            # console.log "down"
             @v.x += accel
-            console.log @v.y
-            # console.log @target.pos.y + " fuck " +  Math.floor(@pos.y)
 
     move: () ->
         #velocity changes
-        # @v   += @a
+        @v   += @a
         @pos += @v
         #body changes
         @body.position = @pos
@@ -267,24 +259,23 @@ class Game
 
     keepInBounds: () ->
         for entity in @entities
-            # entity.pos.x = -entity.size * 1.5
-            # entity.pos.y = -entity.size * 1.5
-            # entity.pos.x = view.bounds.width  + (entity.size * 1.5)
-            # entity.pos.y = view.bounds.height + (entity.size * 1.5)
             if entity.pos.x < entity.size
-                #collide on left wall # console.log(entity.name + " collided on the left wall @ " + entity.pos.x + " with size " + entity.size)
+                #collide on left wall
                 entity.v *= new Point -SPRING, SPRING
                 entity.pos.x = entity.size
+
             if entity.pos.y < entity.size
-                #collide on top wall # console.log(entity.name + " collided on the top wall @ " + entity.pos.y + " with size " + entity.size)
+                #collide on top wall
                 entity.v *= new Point SPRING, -SPRING
                 entity.pos.y = entity.size
+
             if entity.pos.x > view.bounds.width - entity.size
-                #collide on right wall # console.log(entity.name + " collided on the right wall @ " + entity.pos.x + " with size " + entity.size)
+                #collide on right wall
                 entity.v *= new Point -SPRING, SPRING
                 entity.pos.x = view.bounds.width - entity.size
+
             if entity.pos.y > view.bounds.height - entity.size
-                #collide on bottom wall # console.log(entity.name + " collided on the bottom wall @ " + entity.pos.y + " with size " + entity.size)
+                #collide on bottom wall
                 entity.v *= new Point SPRING, -SPRING
                 entity.pos.y = view.bounds.height - entity.size
 
