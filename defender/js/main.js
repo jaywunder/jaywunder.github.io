@@ -54,7 +54,7 @@
       this.strokeWidth = this.size / 7;
       this.primaryColor = "#00b3ff";
       this.secondaryColor = "#23e96b";
-      this.maxVelocity = 5;
+      this.maxVelocity = 10;
       this.makeBody();
     }
 
@@ -194,7 +194,7 @@
 
     Attacker.prototype.trackTarget = function() {
       var accel;
-      accel = 0.1;
+      accel = 0.4;
       if (this.target.pos.x <= this.pos.x) {
         this.v.x -= accel;
       }
@@ -205,7 +205,7 @@
         this.v.x += accel;
       }
       if (this.target.pos.y > this.pos.y) {
-        return this.v.x += accel;
+        return this.v.y += accel;
       }
     };
 
@@ -249,7 +249,7 @@
       });
       this.entities.push(def);
       for (i = _i = 0, _ref = this.attackerAmount; _i <= _ref; i = _i += 1) {
-        this.entities.push(new Attacker(ATTACKER_SIZE, view.center.x, view.center.y, def));
+        this.entities.push(new Attacker(ATTACKER_SIZE, view.center.x + _.random(-500, 500), view.center.y + _.random(-500, 500), def));
       }
       return console.log(this.entities);
     };
@@ -272,7 +272,20 @@
       return _results;
     };
 
-    Game.prototype.collide = function(e1, e2) {};
+    Game.prototype.collide = function(e1, e2) {
+      var a, ax, ay, dx, dy, minDist, targetX, targetY, theta;
+      dx = e1.body.position.x - e2.body.position.x;
+      dy = e1.body.position.y - e2.body.position.y;
+      minDist = e1.size + e2.size;
+      theta = Math.atan2(dy, dx);
+      targetX = e1.body.position.x + Math.cos(theta) * minDist;
+      targetY = e1.body.position.y + Math.sin(theta) * minDist;
+      ax = (targetX - e2.body.position.x) * SPRING;
+      ay = (targetY - e2.body.position.y) * SPRING;
+      a = new Point(ax, ay);
+      e1.v += a;
+      return e2.v += a;
+    };
 
     Game.prototype.checkCollisions = function(index) {
       var e, _i, _ref, _ref1;

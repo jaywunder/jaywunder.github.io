@@ -46,7 +46,7 @@ class Defender extends Entity
         @strokeWidth = @size / 7
         @primaryColor = "#00b3ff"
         @secondaryColor = "#23e96b"
-        @maxVelocity = 5
+        @maxVelocity = 10
 
         @makeBody()
 
@@ -173,7 +173,7 @@ class Attacker extends Entity
         # @rotate()
 
     trackTarget: () ->
-        accel = 0.1
+        accel = 0.4
         # console.log "------"
         if @target.pos.x <= @pos.x # defender to the left
             # console.log "left"
@@ -189,7 +189,7 @@ class Attacker extends Entity
 
         if @target.pos.y > @pos.y # defender is below
             # console.log "down"
-            @v.x += accel
+            @v.y += accel
 
     move: () ->
         #velocity changes
@@ -227,7 +227,8 @@ class Game
         )
         @entities.push def
         for i in [0..@attackerAmount] by 1
-            @entities.push new Attacker(ATTACKER_SIZE, view.center.x, view.center.y, def)
+            @entities.push new Attacker(ATTACKER_SIZE, view.center.x + _.random(-500, 500), view.center.y + _.random(-500,
+            500), def)
 
         console.log @entities
 
@@ -242,10 +243,22 @@ class Game
             entity.update()
 
     collide: (e1, e2) ->
-        # e1.v *= new Point -1 -1
-        # e2.v *= new Point -1 -1
-        # console.log(e1.name + " just collided with " + e2.name)
-
+        #calculate difference in position
+        dx = e1.body.position.x - e2.body.position.x
+        dy = e1.body.position.y - e2.body.position.y
+        #get min distance between two entites
+        minDist = e1.size + e2.size
+        #calculate angle of acceleration
+        theta = Math.atan2(dy, dx)
+        #get target position to accelerate to
+        targetX = e1.body.position.x + Math.cos(theta) * minDist
+        targetY = e1.body.position.y + Math.sin(theta) * minDist
+        #calculate acceleration
+        ax = (targetX - e2.body.position.x) * SPRING
+        ay = (targetY - e2.body.position.y) * SPRING
+        a = new Point(ax, ay)
+        e1.v += a
+        e2.v += a
     checkCollisions: (index) ->
         index ?= 0
 
