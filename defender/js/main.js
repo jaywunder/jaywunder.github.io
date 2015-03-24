@@ -120,22 +120,22 @@
       var accel, key;
       key = e.which;
       accel = 3;
-      if (key === 65 || key === 37) {
+      if (Key.isDown("a") || Key.isDown("left")) {
         if (this.v.x > -this.maxVelocity) {
           this.v.x -= accel;
         }
       }
-      if (key === 87 || key === 38) {
+      if (Key.isDown("w") || Key.isDown("up")) {
         if (this.v.y > -this.maxVelocity) {
           this.v.y -= accel;
         }
       }
-      if (key === 68 || key === 39) {
+      if (Key.isDown("d") || Key.isDown("right")) {
         if (this.v.x < this.maxVelocity) {
           this.v.x += accel;
         }
       }
-      if (key === 83 || key === 40) {
+      if (Key.isDown("s") || Key.isDown("down")) {
         if (this.v.y < this.maxVelocity) {
           this.v.y += accel;
         }
