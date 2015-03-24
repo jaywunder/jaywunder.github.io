@@ -1,7 +1,7 @@
 FRICTION = 0.6
 SPRING = 0.6
-DEFENDER_SIZE = $(window).width() / 25
-ATTACKER_SIZE = $(window).width() / 25
+DEFENDER_SIZE = $(window).width() / 25 # 40
+ATTACKER_SIZE = $(window).width() / 25 # 40
 TRACKING = false
 
 ################################################################################
@@ -46,7 +46,8 @@ class Defender extends Entity
         @strokeWidth = @size / 7
         @primaryColor = "#00b3ff"
         @secondaryColor = "#23e96b"
-        @maxVelocity = 10
+        @maxVelocity = 20
+        @accel = 3
 
         @makeBody()
 
@@ -111,15 +112,14 @@ class Defender extends Entity
 
     keyDown: (e) ->
         key = e.which
-        accel = 3
         if Key.isDown("a") or Key.isDown("left") # left
-            @v.x -= accel if @v.x > -@maxVelocity
+            @v.x -= @accel if @v.x > -@maxVelocity
         if Key.isDown("w") or Key.isDown("up") # up
-            @v.y -= accel if @v.y > -@maxVelocity
+            @v.y -= @accel if @v.y > -@maxVelocity
         if Key.isDown("d") or Key.isDown("right") # right
-            @v.x += accel if @v.x < @maxVelocity
+            @v.x += @accel if @v.x < @maxVelocity
         if Key.isDown("s") or Key.isDown("down") # down
-            @v.y += accel if @v.y < @maxVelocity
+            @v.y += @accel if @v.y < @maxVelocity
 
         if key is 32 # space key this is temporary
             @v = @a = new Point(0, 0) # stop defender
@@ -254,11 +254,11 @@ class Game
         targetX = e1.body.position.x + Math.cos(theta) * minDist
         targetY = e1.body.position.y + Math.sin(theta) * minDist
         #calculate acceleration
-        ax = (targetX - e2.body.position.x) * SPRING
-        ay = (targetY - e2.body.position.y) * SPRING
+        ax = (targetX - e2.body.position.x) * (SPRING / 100)
+        ay = (targetY - e2.body.position.y) * (SPRING / 100)
         a = new Point(ax, ay)
-        e1.v += a
-        e2.v += a
+        e2.v *= -a
+        # e2.v += -a
     checkCollisions: (index) ->
         index ?= 0
 

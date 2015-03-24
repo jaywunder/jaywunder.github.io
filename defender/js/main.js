@@ -54,7 +54,8 @@
       this.strokeWidth = this.size / 7;
       this.primaryColor = "#00b3ff";
       this.secondaryColor = "#23e96b";
-      this.maxVelocity = 10;
+      this.maxVelocity = 20;
+      this.accel = 3;
       this.makeBody();
     }
 
@@ -117,27 +118,26 @@
     };
 
     Defender.prototype.keyDown = function(e) {
-      var accel, key;
+      var key;
       key = e.which;
-      accel = 3;
       if (Key.isDown("a") || Key.isDown("left")) {
         if (this.v.x > -this.maxVelocity) {
-          this.v.x -= accel;
+          this.v.x -= this.accel;
         }
       }
       if (Key.isDown("w") || Key.isDown("up")) {
         if (this.v.y > -this.maxVelocity) {
-          this.v.y -= accel;
+          this.v.y -= this.accel;
         }
       }
       if (Key.isDown("d") || Key.isDown("right")) {
         if (this.v.x < this.maxVelocity) {
-          this.v.x += accel;
+          this.v.x += this.accel;
         }
       }
       if (Key.isDown("s") || Key.isDown("down")) {
         if (this.v.y < this.maxVelocity) {
-          this.v.y += accel;
+          this.v.y += this.accel;
         }
       }
       if (key === 32) {
@@ -280,11 +280,10 @@
       theta = Math.atan2(dy, dx);
       targetX = e1.body.position.x + Math.cos(theta) * minDist;
       targetY = e1.body.position.y + Math.sin(theta) * minDist;
-      ax = (targetX - e2.body.position.x) * SPRING;
-      ay = (targetY - e2.body.position.y) * SPRING;
+      ax = (targetX - e2.body.position.x) * (SPRING / 100);
+      ay = (targetY - e2.body.position.y) * (SPRING / 100);
       a = new Point(ax, ay);
-      e1.v += a;
-      return e2.v += a;
+      return e2.v *= -a;
     };
 
     Game.prototype.checkCollisions = function(index) {
