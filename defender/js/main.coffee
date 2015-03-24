@@ -137,13 +137,14 @@ class Defender extends Entity
 ################################################################################
 class Attacker extends Entity
     constructor: (size, x, y, target) ->
-        super size, x, y, _.random(-5, 5), _.random(-5, 5), 1, 1
+        super size, x, y, _.random(-5, 5), _.random(-5, 5), 0, 0
 
-        @name = "attacker"
-
+        @rotation = 0
         @target = target
-        @primaryColor = "#f24e3f"
+        @name = "attacker"
+        @maxVelocity = 10
         @strokeWidth = @size / 10
+        @primaryColor = "#f24e3f"
 
         @makeBody()
 
@@ -167,16 +168,28 @@ class Attacker extends Entity
         console.log(@body)
 
     update: () ->
-        # if TRACKING is true
         @trackTarget()
         @move()
-        @rotate()
+        # @rotate()
 
     trackTarget: () ->
-        @v.x -= @a.x if @target.pos.x < @pos.x # defender to the left
-        @v.y -= @a.y if @target.pos.y < @pos.y # defender is above
-        @v.x += @a.x if @target.pos.x > @pos.x # defender to the right
-        @v.x += @a.y if @target.pos.y > @pos.y # defender is below
+        accel = 0.1
+        # console.log "------"
+        if @target.pos.x <= @pos.x # defender to the left
+            # console.log "left"
+            @v.x -= accel
+
+        if @target.pos.y <= @pos.y # defender is above
+            # console.log "up"
+            @v.y -= accel
+
+        if @target.pos.x > @pos.x # defender to the right
+            # console.log "right"
+            @v.x += accel
+
+        if @target.pos.y > @pos.y # defender is below
+            # console.log "down"
+            @v.x += accel
 
     move: () ->
         #velocity changes
@@ -246,24 +259,23 @@ class Game
 
     keepInBounds: () ->
         for entity in @entities
-            # entity.pos.x = -entity.size * 1.5
-            # entity.pos.y = -entity.size * 1.5
-            # entity.pos.x = view.bounds.width  + (entity.size * 1.5)
-            # entity.pos.y = view.bounds.height + (entity.size * 1.5)
             if entity.pos.x < entity.size
-                #collide on left wall # console.log(entity.name + " collided on the left wall @ " + entity.pos.x + " with size " + entity.size)
+                #collide on left wall
                 entity.v *= new Point -SPRING, SPRING
                 entity.pos.x = entity.size
+
             if entity.pos.y < entity.size
-                #collide on top wall # console.log(entity.name + " collided on the top wall @ " + entity.pos.y + " with size " + entity.size)
+                #collide on top wall
                 entity.v *= new Point SPRING, -SPRING
                 entity.pos.y = entity.size
+
             if entity.pos.x > view.bounds.width - entity.size
-                #collide on right wall # console.log(entity.name + " collided on the right wall @ " + entity.pos.x + " with size " + entity.size)
+                #collide on right wall
                 entity.v *= new Point -SPRING, SPRING
                 entity.pos.x = view.bounds.width - entity.size
+
             if entity.pos.y > view.bounds.height - entity.size
-                #collide on bottom wall # console.log(entity.name + " collided on the bottom wall @ " + entity.pos.y + " with size " + entity.size)
+                #collide on bottom wall
                 entity.v *= new Point SPRING, -SPRING
                 entity.pos.y = view.bounds.height - entity.size
 

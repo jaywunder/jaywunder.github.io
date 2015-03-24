@@ -159,11 +159,13 @@
     __extends(Attacker, _super);
 
     function Attacker(size, x, y, target) {
-      Attacker.__super__.constructor.call(this, size, x, y, _.random(-5, 5), _.random(-5, 5), 1, 1);
-      this.name = "attacker";
+      Attacker.__super__.constructor.call(this, size, x, y, _.random(-5, 5), _.random(-5, 5), 0, 0);
+      this.rotation = 0;
       this.target = target;
-      this.primaryColor = "#f24e3f";
+      this.name = "attacker";
+      this.maxVelocity = 10;
       this.strokeWidth = this.size / 10;
+      this.primaryColor = "#f24e3f";
       this.makeBody();
     }
 
@@ -187,22 +189,23 @@
 
     Attacker.prototype.update = function() {
       this.trackTarget();
-      this.move();
-      return this.rotate();
+      return this.move();
     };
 
     Attacker.prototype.trackTarget = function() {
-      if (this.target.pos.x < this.pos.x) {
-        this.v.x -= this.a.x;
+      var accel;
+      accel = 0.1;
+      if (this.target.pos.x <= this.pos.x) {
+        this.v.x -= accel;
       }
-      if (this.target.pos.y < this.pos.y) {
-        this.v.y -= this.a.y;
+      if (this.target.pos.y <= this.pos.y) {
+        this.v.y -= accel;
       }
       if (this.target.pos.x > this.pos.x) {
-        this.v.x += this.a.x;
+        this.v.x += accel;
       }
       if (this.target.pos.y > this.pos.y) {
-        return this.v.x += this.a.y;
+        return this.v.x += accel;
       }
     };
 
