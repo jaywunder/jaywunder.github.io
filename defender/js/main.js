@@ -7,9 +7,9 @@
 
   SPRING = 0.6;
 
-  DEFENDER_SIZE = $(window).width() / 25;
+  DEFENDER_SIZE = $(window).width() / 50;
 
-  ATTACKER_SIZE = $(window).width() / 25;
+  ATTACKER_SIZE = $(window).width() / 50;
 
   TRACKING = false;
 
@@ -18,10 +18,24 @@
       this.size = size;
       this.pos = new Point(x, y);
       this.v = new Point(vx, vy);
-      this.a = new Point(ax, ay);
       this.alive = true;
       this.primaryColor = '#bab8b5';
+      this.direction = new Path.Line({
+        from: [this.pos.x, this.pos.y],
+        to: [this.pos.x + (this.v.x * 10), this.pos.y + (this.v.y * 10)],
+        strokeColor: '#ffffff',
+        strokeWidth: 5
+      });
     }
+
+    Entity.prototype.updateDirection = function() {
+      this.direction.segments[0] = new Segment({
+        point: [this.pos.x, this.pos.y]
+      });
+      return this.direction.segments[1] = new Segment({
+        point: [this.pos.x + (this.v.x * 10), this.pos.y + (this.v.y * 10)]
+      });
+    };
 
     Entity.prototype.makeBody = function() {
       return this.body = new Path.Circle({
@@ -54,7 +68,7 @@
       this.strokeWidth = this.size / 7;
       this.primaryColor = "#00b3ff";
       this.secondaryColor = "#23e96b";
-      this.maxVelocity = 20;
+      this.maxVelocity = 5;
       this.accel = 3;
       this.makeBody();
     }
@@ -102,11 +116,11 @@
     Defender.prototype.update = function() {
       this.move();
       this.rotate();
+      this.updateDirection();
       return this.innerCircle.radius += 20;
     };
 
     Defender.prototype.move = function() {
-      this.v += this.a;
       this.pos += this.v;
       return this.body.position = this.pos;
     };
@@ -141,7 +155,7 @@
         }
       }
       if (key === 32) {
-        return this.v = this.a = new Point(0, 0);
+        return this.v = new Point(0, 0);
       }
     };
 
@@ -166,6 +180,7 @@
       this.maxVelocity = 10;
       this.strokeWidth = this.size / 10;
       this.primaryColor = "#f24e3f";
+      this.accel = 0.1;
       this.makeBody();
     }
 
@@ -189,28 +204,26 @@
 
     Attacker.prototype.update = function() {
       this.trackTarget();
-      return this.move();
+      this.move();
+      return this.updateDirection();
     };
 
     Attacker.prototype.trackTarget = function() {
-      var accel;
-      accel = 0.4;
       if (this.target.pos.x <= this.pos.x) {
-        this.v.x -= accel;
+        this.v.x -= this.accel;
       }
       if (this.target.pos.y <= this.pos.y) {
-        this.v.y -= accel;
+        this.v.y -= this.accel;
       }
       if (this.target.pos.x > this.pos.x) {
-        this.v.x += accel;
+        this.v.x += this.accel;
       }
       if (this.target.pos.y > this.pos.y) {
-        return this.v.y += accel;
+        return this.v.y += this.accel;
       }
     };
 
     Attacker.prototype.move = function() {
-      this.v += this.a;
       this.pos += this.v;
       return this.body.position = this.pos;
     };
@@ -249,14 +262,13 @@
       });
       this.entities.push(def);
       for (i = _i = 0, _ref = this.attackerAmount; _i <= _ref; i = _i += 1) {
-        this.entities.push(new Attacker(ATTACKER_SIZE, view.center.x + _.random(-500, 500), view.center.y + _.random(-500, 500), def));
+        this.entities.push(new Attacker(ATTACKER_SIZE, view.center.x, view.center.y, def));
       }
       return console.log(this.entities);
     };
 
     Game.prototype.mainloop = function() {
       this.updateEntities();
-      this.checkCollisions();
       this.keepInBounds();
       return view.draw();
     };
@@ -273,17 +285,11 @@
     };
 
     Game.prototype.collide = function(e1, e2) {
-      var a, ax, ay, dx, dy, minDist, targetX, targetY, theta;
-      dx = e1.body.position.x - e2.body.position.x;
-      dy = e1.body.position.y - e2.body.position.y;
-      minDist = e1.size + e2.size;
-      theta = Math.atan2(dy, dx);
-      targetX = e1.body.position.x + Math.cos(theta) * minDist;
-      targetY = e1.body.position.y + Math.sin(theta) * minDist;
-      ax = (targetX - e2.body.position.x) * (SPRING / 100);
-      ay = (targetY - e2.body.position.y) * (SPRING / 100);
-      a = new Point(ax, ay);
-      return e2.v *= -a;
+      var vi1, vi2;
+      vi1 = e1.v;
+      vi2 = e2.v;
+      e1.v += vi2 / 30;
+      return e2.v += vi1 / 30;
     };
 
     Game.prototype.checkCollisions = function(index) {
@@ -339,6 +345,6 @@
     return game.mainloop();
   };
 
-  setInterval(onFrame, 100 / 6);
+  setInterval(onFrame, 16);
 
 }).call(this);
