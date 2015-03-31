@@ -238,7 +238,7 @@ class Game
 
     mainloop: () ->
         @updateEntities()
-        # @checkCollisions()
+        @checkCollisions()
         @keepInBounds()
         view.draw()
 

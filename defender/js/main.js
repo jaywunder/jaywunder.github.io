@@ -269,6 +269,7 @@
 
     Game.prototype.mainloop = function() {
       this.updateEntities();
+      this.checkCollisions();
       this.keepInBounds();
       return view.draw();
     };
