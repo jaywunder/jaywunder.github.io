@@ -7,9 +7,9 @@
 
   SPRING = 0.6;
 
-  DEFENDER_SIZE = $(window).width() / 25;
+  DEFENDER_SIZE = $(window).width() / 50;
 
-  ATTACKER_SIZE = $(window).width() / 25;
+  ATTACKER_SIZE = $(window).width() / 50;
 
   TRACKING = false;
 
@@ -18,10 +18,24 @@
       this.size = size;
       this.pos = new Point(x, y);
       this.v = new Point(vx, vy);
-      this.a = new Point(ax, ay);
       this.alive = true;
       this.primaryColor = '#bab8b5';
+      this.direction = new Path.Line({
+        from: [this.pos.x, this.pos.y],
+        to: [this.pos.x + (this.v.x * 10), this.pos.y + (this.v.y * 10)],
+        strokeColor: '#ffffff',
+        strokeWidth: 5
+      });
     }
+
+    Entity.prototype.updateDirection = function() {
+      this.direction.segments[0] = new Segment({
+        point: [this.pos.x, this.pos.y]
+      });
+      return this.direction.segments[1] = new Segment({
+        point: [this.pos.x + (this.v.x * 10), this.pos.y + (this.v.y * 10)]
+      });
+    };
 
     Entity.prototype.makeBody = function() {
       return this.body = new Path.Circle({
@@ -55,6 +69,7 @@
       this.primaryColor = "#00b3ff";
       this.secondaryColor = "#23e96b";
       this.maxVelocity = 5;
+      this.accel = 3;
       this.makeBody();
     }
 
@@ -101,11 +116,11 @@
     Defender.prototype.update = function() {
       this.move();
       this.rotate();
+      this.updateDirection();
       return this.innerCircle.radius += 20;
     };
 
     Defender.prototype.move = function() {
-      this.v += this.a;
       this.pos += this.v;
       return this.body.position = this.pos;
     };
@@ -117,31 +132,30 @@
     };
 
     Defender.prototype.keyDown = function(e) {
-      var accel, key;
+      var key;
       key = e.which;
-      accel = 3;
       if (Key.isDown("a") || Key.isDown("left")) {
         if (this.v.x > -this.maxVelocity) {
-          this.v.x -= accel;
+          this.v.x -= this.accel;
         }
       }
       if (Key.isDown("w") || Key.isDown("up")) {
         if (this.v.y > -this.maxVelocity) {
-          this.v.y -= accel;
+          this.v.y -= this.accel;
         }
       }
       if (Key.isDown("d") || Key.isDown("right")) {
         if (this.v.x < this.maxVelocity) {
-          this.v.x += accel;
+          this.v.x += this.accel;
         }
       }
       if (Key.isDown("s") || Key.isDown("down")) {
         if (this.v.y < this.maxVelocity) {
-          this.v.y += accel;
+          this.v.y += this.accel;
         }
       }
       if (key === 32) {
-        return this.v = this.a = new Point(0, 0);
+        return this.v = new Point(0, 0);
       }
     };
 
@@ -166,6 +180,7 @@
       this.maxVelocity = 10;
       this.strokeWidth = this.size / 10;
       this.primaryColor = "#f24e3f";
+      this.accel = 0.1;
       this.makeBody();
     }
 
@@ -189,28 +204,26 @@
 
     Attacker.prototype.update = function() {
       this.trackTarget();
-      return this.move();
+      this.move();
+      return this.updateDirection();
     };
 
     Attacker.prototype.trackTarget = function() {
-      var accel;
-      accel = 0.1;
       if (this.target.pos.x <= this.pos.x) {
-        this.v.x -= accel;
+        this.v.x -= this.accel;
       }
       if (this.target.pos.y <= this.pos.y) {
-        this.v.y -= accel;
+        this.v.y -= this.accel;
       }
       if (this.target.pos.x > this.pos.x) {
-        this.v.x += accel;
+        this.v.x += this.accel;
       }
       if (this.target.pos.y > this.pos.y) {
-        return this.v.x += accel;
+        return this.v.y += this.accel;
       }
     };
 
     Attacker.prototype.move = function() {
-      this.v += this.a;
       this.pos += this.v;
       return this.body.position = this.pos;
     };
@@ -272,7 +285,13 @@
       return _results;
     };
 
-    Game.prototype.collide = function(e1, e2) {};
+    Game.prototype.collide = function(e1, e2) {
+      var vi1, vi2;
+      vi1 = e1.v;
+      vi2 = e2.v;
+      e1.v += vi2 / 30;
+      return e2.v += vi1 / 30;
+    };
 
     Game.prototype.checkCollisions = function(index) {
       var e, _i, _ref, _ref1;
@@ -327,6 +346,6 @@
     return game.mainloop();
   };
 
-  setInterval(onFrame, 100 / 6);
+  setInterval(onFrame, 16);
 
 }).call(this);

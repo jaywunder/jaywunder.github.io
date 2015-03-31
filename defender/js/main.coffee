@@ -1,7 +1,7 @@
 FRICTION = 0.6
 SPRING = 0.6
-DEFENDER_SIZE = $(window).width() / 25
-ATTACKER_SIZE = $(window).width() / 25
+DEFENDER_SIZE = $(window).width() / 50
+ATTACKER_SIZE = $(window).width() / 50
 TRACKING = false
 
 ################################################################################
@@ -10,14 +10,21 @@ TRACKING = false
 class Entity
     constructor: (size, x, y, vx, vy, ax, ay) ->
         @size = size
-
         @pos = new Point(x, y)
         @v = new Point(vx, vy)
-        @a = new Point(ax, ay)
-
         @alive = true
 
         @primaryColor = '#bab8b5'
+        @direction = new Path.Line({
+            from: [@pos.x, @pos.y]
+            to:   [@pos.x + (@v.x * 10), @pos.y + (@v.y * 10)]
+            strokeColor: '#ffffff'
+            strokeWidth: 5
+            })
+
+    updateDirection: () ->
+        @direction.segments[0] = new Segment({ point: [@pos.x, @pos.y]})
+        @direction.segments[1] = new Segment({ point: [@pos.x + (@v.x * 10), @pos.y + (@v.y * 10)]})
 
     makeBody: () ->
         @body = new Path.Circle({
@@ -47,6 +54,7 @@ class Defender extends Entity
         @primaryColor = "#00b3ff"
         @secondaryColor = "#23e96b"
         @maxVelocity = 5
+        @accel = 3
 
         @makeBody()
 
@@ -97,10 +105,10 @@ class Defender extends Entity
     update: () ->
         @move()
         @rotate()
+        @updateDirection()
         @innerCircle.radius += 20
 
     move: () ->
-        @v   += @a # add acceleration to velocity
         @pos += @v # add velocity to position
 
         @body.position = @pos # move @body to @pos
@@ -111,18 +119,17 @@ class Defender extends Entity
 
     keyDown: (e) ->
         key = e.which
-        accel = 3
         if Key.isDown("a") or Key.isDown("left") # left
-            @v.x -= accel if @v.x > -@maxVelocity
+            @v.x -= @accel if @v.x > -@maxVelocity
         if Key.isDown("w") or Key.isDown("up") # up
-            @v.y -= accel if @v.y > -@maxVelocity
+            @v.y -= @accel if @v.y > -@maxVelocity
         if Key.isDown("d") or Key.isDown("right") # right
-            @v.x += accel if @v.x < @maxVelocity
+            @v.x += @accel if @v.x < @maxVelocity
         if Key.isDown("s") or Key.isDown("down") # down
-            @v.y += accel if @v.y < @maxVelocity
+            @v.y += @accel if @v.y < @maxVelocity
 
         if key is 32 # space key this is temporary
-            @v = @a = new Point(0, 0) # stop defender
+            @v = new Point(0, 0) # stop defender
 
     keyUp: (e) ->
         #TODO: slow down defender on keyup?
@@ -145,6 +152,7 @@ class Attacker extends Entity
         @maxVelocity = 10
         @strokeWidth = @size / 10
         @primaryColor = "#f24e3f"
+        @accel = 0.1
 
         @makeBody()
 
@@ -170,36 +178,33 @@ class Attacker extends Entity
     update: () ->
         @trackTarget()
         @move()
+        @updateDirection()
         # @rotate()
 
     trackTarget: () ->
-        accel = 0.1
         # console.log "------"
         if @target.pos.x <= @pos.x # defender to the left
             # console.log "left"
-            @v.x -= accel
+            @v.x -= @accel
 
         if @target.pos.y <= @pos.y # defender is above
             # console.log "up"
-            @v.y -= accel
+            @v.y -= @accel
 
         if @target.pos.x > @pos.x # defender to the right
             # console.log "right"
-            @v.x += accel
+            @v.x += @accel
 
         if @target.pos.y > @pos.y # defender is below
             # console.log "down"
-            @v.x += accel
+            @v.y += @accel
 
     move: () ->
-        #velocity changes
-        @v   += @a
-        @pos += @v
-        #body changes
-        @body.position = @pos
+        @pos += @v # entity position changes
+        @body.position = @pos # body position changes
 
     rotate: () ->
-        #find theta
+        #find theta... "Theta!? Where are you, Theta?"
         theta = Math.atan(@v.y / @v.x) * (180 / Math.PI) - 90 # convert to degrees
         theta += 180 if @v.x < 0 # make sure theta is within the range
         @body.rotation = theta if theta != @body.data.rotation
@@ -242,8 +247,12 @@ class Game
             entity.update()
 
     collide: (e1, e2) ->
-        # e1.v *= new Point -1 -1
-        # e2.v *= new Point -1 -1
+        vi1 = e1.v
+        vi2 = e2.v
+
+        e1.v += vi2 / 30
+        e2.v += vi1 / 30
+
         # console.log(e1.name + " just collided with " + e2.name)
 
     checkCollisions: (index) ->
@@ -255,7 +264,7 @@ class Game
                 @collide(@entities[index], @entities[e])
 
         if index + 1 < @entities.length
-            @checkCollisions(index + 1)
+            return @checkCollisions(index + 1)
 
     keepInBounds: () ->
         for entity in @entities
@@ -289,9 +298,7 @@ game = new Game()
 onFrame = () ->
     game.mainloop()
 
-setInterval(onFrame, 100/6)
-
-
+setInterval(onFrame, 16)
 
 # path = new Path.Circle({
 #     center: view.center + 300,
