@@ -45,14 +45,20 @@
       });
     };
 
-    Entity.prototype.update = function() {
-      this.move();
-      return this.rotate();
+    Entity.prototype.limitVelocity = function() {
+      if (v.x > this.maxVelocity) {
+        v.x = this.maxVelocity;
+      }
+      if (v.x < -this.maxVelocity) {
+        v.x = -this.maxVelocity;
+      }
+      if (v.y > this.maxVelocity) {
+        v.y = this.maxVelocity;
+      }
+      if (v.y < -this.maxVelocity) {
+        return v.y = -this.maxVelocity;
+      }
     };
-
-    Entity.prototype.move = function() {};
-
-    Entity.prototype.rotate = function() {};
 
     return Entity;
 
@@ -63,7 +69,7 @@
 
     function Defender(size, x, y) {
       Defender.__super__.constructor.call(this, size, x, y, 0, 0, 0, 0);
-      this.name = "defender";
+      this.type = "defender";
       this.armSize = 1.5;
       this.strokeWidth = this.size / 7;
       this.primaryColor = "#00b3ff";
@@ -176,7 +182,7 @@
       Attacker.__super__.constructor.call(this, size, x, y, _.random(-5, 5), _.random(-5, 5), 0, 0);
       this.rotation = 0;
       this.target = target;
-      this.name = "attacker";
+      this.type = "attacker";
       this.maxVelocity = 10;
       this.strokeWidth = this.size / 10;
       this.primaryColor = "#f24e3f";
@@ -285,14 +291,6 @@
       return _results;
     };
 
-    Game.prototype.collide = function(e1, e2) {
-      var vi1, vi2;
-      vi1 = e1.v;
-      vi2 = e2.v;
-      e1.v += vi2 / 30;
-      return e2.v += vi1 / 30;
-    };
-
     Game.prototype.checkCollisions = function(index) {
       var e, _i, _ref, _ref1;
       if (index == null) {
@@ -301,11 +299,25 @@
       for (e = _i = _ref = index + 1, _ref1 = this.entities.length; _i < _ref1; e = _i += 1) {
         if (this.entities[index].pos.getDistance(this.entities[e].pos) <= this.entities[index].size + this.entities[e].size) {
           this.collide(this.entities[index], this.entities[e]);
+          this.collide(this.entities[e], this.entities[index]);
         }
       }
       if (index + 1 < this.entities.length) {
         return this.checkCollisions(index + 1);
       }
+    };
+
+    Game.prototype.collide = function(e1, e2) {
+      var angle, ax, ay, dx, dy, minDist, targetX, targetY;
+      dx = e1.pos.x - e2.pos.x;
+      dy = e1.pos.y - e2.pos.y;
+      angle = Math.atan2(dy, dx);
+      minDist = e1.size + e2.size;
+      targetX = e1.pos.x + Math.cos(angle) * minDist;
+      targetY = e2.pos.y + Math.sin(angle) * minDist;
+      ax = (targetX - e2.pos.x) * SPRING / 50;
+      ay = (targetY - e2.pos.y) * SPRING / 50;
+      return e1.v += new Point(ax, ay);
     };
 
     Game.prototype.keepInBounds = function() {

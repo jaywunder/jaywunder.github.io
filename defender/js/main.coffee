@@ -33,13 +33,11 @@ class Entity
             strokeColor: @strokeColor
         })
 
-    update: ->
-        @move()
-        @rotate()
-
-    move: ->
-
-    rotate: ->
+    limitVelocity: () ->
+        v.x = @maxVelocity if v.x > @maxVelocity
+        v.x = -@maxVelocity if v.x < -@maxVelocity
+        v.y = @maxVelocity if v.y > @maxVelocity
+        v.y = -@maxVelocity if v.y < -@maxVelocity
 
 ################################################################################
 #DEFENDER#######################################################################
@@ -48,7 +46,7 @@ class Defender extends Entity
     constructor: (size, x, y) ->
         super size, x, y, 0, 0, 0, 0
 
-        @name = "defender"
+        @type = "defender"
         @armSize = 1.5
         @strokeWidth = @size / 7
         @primaryColor = "#00b3ff"
@@ -148,7 +146,7 @@ class Attacker extends Entity
 
         @rotation = 0
         @target = target
-        @name = "attacker"
+        @type = "attacker"
         @maxVelocity = 10
         @strokeWidth = @size / 10
         @primaryColor = "#f24e3f"
@@ -246,25 +244,34 @@ class Game
         for entity in @entities
             entity.update()
 
-    collide: (e1, e2) ->
-        vi1 = e1.v
-        vi2 = e2.v
-
-        e1.v += vi2 / 30
-        e2.v += vi1 / 30
-
-        # console.log(e1.name + " just collided with " + e2.name)
-
     checkCollisions: (index) ->
         index ?= 0
 
         for e in [index + 1...@entities.length] by 1
             # console.log @entities[e].pos
             if @entities[index].pos.getDistance(@entities[e].pos) <= @entities[index].size + @entities[e].size
+                #collide each entity with the other entity
                 @collide(@entities[index], @entities[e])
+                @collide(@entities[e], @entities[index])
 
         if index + 1 < @entities.length
             return @checkCollisions(index + 1)
+
+    collide: (e1, e2) ->
+        #FIXME: collisions
+        dx = e1.pos.x - e2.pos.x
+        dy = e1.pos.y - e2.pos.y
+
+        angle = Math.atan2(dy, dx)
+        minDist = e1.size + e2.size
+
+        targetX = e1.pos.x + Math.cos(angle) * minDist
+        targetY = e2.pos.y + Math.sin(angle) * minDist
+
+        ax = (targetX - e2.pos.x) * SPRING / 50
+        ay = (targetY - e2.pos.y) * SPRING / 50
+
+        e1.v += new Point ax, ay
 
     keepInBounds: () ->
         for entity in @entities
