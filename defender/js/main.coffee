@@ -15,16 +15,16 @@ class Entity
         @alive = true
 
         @primaryColor = '#bab8b5'
-        @direction = new Path.Line({
-            from: [@pos.x, @pos.y]
-            to:   [@pos.x + (@v.x * 10), @pos.y + (@v.y * 10)]
-            strokeColor: '#ffffff'
-            strokeWidth: 5
-            })
+        # @direction = new Path.Line({
+        #     from: [@pos.x, @pos.y]
+        #     to:   [@pos.x + (@v.x * 10), @pos.y + (@v.y * 10)]
+        #     strokeColor: '#ffffff'
+        #     strokeWidth: 5
+        #     })
 
     updateDirection: () ->
-        @direction.segments[0] = new Segment({ point: [@pos.x, @pos.y]})
-        @direction.segments[1] = new Segment({ point: [@pos.x + (@v.x * 10), @pos.y + (@v.y * 10)]})
+    #     @direction.segments[0] = new Segment({ point: [@pos.x, @pos.y]})
+    #     @direction.segments[1] = new Segment({ point: [@pos.x + (@v.x * 10), @pos.y + (@v.y * 10)]})
 
     makeBody: () ->
         @body = new Path.Circle({
@@ -251,8 +251,8 @@ class Game
             # console.log @entities[e].pos
             if @entities[index].pos.getDistance(@entities[e].pos) <= @entities[index].size + @entities[e].size
                 #collide each entity with the other entity
-                @collide(@entities[index], @entities[e])
                 @collide(@entities[e], @entities[index])
+                @collide(@entities[index], @entities[e])
 
         if index + 1 < @entities.length
             return @checkCollisions(index + 1)

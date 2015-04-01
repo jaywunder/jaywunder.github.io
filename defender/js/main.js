@@ -20,22 +20,9 @@
       this.v = new Point(vx, vy);
       this.alive = true;
       this.primaryColor = '#bab8b5';
-      this.direction = new Path.Line({
-        from: [this.pos.x, this.pos.y],
-        to: [this.pos.x + (this.v.x * 10), this.pos.y + (this.v.y * 10)],
-        strokeColor: '#ffffff',
-        strokeWidth: 5
-      });
     }
 
-    Entity.prototype.updateDirection = function() {
-      this.direction.segments[0] = new Segment({
-        point: [this.pos.x, this.pos.y]
-      });
-      return this.direction.segments[1] = new Segment({
-        point: [this.pos.x + (this.v.x * 10), this.pos.y + (this.v.y * 10)]
-      });
-    };
+    Entity.prototype.updateDirection = function() {};
 
     Entity.prototype.makeBody = function() {
       return this.body = new Path.Circle({
@@ -298,8 +285,8 @@
       }
       for (e = _i = _ref = index + 1, _ref1 = this.entities.length; _i < _ref1; e = _i += 1) {
         if (this.entities[index].pos.getDistance(this.entities[e].pos) <= this.entities[index].size + this.entities[e].size) {
-          this.collide(this.entities[index], this.entities[e]);
           this.collide(this.entities[e], this.entities[index]);
+          this.collide(this.entities[index], this.entities[e]);
         }
       }
       if (index + 1 < this.entities.length) {
