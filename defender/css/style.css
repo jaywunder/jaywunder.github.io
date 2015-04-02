@@ -37,6 +37,16 @@ html {
 #health {
     color: #f24e3f;
     font-size: 20px;
+    border-bottom: solid 1px #f24e3f;
+    padding-right: 0px;
+    margin-right: 0px;
+}
+#injury {
+    color: #c0c0c0;
+    font-size: 20px;
+    border-bottom: solid 1px #c0c0c0;
+    margin-left: -10px;
+    padding-left: 0px;
 }
 
 .wrapper {

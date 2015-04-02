@@ -54,7 +54,7 @@ class Defender extends Entity
     constructor: (size, x, y) ->
         super size, x, y, 0, 0
 
-        @health = 12
+        @health = @healthMax = 12
         @type = "defender"
         @armSize = 1.5
         @strokeWidth = @size / 7
@@ -155,8 +155,9 @@ class Defender extends Entity
 #LASER#########################################################################
 ################################################################################
 class Laser extends Entity
-    constructor: (x, y, direction) ->
+    constructor: (num) ->
         super  LASER_SIZE, x, y, 10 * direction.x, 10 * direction.y
+        @num = num
         @makeBody()
 
     makeBody: () ->
@@ -256,6 +257,9 @@ class Game
 
         @makeEntities()
 
+        @$healthBar = $ "#health"
+        @$injuryBar = $ "#injury"
+
     makeEntities: () ->
         @defender = def = new Defender(DEFENDER_SIZE, view.center.x, view.center.y)
         #I use the second pointer "def" as a way to reference def in the keyboard event handlers
@@ -295,9 +299,9 @@ class Game
             entity.update()
 
     updateHealthBar: () ->
-        $health = $ "#health"
         if @defender.health >= 0
-            $health.text("♡".repeat(@defender.health))
+            @$healthBar.text("♡".repeat(@defender.health))
+            @$injuryBar.text("♡".repeat(@defender.healthMax - @defender.health))
         # ♡ —
     updateScoreBar: () ->
 

@@ -64,7 +64,7 @@
 
     function Defender(size, x, y) {
       Defender.__super__.constructor.call(this, size, x, y, 0, 0);
-      this.health = 12;
+      this.health = this.healthMax = 12;
       this.type = "defender";
       this.armSize = 1.5;
       this.strokeWidth = this.size / 7;
@@ -186,8 +186,9 @@
   Laser = (function(_super) {
     __extends(Laser, _super);
 
-    function Laser(x, y, direction) {
+    function Laser(num) {
       Laser.__super__.constructor.call(this, LASER_SIZE, x, y, 10 * direction.x, 10 * direction.y);
+      this.num = num;
       this.makeBody();
     }
 
@@ -292,6 +293,8 @@
       this.difficulty = 1;
       this.attackerAmount = Math.floor(this.difficulty * 3);
       this.makeEntities();
+      this.$healthBar = $("#health");
+      this.$injuryBar = $("#injury");
     }
 
     Game.prototype.makeEntities = function() {
@@ -333,10 +336,9 @@
     };
 
     Game.prototype.updateHealthBar = function() {
-      var $health;
-      $health = $("#health");
       if (this.defender.health >= 0) {
-        return $health.text("♡".repeat(this.defender.health));
+        this.$healthBar.text("♡".repeat(this.defender.health));
+        return this.$injuryBar.text("♡".repeat(this.defender.healthMax - this.defender.health));
       }
     };
 
