@@ -1,7 +1,11 @@
 (function() {
-  var ATTACKER_SIZE, Attacker, DEFENDER_SIZE, Defender, Entity, FRICTION, Game, SPRING, TRACKING, game, onFrame,
+  var ATTACKER_SIZE, Attacker, DEFENDER_SIZE, Defender, Entity, FRICTION, Game, LASER_SIZE, Laser, SPRING, TRACKING, game, mainloop,
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+  String.prototype.repeat = function(num) {
+    return new Array(num + 1).join(this);
+  };
 
   FRICTION = 0.6;
 
@@ -11,10 +15,12 @@
 
   ATTACKER_SIZE = $(window).width() / 50;
 
+  LASER_SIZE = $(window).width() / 60;
+
   TRACKING = false;
 
   Entity = (function() {
-    function Entity(size, x, y, vx, vy, ax, ay) {
+    function Entity(size, x, y, vx, vy) {
       this.size = size;
       this.pos = new Point(x, y);
       this.v = new Point(vx, vy);
@@ -47,6 +53,8 @@
       }
     };
 
+    Entity.prototype.damage = function() {};
+
     return Entity;
 
   })();
@@ -55,7 +63,8 @@
     __extends(Defender, _super);
 
     function Defender(size, x, y) {
-      Defender.__super__.constructor.call(this, size, x, y, 0, 0, 0, 0);
+      Defender.__super__.constructor.call(this, size, x, y, 0, 0);
+      this.health = 12;
       this.type = "defender";
       this.armSize = 1.5;
       this.strokeWidth = this.size / 7;
@@ -63,6 +72,8 @@
       this.secondaryColor = "#23e96b";
       this.maxVelocity = 5;
       this.accel = 3;
+      this.timeSinceDamaged = 0;
+      this.DAMAGE_COOLDOWN = 30;
       this.makeBody();
     }
 
@@ -110,7 +121,10 @@
       this.move();
       this.rotate();
       this.updateDirection();
-      return this.innerCircle.radius += 20;
+      this.innerCircle.radius += 20;
+      if (this.timeSinceDamaged < this.DAMAGE_COOLDOWN) {
+        return this.timeSinceDamaged += 1;
+      }
     };
 
     Defender.prototype.move = function() {
@@ -158,7 +172,42 @@
       return this.body.rotate(0.6);
     };
 
+    Defender.prototype.damage = function(type) {
+      if (type === "attacker" && this.timeSinceDamaged === this.DAMAGE_COOLDOWN) {
+        this.health--;
+      }
+      return this.timeSinceDamaged = 0;
+    };
+
     return Defender;
+
+  })(Entity);
+
+  Laser = (function(_super) {
+    __extends(Laser, _super);
+
+    function Laser(x, y, direction) {
+      Laser.__super__.constructor.call(this, LASER_SIZE, x, y, 10 * direction.x, 10 * direction.y);
+      this.makeBody();
+    }
+
+    Laser.prototype.makeBody = function() {
+      return this.body = new Path.Line({
+        from: [this.pos.x, this.pos.y],
+        to: [this.pos.x + LASER_SIZE * this.direction.x, this.pos.y + LASER_SIZE * this.direction.y]
+      });
+    };
+
+    Laser.prototype.update = function() {
+      return this.move();
+    };
+
+    Laser.prototype.move = function() {
+      this.pos += this.v;
+      return this.body.position = this.pos;
+    };
+
+    return Laser;
 
   })(Entity);
 
@@ -166,7 +215,7 @@
     __extends(Attacker, _super);
 
     function Attacker(size, x, y, target) {
-      Attacker.__super__.constructor.call(this, size, x, y, _.random(-5, 5), _.random(-5, 5), 0, 0);
+      Attacker.__super__.constructor.call(this, size, x, y, _.random(-5, 5), _.random(-5, 5));
       this.rotation = 0;
       this.target = target;
       this.type = "attacker";
@@ -246,24 +295,29 @@
     }
 
     Game.prototype.makeEntities = function() {
-      var def, i, _i, _ref;
-      def = new Defender(DEFENDER_SIZE, view.center.x, view.center.y);
+      var def, i, _i, _ref, _results;
+      this.defender = def = new Defender(DEFENDER_SIZE, view.center.x, view.center.y);
       $(window).on('keydown', function(e) {
         return def.keyBoard(e);
       }).on('keyup', function(e) {
         return def.keyBoard(e);
       });
-      this.entities.push(def);
+      this.entities.push(this.defender);
+      _results = [];
       for (i = _i = 0, _ref = this.attackerAmount; _i <= _ref; i = _i += 1) {
-        this.entities.push(new Attacker(ATTACKER_SIZE, view.center.x, view.center.y, def));
+        _results.push(this.entities.push(new Attacker(ATTACKER_SIZE, view.center.x + _.random(-500, 500), view.center.y + _.random(-500, 500), this.defender)));
       }
-      return console.log(this.entities);
+      return _results;
     };
+
+    Game.prototype.handleInput = function(e) {};
 
     Game.prototype.mainloop = function() {
       this.updateEntities();
       this.checkCollisions();
       this.keepInBounds();
+      this.updateScoreBar();
+      this.updateHealthBar();
       return view.draw();
     };
 
@@ -278,6 +332,16 @@
       return _results;
     };
 
+    Game.prototype.updateHealthBar = function() {
+      var $health;
+      $health = $("#health");
+      if (this.defender.health >= 0) {
+        return $health.text("♡".repeat(this.defender.health));
+      }
+    };
+
+    Game.prototype.updateScoreBar = function() {};
+
     Game.prototype.checkCollisions = function(index) {
       var e, _i, _ref, _ref1;
       if (index == null) {
@@ -287,6 +351,8 @@
         if (this.entities[index].pos.getDistance(this.entities[e].pos) <= this.entities[index].size + this.entities[e].size) {
           this.collide(this.entities[e], this.entities[index]);
           this.collide(this.entities[index], this.entities[e]);
+          this.entities[e].damage(this.entities[index].type);
+          this.entities[index].damage(this.entities[e].type);
         }
       }
       if (index + 1 < this.entities.length) {
@@ -341,10 +407,25 @@
 
   game = new Game();
 
-  onFrame = function() {
+  mainloop = function() {
     return game.mainloop();
   };
 
-  setInterval(onFrame, 16);
+  setTimeout(function() {
+    return $("#countdownText").text("THREE");
+  }, 0);
+
+  setTimeout(function() {
+    return $("#countdownText").text("TWO");
+  }, 1000);
+
+  setTimeout(function() {
+    return $("#countdownText").text("ONE");
+  }, 2000);
+
+  setTimeout(function() {
+    $("#countdownText").text("");
+    return setInterval(mainloop, 16);
+  }, 3000);
 
 }).call(this);

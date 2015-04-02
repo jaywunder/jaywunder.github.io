@@ -1,14 +1,19 @@
+String.prototype.repeat = ( num ) ->
+    #I'm sorry for extending a primitive type, but it must be done
+    return new Array( num + 1 ).join( this );
+
 FRICTION = 0.6
 SPRING = 0.6
 DEFENDER_SIZE = $(window).width() / 50
 ATTACKER_SIZE = $(window).width() / 50
+LASER_SIZE =    $(window).width() / 60
 TRACKING = false
 
 ################################################################################
 #ENTITY#########################################################################
 ################################################################################
 class Entity
-    constructor: (size, x, y, vx, vy, ax, ay) ->
+    constructor: (size, x, y, vx, vy) ->
         @size = size
         @pos = new Point(x, y)
         @v = new Point(vx, vy)
@@ -39,13 +44,17 @@ class Entity
         v.y = @maxVelocity if v.y > @maxVelocity
         v.y = -@maxVelocity if v.y < -@maxVelocity
 
+    damage: () ->
+
+
 ################################################################################
 #DEFENDER#######################################################################
 ################################################################################
 class Defender extends Entity
     constructor: (size, x, y) ->
-        super size, x, y, 0, 0, 0, 0
+        super size, x, y, 0, 0
 
+        @health = 12
         @type = "defender"
         @armSize = 1.5
         @strokeWidth = @size / 7
@@ -53,6 +62,8 @@ class Defender extends Entity
         @secondaryColor = "#23e96b"
         @maxVelocity = 5
         @accel = 3
+        @timeSinceDamaged = 0
+        @DAMAGE_COOLDOWN = 30
 
         @makeBody()
 
@@ -105,6 +116,7 @@ class Defender extends Entity
         @rotate()
         @updateDirection()
         @innerCircle.radius += 20
+        @timeSinceDamaged += 1 if @timeSinceDamaged < @DAMAGE_COOLDOWN
 
     move: () ->
         @pos += @v # add velocity to position
@@ -135,14 +147,38 @@ class Defender extends Entity
     rotate: () ->
         @body.rotate(0.6)
 
-#TODO: make a laser class
+    damage: (type) ->
+        @health-- if type == "attacker" and @timeSinceDamaged == @DAMAGE_COOLDOWN
+        @timeSinceDamaged = 0
+
+################################################################################
+#LASER#########################################################################
+################################################################################
+class Laser extends Entity
+    constructor: (x, y, direction) ->
+        super  LASER_SIZE, x, y, 10 * direction.x, 10 * direction.y
+        @makeBody()
+
+    makeBody: () ->
+        @body = new Path.Line({
+            from: [@pos.x, @pos.y]
+            to:   [@pos.x + LASER_SIZE * @direction.x,
+                   @pos.y + LASER_SIZE * @direction.y]
+        })
+
+    update: () ->
+        @move()
+
+    move: () ->
+        @pos += @v
+        @body.position = @pos
 
 ################################################################################
 #ATTACKER#######################################################################
 ################################################################################
 class Attacker extends Entity
     constructor: (size, x, y, target) ->
-        super size, x, y, _.random(-5, 5), _.random(-5, 5), 0, 0
+        super size, x, y, _.random(-5, 5), _.random(-5, 5)
 
         @rotation = 0
         @target = target
@@ -221,28 +257,50 @@ class Game
         @makeEntities()
 
     makeEntities: () ->
-        def = new Defender(DEFENDER_SIZE, view.center.x, view.center.y)
+        @defender = def = new Defender(DEFENDER_SIZE, view.center.x, view.center.y)
+        #I use the second pointer "def" as a way to reference def in the keyboard event handlers
+        #This will change in the future
+
         $(window)
         .on('keydown', (e) ->
             def.keyBoard(e)
         ).on('keyup', (e) ->
             def.keyBoard(e)
         )
-        @entities.push def
+        @entities.push @defender
         for i in [0..@attackerAmount] by 1
-            @entities.push new Attacker(ATTACKER_SIZE, view.center.x, view.center.y, def)
+            @entities.push new Attacker(
+                ATTACKER_SIZE,
+                view.center.x + _.random(-500, 500),
+                view.center.y + _.random(-500, 500),
+                @defender
+            )
+        # laser = new Laser(0, 0, new Point(1, 1))
+        # @entities.push laser
 
-        console.log @entities
+    handleInput: (e) ->
+        #TODO: handle input in Game class, then pass to @defender object
 
     mainloop: () ->
         @updateEntities()
         @checkCollisions()
         @keepInBounds()
+        @updateScoreBar()
+        @updateHealthBar()
+
         view.draw()
 
     updateEntities: () ->
         for entity in @entities
             entity.update()
+
+    updateHealthBar: () ->
+        $health = $ "#health"
+        if @defender.health >= 0
+            $health.text("♡".repeat(@defender.health))
+        # ♡ —
+    updateScoreBar: () ->
+
 
     checkCollisions: (index) ->
         index ?= 0
@@ -253,6 +311,9 @@ class Game
                 #collide each entity with the other entity
                 @collide(@entities[e], @entities[index])
                 @collide(@entities[index], @entities[e])
+
+                @entities[e].damage(@entities[index].type)
+                @entities[index].damage(@entities[e].type)
 
         if index + 1 < @entities.length
             return @checkCollisions(index + 1)
@@ -302,10 +363,23 @@ class Game
 
 game = new Game()
 
-onFrame = () ->
+mainloop = () ->
     game.mainloop()
 
-setInterval(onFrame, 16)
+setTimeout(() ->
+    $("#countdownText").text("THREE")
+, 0)
+setTimeout(() ->
+    $("#countdownText").text("TWO")
+, 1000)
+setTimeout(() ->
+    $("#countdownText").text("ONE")
+, 2000)
+
+setTimeout(() ->
+    $("#countdownText").text("")
+    setInterval(mainloop, 16)
+, 3000)
 
 # path = new Path.Circle({
 #     center: view.center + 300,
