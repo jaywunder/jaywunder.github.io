@@ -151,6 +151,9 @@ class Defender extends Entity
         @health-- if type == "attacker" and @timeSinceDamaged == @DAMAGE_COOLDOWN
         @timeSinceDamaged = 0
 
+    fireMahLazers: ()->
+
+
 ################################################################################
 #LASER##########################################################################
 ################################################################################
@@ -169,7 +172,6 @@ class Laser extends Entity
         @magnitude = 15
 
         @makeBody()
-        console.log @reference.segments[1]
 
     makeBody: () ->
         @pos.x = @reference.position.x
@@ -223,7 +225,7 @@ class Attacker extends Entity
                 strokeWidth: @strokeWidth
                 closed: true
             })
-        console.log(@body)
+        # console.log(@body)
 
     update: () ->
         @trackTarget()
@@ -232,22 +234,10 @@ class Attacker extends Entity
         # @rotate()
 
     trackTarget: () ->
-        # console.log "------"
-        if @target.pos.x <= @pos.x # defender to the left
-            # console.log "left"
-            @v.x -= @accel
-
-        if @target.pos.y <= @pos.y # defender is above
-            # console.log "up"
-            @v.y -= @accel
-
-        if @target.pos.x > @pos.x # defender to the right
-            # console.log "right"
-            @v.x += @accel
-
-        if @target.pos.y > @pos.y # defender is below
-            # console.log "down"
-            @v.y += @accel
+        @v.x -= @accel if @target.pos.x < @pos.x # defender to the left
+        @v.y -= @accel if @target.pos.y < @pos.y # defender is above
+        @v.x += @accel if @target.pos.x > @pos.x # defender to the right
+        @v.y += @accel if @target.pos.y > @pos.y # defender is below
 
     move: () ->
         @pos += @v # entity position changes
@@ -273,23 +263,11 @@ class Game
         @defender
         @makeEntities()
 
-        console.log @defender
-
         @$healthBar = $ "#health"
         @$injuryBar = $ "#injury"
 
-        # $(window).keydown()
-        # .on('keydown', (e) ->
-        #     handleInput(e)
-            # console.log e
-        # ).on('keyup', (e) ->
-        #     # handleInput(e)
-        # )
-
-    defender: new Defender(DEFENDER_SIZE, view.center.x, view.center.y)
-
     makeEntities: () ->
-        # @defender = new Defender(DEFENDER_SIZE, view.center.x, view.center.y)
+        @defender = new Defender(DEFENDER_SIZE, view.center.x, view.center.y)
         @entities.push @defender
 
         for i in [0..@attackerAmount] by 1
@@ -302,9 +280,6 @@ class Game
         for i in [0...4] by 1
             @entities.push new Laser(i, @defender)
 
-        return @entities
-
-
     handleInput: () ->
         if Key.isDown("a") or Key.isDown("left") # left
             @defender.v.x -= @defender.accel if @defender.v.x > -@defender.maxVelocity
@@ -316,6 +291,9 @@ class Game
             @defender.v.y += @defender.accel if @defender.v.y < @defender.maxVelocity
 
         if Key.isDown("space")
+            @fireMahLazers()
+            @defender.fireMahLazers()
+        if Key.isDown("escape")
             @defender.v = new Point(0, 0) # stop defender
 
     mainloop: () ->
@@ -325,9 +303,6 @@ class Game
         @keepInBounds()
         @updateScoreBar()
         @updateHealthBar()
-
-        # for i in [0...4] by 1
-        #     @entities.push new Laser(i, def)
 
         view.draw()
 
@@ -339,8 +314,22 @@ class Game
         if @defender.health >= 0
             @$healthBar.text("♡".repeat(@defender.health))
             @$injuryBar.text("♡".repeat(@defender.healthMax - @defender.health))
-        # ♡ —
+                            # ♡ —
     updateScoreBar: () ->
+
+    kill: (entity) ->
+        entity.body.remove()
+        @entities.splice(@entities.indexOf(entity), 1)
+
+    fireMahLazers: () ->
+        console.log "fireMahLazers"
+
+        for entity in @entities
+            if entity.type == "laser"
+                @kill(entity)
+
+        for i in [0...4] by 1
+            @entities.push new Laser(i, @defender)
 
 
     checkCollisions: (index) ->

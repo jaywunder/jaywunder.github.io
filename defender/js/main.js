@@ -179,6 +179,8 @@
       return this.timeSinceDamaged = 0;
     };
 
+    Defender.prototype.fireMahLazers = function() {};
+
     return Defender;
 
   })(Entity);
@@ -200,7 +202,6 @@
       this.type = "laser";
       this.magnitude = 15;
       this.makeBody();
-      console.log(this.reference.segments[1]);
     }
 
     Laser.prototype.makeBody = function() {
@@ -243,7 +244,7 @@
     }
 
     Attacker.prototype.makeBody = function() {
-      this.body = new Path({
+      return this.body = new Path({
         segments: [
           new Segment({
             point: [this.pos.x + this.size, this.pos.y - this.size]
@@ -257,7 +258,6 @@
         strokeWidth: this.strokeWidth,
         closed: true
       });
-      return console.log(this.body);
     };
 
     Attacker.prototype.update = function() {
@@ -267,10 +267,10 @@
     };
 
     Attacker.prototype.trackTarget = function() {
-      if (this.target.pos.x <= this.pos.x) {
+      if (this.target.pos.x < this.pos.x) {
         this.v.x -= this.accel;
       }
-      if (this.target.pos.y <= this.pos.y) {
+      if (this.target.pos.y < this.pos.y) {
         this.v.y -= this.accel;
       }
       if (this.target.pos.x > this.pos.x) {
@@ -309,23 +309,22 @@
       this.attackerAmount = Math.floor(this.difficulty * 3);
       this.defender;
       this.makeEntities();
-      console.log(this.defender);
       this.$healthBar = $("#health");
       this.$injuryBar = $("#injury");
     }
 
-    Game.prototype.defender = new Defender(DEFENDER_SIZE, view.center.x, view.center.y);
-
     Game.prototype.makeEntities = function() {
-      var i, _i, _j, _ref;
+      var i, _i, _j, _ref, _results;
+      this.defender = new Defender(DEFENDER_SIZE, view.center.x, view.center.y);
       this.entities.push(this.defender);
       for (i = _i = 0, _ref = this.attackerAmount; _i <= _ref; i = _i += 1) {
         this.entities.push(new Attacker(ATTACKER_SIZE, view.center.x + _.random(-500, 500), view.center.y + _.random(-500, 500), this.defender));
       }
+      _results = [];
       for (i = _j = 0; _j < 4; i = _j += 1) {
-        this.entities.push(new Laser(i, this.defender));
+        _results.push(this.entities.push(new Laser(i, this.defender)));
       }
-      return this.entities;
+      return _results;
     };
 
     Game.prototype.handleInput = function() {
@@ -350,6 +349,10 @@
         }
       }
       if (Key.isDown("space")) {
+        this.fireMahLazers();
+        this.defender.fireMahLazers();
+      }
+      if (Key.isDown("escape")) {
         return this.defender.v = new Point(0, 0);
       }
     };
@@ -383,6 +386,28 @@
     };
 
     Game.prototype.updateScoreBar = function() {};
+
+    Game.prototype.kill = function(entity) {
+      entity.body.remove();
+      return this.entities.splice(this.entities.indexOf(entity), 1);
+    };
+
+    Game.prototype.fireMahLazers = function() {
+      var entity, i, _i, _j, _len, _ref, _results;
+      console.log("fireMahLazers");
+      _ref = this.entities;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        entity = _ref[_i];
+        if (entity.type === "laser") {
+          this.kill(entity);
+        }
+      }
+      _results = [];
+      for (i = _j = 0; _j < 4; i = _j += 1) {
+        _results.push(this.entities.push(new Laser(i, this.defender)));
+      }
+      return _results;
+    };
 
     Game.prototype.checkCollisions = function(index) {
       var e, _i, _ref, _ref1;
