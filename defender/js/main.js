@@ -64,14 +64,14 @@
 
     function Defender(size, x, y) {
       Defender.__super__.constructor.call(this, size, x, y, 0, 0);
-      this.health = this.healthMax = 63;
+      this.health = this.healthMax = 12;
       this.type = "defender";
       this.armSize = 1.5;
       this.strokeWidth = this.size / 7;
       this.primaryColor = "#00b3ff";
       this.secondaryColor = "#23e96b";
       this.maxVelocity = 5;
-      this.accel = 3;
+      this.accel = 0.5;
       this.timeSinceDamaged = 0;
       this.DAMAGE_COOLDOWN = 30;
       this.makeBody();
@@ -307,32 +307,55 @@
       this.entities = [];
       this.difficulty = 1;
       this.attackerAmount = Math.floor(this.difficulty * 3);
+      this.defender;
       this.makeEntities();
+      console.log(this.defender);
       this.$healthBar = $("#health");
       this.$injuryBar = $("#injury");
-      console.log(this);
-      $(window).keydown(this.handleInput);
     }
 
+    Game.prototype.defender = new Defender(DEFENDER_SIZE, view.center.x, view.center.y);
+
     Game.prototype.makeEntities = function() {
-      var i, _i, _j, _ref, _results;
-      this.defender = new Defender(DEFENDER_SIZE, view.center.x, view.center.y);
+      var i, _i, _j, _ref;
       this.entities.push(this.defender);
       for (i = _i = 0, _ref = this.attackerAmount; _i <= _ref; i = _i += 1) {
         this.entities.push(new Attacker(ATTACKER_SIZE, view.center.x + _.random(-500, 500), view.center.y + _.random(-500, 500), this.defender));
       }
-      _results = [];
       for (i = _j = 0; _j < 4; i = _j += 1) {
-        _results.push(this.entities.push(new Laser(i, this.defender)));
+        this.entities.push(new Laser(i, this.defender));
       }
-      return _results;
+      return this.entities;
     };
 
-    Game.prototype.handleInput = function(e) {
-      return console.log(this.defender);
+    Game.prototype.handleInput = function() {
+      if (Key.isDown("a") || Key.isDown("left")) {
+        if (this.defender.v.x > -this.defender.maxVelocity) {
+          this.defender.v.x -= this.defender.accel;
+        }
+      }
+      if (Key.isDown("w") || Key.isDown("up")) {
+        if (this.defender.v.y > -this.defender.maxVelocity) {
+          this.defender.v.y -= this.defender.accel;
+        }
+      }
+      if (Key.isDown("d") || Key.isDown("right")) {
+        if (this.defender.v.x < this.defender.maxVelocity) {
+          this.defender.v.x += this.defender.accel;
+        }
+      }
+      if (Key.isDown("s") || Key.isDown("down")) {
+        if (this.defender.v.y < this.defender.maxVelocity) {
+          this.defender.v.y += this.defender.accel;
+        }
+      }
+      if (Key.isDown("space")) {
+        return this.defender.v = new Point(0, 0);
+      }
     };
 
     Game.prototype.mainloop = function() {
+      this.handleInput();
       this.updateEntities();
       this.checkCollisions();
       this.keepInBounds();

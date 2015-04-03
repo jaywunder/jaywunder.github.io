@@ -54,14 +54,14 @@ class Defender extends Entity
     constructor: (size, x, y) ->
         super size, x, y, 0, 0
 
-        @health = @healthMax = 63
+        @health = @healthMax = 12
         @type = "defender"
         @armSize = 1.5
         @strokeWidth = @size / 7
         @primaryColor = "#00b3ff"
         @secondaryColor = "#23e96b"
         @maxVelocity = 5
-        @accel = 3
+        @accel = 0.5
         @timeSinceDamaged = 0
         @DAMAGE_COOLDOWN = 30
 
@@ -270,14 +270,15 @@ class Game
         @difficulty = 1
         @attackerAmount = Math.floor(@difficulty * 3)
 
+        @defender
         @makeEntities()
+
+        console.log @defender
 
         @$healthBar = $ "#health"
         @$injuryBar = $ "#injury"
 
-        console.log this
-
-        $(window).keydown(@handleInput)
+        # $(window).keydown()
         # .on('keydown', (e) ->
         #     handleInput(e)
             # console.log e
@@ -285,8 +286,10 @@ class Game
         #     # handleInput(e)
         # )
 
+    defender: new Defender(DEFENDER_SIZE, view.center.x, view.center.y)
+
     makeEntities: () ->
-        @defender = new Defender(DEFENDER_SIZE, view.center.x, view.center.y)
+        # @defender = new Defender(DEFENDER_SIZE, view.center.x, view.center.y)
         @entities.push @defender
 
         for i in [0..@attackerAmount] by 1
@@ -299,25 +302,24 @@ class Game
         for i in [0...4] by 1
             @entities.push new Laser(i, @defender)
 
+        return @entities
 
-    handleInput: (e) ->
-        #TODO: handle input in Game class, then pass to @defender object
 
-        console.log @defender
+    handleInput: () ->
+        if Key.isDown("a") or Key.isDown("left") # left
+            @defender.v.x -= @defender.accel if @defender.v.x > -@defender.maxVelocity
+        if Key.isDown("w") or Key.isDown("up") # up
+            @defender.v.y -= @defender.accel if @defender.v.y > -@defender.maxVelocity
+        if Key.isDown("d") or Key.isDown("right") # right
+            @defender.v.x += @defender.accel if @defender.v.x < @defender.maxVelocity
+        if Key.isDown("s") or Key.isDown("down") # down
+            @defender.v.y += @defender.accel if @defender.v.y < @defender.maxVelocity
 
-        # if Key.isDown("a") or Key.isDown("left") # left
-        #     @defender.v.x -= @defender.accel if @defender.v.x > -@defender.maxVelocity
-        # if Key.isDown("w") or Key.isDown("up") # up
-        #     @defender.v.y -= @defender.accel if @defender.v.y > -@defender.maxVelocity
-        # if Key.isDown("d") or Key.isDown("right") # right
-        #     @defender.v.x += @defender.accel if @defender.v.x < @defender.maxVelocity
-        # if Key.isDown("s") or Key.isDown("down") # down
-        #     @defender.v.y += @defender.accel if @defender.v.y < @defender.maxVelocity
-        #
-        # if key is 32 # space key this is temporary
-        #     @defender.v = new Point(0, 0) # stop defender
+        if Key.isDown("space")
+            @defender.v = new Point(0, 0) # stop defender
 
     mainloop: () ->
+        @handleInput()
         @updateEntities()
         @checkCollisions()
         @keepInBounds()
