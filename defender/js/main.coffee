@@ -151,7 +151,7 @@ class Defender extends Entity
         @health-- if type == "attacker" and @timeSinceDamaged == @DAMAGE_COOLDOWN
         @timeSinceDamaged = 0
 
-    fireMahLazers: ()->
+    fireMahLazarz: ()->
 
 
 ################################################################################
@@ -263,8 +263,8 @@ class Game
         @defender
         @makeEntities()
 
-        @$healthBar = $ "#health"
-        @$injuryBar = $ "#injury"
+        @healthBar = $ "#health"
+        @injuryBar = $ "#injury"
 
     makeEntities: () ->
         @defender = new Defender(DEFENDER_SIZE, view.center.x, view.center.y)
@@ -291,8 +291,8 @@ class Game
             @defender.v.y += @defender.accel if @defender.v.y < @defender.maxVelocity
 
         if Key.isDown("space")
-            @fireMahLazers()
-            @defender.fireMahLazers()
+            @fireMahLazarz()
+            @defender.fireMahLazarz()
         if Key.isDown("escape")
             @defender.v = new Point(0, 0) # stop defender
 
@@ -312,8 +312,8 @@ class Game
 
     updateHealthBar: () ->
         if @defender.health >= 0
-            @$healthBar.text("♡".repeat(@defender.health))
-            @$injuryBar.text("♡".repeat(@defender.healthMax - @defender.health))
+            @healthBar.text("♡".repeat(@defender.health))
+            @injuryBar.text("♡".repeat(@defender.healthMax - @defender.health))
                             # ♡ —
     updateScoreBar: () ->
 
@@ -321,12 +321,21 @@ class Game
         entity.body.remove()
         @entities.splice(@entities.indexOf(entity), 1)
 
-    fireMahLazers: () ->
-        console.log "fireMahLazers"
+    spawnAttacker: () ->
+        @entities.push new Attacker(
+            ATTACKER_SIZE,
+            view.center.x + _.random(-500, 500),
+            view.center.y + _.random(-500, 500),
+            @defender
+        )
+
+    fireMahLazarz: () ->
 
         for entity in @entities
-            if entity.type == "laser"
-                @kill(entity)
+            try
+                if entity.type == "laser"
+                    @kill(entity)
+            catch error
 
         for i in [0...4] by 1
             @entities.push new Laser(i, @defender)
@@ -336,20 +345,31 @@ class Game
         index ?= 0
 
         for e in [index + 1...@entities.length] by 1
-            # console.log @entities[e].pos
-            if @entities[index].pos.getDistance(@entities[e].pos) <= @entities[index].size + @entities[e].size
-                #collide each entity with the other entity
-                @collide(@entities[e], @entities[index])
-                @collide(@entities[index], @entities[e])
+            try
+                if @entities[index].pos.getDistance(@entities[e].pos) <= @entities[index].size + @entities[e].size
+                    #collide each entity with the other entity
+                    @collide(@entities[e], @entities[index])
+                    @collide(@entities[index], @entities[e])
 
-                @entities[e].damage(@entities[index].type)
-                @entities[index].damage(@entities[e].type)
+                    @entities[e].damage(@entities[index].type)
+                    @entities[index].damage(@entities[e].type)
+
+                    @checkDeath(@entities[e], @entities[index])
+            catch error
+
 
         if index + 1 < @entities.length
             return @checkCollisions(index + 1)
 
+    checkDeath: (e1, e2) ->
+        if e1.type == "attacker" or e1.type == "laser"
+            if e2.type == "attacker" or e2.type == "laser"
+                if e1.type != e2.type
+                    @kill(e1)
+                    @kill(e2)
+                    @spawnAttacker()
+
     collide: (e1, e2) ->
-        #FIXME: collisions
         dx = e1.pos.x - e2.pos.x
         dy = e1.pos.y - e2.pos.y
 
@@ -370,21 +390,25 @@ class Game
                 #collide on left wall
                 entity.v *= new Point -SPRING, SPRING
                 entity.pos.x = entity.size
+                @kill entity if entity.type == "laser"
 
             if entity.pos.y < entity.size
                 #collide on top wall
                 entity.v *= new Point SPRING, -SPRING
                 entity.pos.y = entity.size
+                @kill entity if entity.type == "laser"
 
             if entity.pos.x > view.bounds.width - entity.size
                 #collide on right wall
                 entity.v *= new Point -SPRING, SPRING
                 entity.pos.x = view.bounds.width - entity.size
+                @kill entity if entity.type == "laser"
 
             if entity.pos.y > view.bounds.height - entity.size
                 #collide on bottom wall
                 entity.v *= new Point SPRING, -SPRING
                 entity.pos.y = view.bounds.height - entity.size
+                @kill entity if entity.type == "laser"
 
 
 ################################################################################

@@ -179,7 +179,7 @@
       return this.timeSinceDamaged = 0;
     };
 
-    Defender.prototype.fireMahLazers = function() {};
+    Defender.prototype.fireMahLazarz = function() {};
 
     return Defender;
 
@@ -309,8 +309,8 @@
       this.attackerAmount = Math.floor(this.difficulty * 3);
       this.defender;
       this.makeEntities();
-      this.$healthBar = $("#health");
-      this.$injuryBar = $("#injury");
+      this.healthBar = $("#health");
+      this.injuryBar = $("#injury");
     }
 
     Game.prototype.makeEntities = function() {
@@ -349,8 +349,8 @@
         }
       }
       if (Key.isDown("space")) {
-        this.fireMahLazers();
-        this.defender.fireMahLazers();
+        this.fireMahLazarz();
+        this.defender.fireMahLazarz();
       }
       if (Key.isDown("escape")) {
         return this.defender.v = new Point(0, 0);
@@ -380,8 +380,8 @@
 
     Game.prototype.updateHealthBar = function() {
       if (this.defender.health >= 0) {
-        this.$healthBar.text("♡".repeat(this.defender.health));
-        return this.$injuryBar.text("♡".repeat(this.defender.healthMax - this.defender.health));
+        this.healthBar.text("♡".repeat(this.defender.health));
+        return this.injuryBar.text("♡".repeat(this.defender.healthMax - this.defender.health));
       }
     };
 
@@ -392,14 +392,21 @@
       return this.entities.splice(this.entities.indexOf(entity), 1);
     };
 
-    Game.prototype.fireMahLazers = function() {
-      var entity, i, _i, _j, _len, _ref, _results;
-      console.log("fireMahLazers");
+    Game.prototype.spawnAttacker = function() {
+      return this.entities.push(new Attacker(ATTACKER_SIZE, view.center.x + _.random(-500, 500), view.center.y + _.random(-500, 500), this.defender));
+    };
+
+    Game.prototype.fireMahLazarz = function() {
+      var entity, error, i, _i, _j, _len, _ref, _results;
       _ref = this.entities;
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         entity = _ref[_i];
-        if (entity.type === "laser") {
-          this.kill(entity);
+        try {
+          if (entity.type === "laser") {
+            this.kill(entity);
+          }
+        } catch (_error) {
+          error = _error;
         }
       }
       _results = [];
@@ -410,20 +417,37 @@
     };
 
     Game.prototype.checkCollisions = function(index) {
-      var e, _i, _ref, _ref1;
+      var e, error, _i, _ref, _ref1;
       if (index == null) {
         index = 0;
       }
       for (e = _i = _ref = index + 1, _ref1 = this.entities.length; _i < _ref1; e = _i += 1) {
-        if (this.entities[index].pos.getDistance(this.entities[e].pos) <= this.entities[index].size + this.entities[e].size) {
-          this.collide(this.entities[e], this.entities[index]);
-          this.collide(this.entities[index], this.entities[e]);
-          this.entities[e].damage(this.entities[index].type);
-          this.entities[index].damage(this.entities[e].type);
+        try {
+          if (this.entities[index].pos.getDistance(this.entities[e].pos) <= this.entities[index].size + this.entities[e].size) {
+            this.collide(this.entities[e], this.entities[index]);
+            this.collide(this.entities[index], this.entities[e]);
+            this.entities[e].damage(this.entities[index].type);
+            this.entities[index].damage(this.entities[e].type);
+            this.checkDeath(this.entities[e], this.entities[index]);
+          }
+        } catch (_error) {
+          error = _error;
         }
       }
       if (index + 1 < this.entities.length) {
         return this.checkCollisions(index + 1);
+      }
+    };
+
+    Game.prototype.checkDeath = function(e1, e2) {
+      if (e1.type === "attacker" || e1.type === "laser") {
+        if (e2.type === "attacker" || e2.type === "laser") {
+          if (e1.type !== e2.type) {
+            this.kill(e1);
+            this.kill(e2);
+            return this.spawnAttacker();
+          }
+        }
       }
     };
 
@@ -449,18 +473,32 @@
         if (entity.pos.x < entity.size) {
           entity.v *= new Point(-SPRING, SPRING);
           entity.pos.x = entity.size;
+          if (entity.type === "laser") {
+            this.kill(entity);
+          }
         }
         if (entity.pos.y < entity.size) {
           entity.v *= new Point(SPRING, -SPRING);
           entity.pos.y = entity.size;
+          if (entity.type === "laser") {
+            this.kill(entity);
+          }
         }
         if (entity.pos.x > view.bounds.width - entity.size) {
           entity.v *= new Point(-SPRING, SPRING);
           entity.pos.x = view.bounds.width - entity.size;
+          if (entity.type === "laser") {
+            this.kill(entity);
+          }
         }
         if (entity.pos.y > view.bounds.height - entity.size) {
           entity.v *= new Point(SPRING, -SPRING);
-          _results.push(entity.pos.y = view.bounds.height - entity.size);
+          entity.pos.y = view.bounds.height - entity.size;
+          if (entity.type === "laser") {
+            _results.push(this.kill(entity));
+          } else {
+            _results.push(void 0);
+          }
         } else {
           _results.push(void 0);
         }
