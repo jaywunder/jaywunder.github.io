@@ -28,8 +28,8 @@ class Entity
         #     })
 
     updateDirection: () ->
-    #     @direction.segments[0] = new Segment({ point: [@pos.x, @pos.y]})
-    #     @direction.segments[1] = new Segment({ point: [@pos.x + (@v.x * 10), @pos.y + (@v.y * 10)]})
+        # @direction.segments[0] = new Segment({ point: [@pos.x, @pos.y]})
+        # @direction.segments[1] = new Segment({ point: [@pos.x + (@v.x * 10), @pos.y + (@v.y * 10)]})
 
     makeBody: () ->
         @body = new Path.Circle({
@@ -54,7 +54,7 @@ class Defender extends Entity
     constructor: (size, x, y) ->
         super size, x, y, 0, 0
 
-        @health = @healthMax = 12
+        @health = @healthMax = 63
         @type = "defender"
         @armSize = 1.5
         @strokeWidth = @size / 7
@@ -152,19 +152,34 @@ class Defender extends Entity
         @timeSinceDamaged = 0
 
 ################################################################################
-#LASER#########################################################################
+#LASER##########################################################################
 ################################################################################
 class Laser extends Entity
-    constructor: (num) ->
-        super  LASER_SIZE, x, y, 10 * direction.x, 10 * direction.y
+    constructor: (num, defender) ->
+        @reference = defender["arm" + num]
+        @from = @reference.segments[0].point
+        @to   = @reference.segments[1].point
+        vx = (@to.x - @from.x)
+        vy = (@to.y - @from.y)
+        super  LASER_SIZE, @reference.position.x, @reference.position.y, vx, vy
         @num = num
+        @defender = defender
+        @primaryColor = "#23e96b"
+        @type = "laser"
+        @magnitude = 15
+
         @makeBody()
+        console.log @reference.segments[1]
 
     makeBody: () ->
+        @pos.x = @reference.position.x
+        @pos.y = @reference.position.y
+
         @body = new Path.Line({
-            from: [@pos.x, @pos.y]
-            to:   [@pos.x + LASER_SIZE * @direction.x,
-                   @pos.y + LASER_SIZE * @direction.y]
+            from: [@from.x, @from.y]
+            to:   [@to.x, @to.y]
+            strokeColor: @primaryColor
+            strokeWidth: DEFENDER_SIZE / 7
         })
 
     update: () ->
@@ -260,18 +275,20 @@ class Game
         @$healthBar = $ "#health"
         @$injuryBar = $ "#injury"
 
-    makeEntities: () ->
-        @defender = def = new Defender(DEFENDER_SIZE, view.center.x, view.center.y)
-        #I use the second pointer "def" as a way to reference def in the keyboard event handlers
-        #This will change in the future
+        console.log this
 
-        $(window)
-        .on('keydown', (e) ->
-            def.keyBoard(e)
-        ).on('keyup', (e) ->
-            def.keyBoard(e)
-        )
+        $(window).keydown(@handleInput)
+        # .on('keydown', (e) ->
+        #     handleInput(e)
+            # console.log e
+        # ).on('keyup', (e) ->
+        #     # handleInput(e)
+        # )
+
+    makeEntities: () ->
+        @defender = new Defender(DEFENDER_SIZE, view.center.x, view.center.y)
         @entities.push @defender
+
         for i in [0..@attackerAmount] by 1
             @entities.push new Attacker(
                 ATTACKER_SIZE,
@@ -279,11 +296,26 @@ class Game
                 view.center.y + _.random(-500, 500),
                 @defender
             )
-        # laser = new Laser(0, 0, new Point(1, 1))
-        # @entities.push laser
+        for i in [0...4] by 1
+            @entities.push new Laser(i, @defender)
+
 
     handleInput: (e) ->
         #TODO: handle input in Game class, then pass to @defender object
+
+        console.log @defender
+
+        # if Key.isDown("a") or Key.isDown("left") # left
+        #     @defender.v.x -= @defender.accel if @defender.v.x > -@defender.maxVelocity
+        # if Key.isDown("w") or Key.isDown("up") # up
+        #     @defender.v.y -= @defender.accel if @defender.v.y > -@defender.maxVelocity
+        # if Key.isDown("d") or Key.isDown("right") # right
+        #     @defender.v.x += @defender.accel if @defender.v.x < @defender.maxVelocity
+        # if Key.isDown("s") or Key.isDown("down") # down
+        #     @defender.v.y += @defender.accel if @defender.v.y < @defender.maxVelocity
+        #
+        # if key is 32 # space key this is temporary
+        #     @defender.v = new Point(0, 0) # stop defender
 
     mainloop: () ->
         @updateEntities()
@@ -291,6 +323,9 @@ class Game
         @keepInBounds()
         @updateScoreBar()
         @updateHealthBar()
+
+        # for i in [0...4] by 1
+        #     @entities.push new Laser(i, def)
 
         view.draw()
 
@@ -375,15 +410,15 @@ setTimeout(() ->
 , 0)
 setTimeout(() ->
     $("#countdownText").text("TWO")
-, 1000)
+, 750)
 setTimeout(() ->
     $("#countdownText").text("ONE")
-, 2000)
+, 750 * 2)
 
 setTimeout(() ->
     $("#countdownText").text("")
     setInterval(mainloop, 16)
-, 3000)
+, 750 * 3)
 
 # path = new Path.Circle({
 #     center: view.center + 300,
