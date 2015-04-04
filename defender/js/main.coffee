@@ -44,7 +44,8 @@ class Entity
         v.y = @maxVelocity if v.y > @maxVelocity
         v.y = -@maxVelocity if v.y < -@maxVelocity
 
-    damage: () ->
+    damage: (type) ->
+
 
 
 ################################################################################
@@ -64,6 +65,8 @@ class Defender extends Entity
         @accel = 0.5
         @timeSinceDamaged = 0
         @DAMAGE_COOLDOWN = 30
+        @timeSinceLazar = 0
+        @LAZAR_COOLDOWN = 100
 
         @makeBody()
 
@@ -104,7 +107,7 @@ class Defender extends Entity
             })
         @innerCircle = new Path.Circle({
                 center: @pos
-                radius: @size * 0.6
+                radius: 1 # @size * 0.6
                 strokeColor: @secondaryColor
                 strokeWidth: @strokeWidth
             })
@@ -115,7 +118,10 @@ class Defender extends Entity
         @move()
         @rotate()
         @updateDirection()
-        @innerCircle.radius += 20
+
+        @timeSinceLazar += 1 if @timeSinceLazar < @LAZAR_COOLDOWN
+        # if @timeSinceLazar < @LAZAR_COOLDOWN
+        #     @innerCircle.scaling = 1.1 / (@LAZAR_COOLDOWN - @timeSinceLazar)
         @timeSinceDamaged += 1 if @timeSinceDamaged < @DAMAGE_COOLDOWN
 
     move: () ->
@@ -123,47 +129,32 @@ class Defender extends Entity
 
         @body.position = @pos # move @body to @pos
 
-    keyBoard: (e) ->
-        if e.type is 'keydown'
-            @keyDown(e)
-
-    keyDown: (e) ->
-        key = e.which
-        if Key.isDown("a") or Key.isDown("left") # left
-            @v.x -= @accel if @v.x > -@maxVelocity
-        if Key.isDown("w") or Key.isDown("up") # up
-            @v.y -= @accel if @v.y > -@maxVelocity
-        if Key.isDown("d") or Key.isDown("right") # right
-            @v.x += @accel if @v.x < @maxVelocity
-        if Key.isDown("s") or Key.isDown("down") # down
-            @v.y += @accel if @v.y < @maxVelocity
-
-        if key is 32 # space key this is temporary
-            @v = new Point(0, 0) # stop defender
-
-    keyUp: (e) ->
-        #TODO: slow down defender on keyup?
-
     rotate: () ->
         @body.rotate(0.6)
 
     damage: (type) ->
-        @health-- if type == "attacker" and @timeSinceDamaged == @DAMAGE_COOLDOWN
-        @timeSinceDamaged = 0
+        if type == "attacker" and @timeSinceDamaged == @DAMAGE_COOLDOWN
+            @health--
+            @timeSinceDamaged = 0
 
-    fireMahLazarz: ()->
-
+    canFireMahLazarz: ()->
+        if @timeSinceLazar == @LAZAR_COOLDOWN
+            return true
+            #
+        else
+            return false
 
 ################################################################################
 #LASER##########################################################################
 ################################################################################
 class Laser extends Entity
     constructor: (num, defender) ->
+        # onsole.log "Laser #{num} at the ready!"
         @reference = defender["arm" + num]
         @from = @reference.segments[0].point
         @to   = @reference.segments[1].point
-        vx = (@to.x - @from.x)
-        vy = (@to.y - @from.y)
+        vx = (@to.x - @from.x) / 2
+        vy = (@to.y - @from.y) / 2
         super  LASER_SIZE, @reference.position.x, @reference.position.y, vx, vy
         @num = num
         @defender = defender
@@ -190,6 +181,10 @@ class Laser extends Entity
     move: () ->
         @pos += @v
         @body.position = @pos
+
+    damage: (type) ->
+        if type == "true"
+            @alive = false
 
 ################################################################################
 #ATTACKER#######################################################################
@@ -225,7 +220,6 @@ class Attacker extends Entity
                 strokeWidth: @strokeWidth
                 closed: true
             })
-        # console.log(@body)
 
     update: () ->
         @trackTarget()
@@ -250,6 +244,10 @@ class Attacker extends Entity
         @body.rotation = theta if theta != @body.data.rotation
         @body.data.rotation = theta
 
+    damage: (type) ->
+        if type == "laser"
+            @alive = false
+
 ################################################################################
 #GAME###########################################################################
 ################################################################################
@@ -258,7 +256,8 @@ class Game
     constructor: () ->
         @entities = []
         @difficulty = 1
-        @attackerAmount = Math.floor(@difficulty * 3)
+        @ATTACKER_AMOUNT = Math.floor(@difficulty * 3)
+        @numAttackers = 0
 
         @defender
         @makeEntities()
@@ -270,15 +269,14 @@ class Game
         @defender = new Defender(DEFENDER_SIZE, view.center.x, view.center.y)
         @entities.push @defender
 
-        for i in [0..@attackerAmount] by 1
+        for i in [0..@ATTACKER_AMOUNT] by 1
+            @numAttackers++
             @entities.push new Attacker(
                 ATTACKER_SIZE,
                 view.center.x + _.random(-500, 500),
                 view.center.y + _.random(-500, 500),
                 @defender
             )
-        for i in [0...4] by 1
-            @entities.push new Laser(i, @defender)
 
     handleInput: () ->
         if Key.isDown("a") or Key.isDown("left") # left
@@ -289,10 +287,11 @@ class Game
             @defender.v.x += @defender.accel if @defender.v.x < @defender.maxVelocity
         if Key.isDown("s") or Key.isDown("down") # down
             @defender.v.y += @defender.accel if @defender.v.y < @defender.maxVelocity
-
+        if Key.isDown("shift")
+            console.log @entities # "shiftaki"
         if Key.isDown("space")
-            @fireMahLazarz()
-            @defender.fireMahLazarz()
+            if @defender.canFireMahLazarz()
+                @fireMahLazarz()
         if Key.isDown("escape")
             @defender.v = new Point(0, 0) # stop defender
 
@@ -303,6 +302,7 @@ class Game
         @keepInBounds()
         @updateScoreBar()
         @updateHealthBar()
+        @destroyDeadEntities()
 
         view.draw()
 
@@ -310,16 +310,26 @@ class Game
         for entity in @entities
             entity.update()
 
+        if @numAttackers < @ATTACKER_AMOUNT
+            @spawnAttacker()
+
     updateHealthBar: () ->
         if @defender.health >= 0
             @healthBar.text("♡".repeat(@defender.health))
             @injuryBar.text("♡".repeat(@defender.healthMax - @defender.health))
                             # ♡ —
+
     updateScoreBar: () ->
 
     kill: (entity) ->
-        entity.body.remove()
-        @entities.splice(@entities.indexOf(entity), 1)
+        entity.alive = false
+
+    destroyDeadEntities: () ->
+        for entity in @entities
+            if entity.alive == false
+                @spawnAttacker() if entity.type == "attacker"
+                entity.body.remove()
+                @entities.splice(@entities.indexOf(entity), 1)
 
     spawnAttacker: () ->
         @entities.push new Attacker(
@@ -330,44 +340,30 @@ class Game
         )
 
     fireMahLazarz: () ->
-
+        @defender.timeSinceLazar = 0
         for entity in @entities
-            try
-                if entity.type == "laser"
-                    @kill(entity)
-            catch error
+            if entity.type == "laser"
+                @kill(entity)
 
         for i in [0...4] by 1
             @entities.push new Laser(i, @defender)
-
 
     checkCollisions: (index) ->
         index ?= 0
 
         for e in [index + 1...@entities.length] by 1
-            try
-                if @entities[index].pos.getDistance(@entities[e].pos) <= @entities[index].size + @entities[e].size
-                    #collide each entity with the other entity
-                    @collide(@entities[e], @entities[index])
-                    @collide(@entities[index], @entities[e])
+            if @entities[index].pos.getDistance(@entities[e].pos) <= @entities[index].size + @entities[e].size
+                #collide each entity with the other entity
+                @collide(@entities[e], @entities[index])
+                @collide(@entities[index], @entities[e])
 
-                    @entities[e].damage(@entities[index].type)
-                    @entities[index].damage(@entities[e].type)
-
-                    @checkDeath(@entities[e], @entities[index])
-            catch error
-
+                type1 = @entities[index].type
+                type2 = @entities[e].type
+                @entities[e].damage(type1)
+                @entities[index].damage(type2)
 
         if index + 1 < @entities.length
             return @checkCollisions(index + 1)
-
-    checkDeath: (e1, e2) ->
-        if e1.type == "attacker" or e1.type == "laser"
-            if e2.type == "attacker" or e2.type == "laser"
-                if e1.type != e2.type
-                    @kill(e1)
-                    @kill(e2)
-                    @spawnAttacker()
 
     collide: (e1, e2) ->
         dx = e1.pos.x - e2.pos.x
@@ -386,30 +382,33 @@ class Game
 
     keepInBounds: () ->
         for entity in @entities
+            kill = false
             if entity.pos.x < entity.size
                 #collide on left wall
                 entity.v *= new Point -SPRING, SPRING
                 entity.pos.x = entity.size
-                @kill entity if entity.type == "laser"
+                kill = true if entity.type == "laser"
 
             if entity.pos.y < entity.size
                 #collide on top wall
                 entity.v *= new Point SPRING, -SPRING
                 entity.pos.y = entity.size
-                @kill entity if entity.type == "laser"
+                kill = true if entity.type == "laser"
 
             if entity.pos.x > view.bounds.width - entity.size
                 #collide on right wall
                 entity.v *= new Point -SPRING, SPRING
                 entity.pos.x = view.bounds.width - entity.size
-                @kill entity if entity.type == "laser"
+                kill = true if entity.type == "laser"
 
             if entity.pos.y > view.bounds.height - entity.size
                 #collide on bottom wall
                 entity.v *= new Point SPRING, -SPRING
                 entity.pos.y = view.bounds.height - entity.size
-                @kill entity if entity.type == "laser"
+                kill = true if entity.type == "laser"
 
+            if kill == true
+                @kill entity
 
 ################################################################################
 #MAIN###########################################################################
