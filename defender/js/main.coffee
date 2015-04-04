@@ -113,15 +113,16 @@ class Defender extends Entity
             })
 
         @body = new Group([@arm0, @arm1, @arm2, @arm3, @outerCircle, @innerCircle])
+        console.log @innerCircle.segments
 
     update: () ->
         @move()
         @rotate()
         @updateDirection()
 
-        @timeSinceLazar += 1 if @timeSinceLazar < @LAZAR_COOLDOWN
-        # if @timeSinceLazar < @LAZAR_COOLDOWN
-        #     @innerCircle.scaling = 1.1 / (@LAZAR_COOLDOWN - @timeSinceLazar)
+        @timeSinceLazar += 0.5 if @timeSinceLazar < @LAZAR_COOLDOWN
+        radius = (@size * 0.6) / (@LAZAR_COOLDOWN / @timeSinceLazar)
+        @setInnerCircle(radius)
         @timeSinceDamaged += 1 if @timeSinceDamaged < @DAMAGE_COOLDOWN
 
     move: () ->
@@ -143,6 +144,23 @@ class Defender extends Entity
             #
         else
             return false
+
+    setInnerCircle: (radius) ->
+        @innerCircle.remove()
+
+        @innerCircle = new Path.Circle({
+                center: @pos
+                radius: radius
+                strokeColor: @secondaryColor
+                strokeWidth: @strokeWidth
+            })
+
+        # segs[0].point = new Point @pos.x + radius, @pos.y + radius
+        # segs[1].point = new Point @pos.x - radius, @pos.y + radius
+        # segs[2].point = new Point @pos.x + radius, @pos.y - radius
+        # segs[3].point = new Point @pos.x - radius, @pos.y - radius
+
+
 
 ################################################################################
 #LASER##########################################################################

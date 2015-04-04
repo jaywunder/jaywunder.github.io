@@ -116,16 +116,20 @@
         strokeColor: this.secondaryColor,
         strokeWidth: this.strokeWidth
       });
-      return this.body = new Group([this.arm0, this.arm1, this.arm2, this.arm3, this.outerCircle, this.innerCircle]);
+      this.body = new Group([this.arm0, this.arm1, this.arm2, this.arm3, this.outerCircle, this.innerCircle]);
+      return console.log(this.innerCircle.segments);
     };
 
     Defender.prototype.update = function() {
+      var radius;
       this.move();
       this.rotate();
       this.updateDirection();
       if (this.timeSinceLazar < this.LAZAR_COOLDOWN) {
-        this.timeSinceLazar += 1;
+        this.timeSinceLazar += 0.5;
       }
+      radius = (this.size * 0.6) / (this.LAZAR_COOLDOWN / this.timeSinceLazar);
+      this.setInnerCircle(radius);
       if (this.timeSinceDamaged < this.DAMAGE_COOLDOWN) {
         return this.timeSinceDamaged += 1;
       }
@@ -153,6 +157,16 @@
       } else {
         return false;
       }
+    };
+
+    Defender.prototype.setInnerCircle = function(radius) {
+      this.innerCircle.remove();
+      return this.innerCircle = new Path.Circle({
+        center: this.pos,
+        radius: radius,
+        strokeColor: this.secondaryColor,
+        strokeWidth: this.strokeWidth
+      });
     };
 
     return Defender;
