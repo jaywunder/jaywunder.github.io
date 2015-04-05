@@ -335,7 +335,9 @@
     };
 
     Defender.prototype.onHealthGain = function() {
-      return this.health++;
+      if (this.health < this.healthMax) {
+        return this.health++;
+      }
     };
 
     return Defender;

@@ -276,7 +276,7 @@ class Defender extends Entity
         @raiseHealth() if @score % 10 == 0
 
     onHealthGain: () ->
-        @health++
+        @health++ if @health < @healthMax
 
 ################################################################################
 #ATTACKER#######################################################################
