@@ -5,11 +5,11 @@
     <title>Defender</title>
     <meta name="Author" content="Jacob Wunder"/>
     <link rel="stylesheet" type="text/css" href="css/style.css">
+    <link rel="stylesheet" type="text/css" href="css/animate.css">
 
     <script src="../lib/jquery-1.11.2.min.js"></script>
     <script src="../lib/underscore-min.js"></script>
     <script src="../lib/backbone-min.js"></script>
-    <script src="../lib/two.min.js"></script>
     <script src="../lib/paper-full.min.js"></script>
 
     <script type="text/paperscript" src="js/main.js" canvas="mainCanvas"></script>
@@ -20,9 +20,20 @@
         <canvas id="mainCanvas" resize></canvas>
     </div>
     <div class="header">
-        <span id="health"></span>
-        <span id="injury"></span>
-        <span id="countdown"> <h1 id="countdownText"></h1> </span>
+        <ul>
+            <li>
+                <div id="healthContainer">
+                    <span id="health"></span> <span id="injury"></span>
+                </div>
+            </li>
+            <li>
+                <span id="countdown"> <h1 id="countdownText"></h1></span>
+            </li>
+            <li>
+                <span id="score"></span>
+            </li>
+
+        </ul>
     </div>
 </body>
 </html>

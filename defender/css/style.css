@@ -17,21 +17,21 @@ html {
     font-family: courier;
 }
 
+.header ul {
+    margin: 0;
+    padding: 0;
+    list-style-type: none;
+    text-align: center;
+}
+.header ul li {
+    display: inline;
+}
+
 #countdown {
-    /*width:800px;
-    margin:0 auto;*/
     text-align: center;
     font-size: 20;
     color: white;
     font-family: courier;
-    /*position:absolute;
-    width:300px;
-    height:200px;
-    top:50%;
-    left:50%;
-    margin:-100px 0 0 -150px;*/
-    /*border-bottom: gray solid 2px;*/
-    /*background: gray;*/
 }
 
 #health {
@@ -40,12 +40,17 @@ html {
     border-bottom: solid 1px #f24e3f;
     padding-right: 0px;
     margin-right: 0px;
+    float: left
 }
 #injury {
     color: #c0c0c0;
     font-size: 20px;
     border-bottom: solid 1px #c0c0c0;
-    margin-left: -10px;
+    float: left
+}
+#score {
+    float: right;
+    font-size: 20px
 }
 
 .wrapper {

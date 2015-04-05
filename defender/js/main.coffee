@@ -2,6 +2,8 @@ String.prototype.repeat = ( num ) ->
     #I'm sorry for extending a primitive type, but it must be done
     return new Array( num + 1 ).join( this );
 
+$mainCanvas = $("#mainCanvas")
+
 FRICTION = 0.6
 SPRING = 0.6
 DEFENDER_SIZE = $(window).width() / 50
@@ -46,8 +48,6 @@ class Entity
 
     damage: (type) ->
 
-
-
 ################################################################################
 #DEFENDER#######################################################################
 ################################################################################
@@ -56,6 +56,7 @@ class Defender extends Entity
         super size, x, y, 0, 0
 
         @health = @healthMax = 12
+        @score = 0
         @type = "defender"
         @armSize = 1.5
         @strokeWidth = @size / 7
@@ -67,6 +68,8 @@ class Defender extends Entity
         @DAMAGE_COOLDOWN = 30
         @timeSinceLazar = 0
         @LAZAR_COOLDOWN = 100
+        @lazarRate = 1
+        @currentCheckPoint = 0
 
         @makeBody()
 
@@ -119,8 +122,15 @@ class Defender extends Entity
         @move()
         @rotate()
         @updateDirection()
+        @updateStats()
+        @updateLazar()
 
-        @timeSinceLazar += 0.5 if @timeSinceLazar < @LAZAR_COOLDOWN
+    updateStats: () ->
+        if @score > 2
+            @healthMax = 14
+
+    updateLazar: () ->
+        @timeSinceLazar += @lazarRate if @timeSinceLazar < @LAZAR_COOLDOWN
         radius = (@size * 0.6) / (@LAZAR_COOLDOWN / @timeSinceLazar)
         @setInnerCircle(radius)
         @timeSinceDamaged += 1 if @timeSinceDamaged < @DAMAGE_COOLDOWN
@@ -137,11 +147,11 @@ class Defender extends Entity
         if type == "attacker" and @timeSinceDamaged == @DAMAGE_COOLDOWN
             @health--
             @timeSinceDamaged = 0
+            @timeSinceLazar = 0
 
     canFireMahLazarz: ()->
-        if @timeSinceLazar == @LAZAR_COOLDOWN
+        if @timeSinceLazar >= @LAZAR_COOLDOWN
             return true
-            #
         else
             return false
 
@@ -154,11 +164,6 @@ class Defender extends Entity
                 strokeColor: @secondaryColor
                 strokeWidth: @strokeWidth
             })
-
-        # segs[0].point = new Point @pos.x + radius, @pos.y + radius
-        # segs[1].point = new Point @pos.x - radius, @pos.y + radius
-        # segs[2].point = new Point @pos.x + radius, @pos.y - radius
-        # segs[3].point = new Point @pos.x - radius, @pos.y - radius
 
 
 
@@ -218,6 +223,7 @@ class Attacker extends Entity
         @strokeWidth = @size / 10
         @primaryColor = "#f24e3f"
         @accel = 0.1
+        @scoreValue = 1
 
         @makeBody()
 
@@ -277,11 +283,13 @@ class Game
         @ATTACKER_AMOUNT = Math.floor(@difficulty * 3)
         @numAttackers = 0
 
-        @defender
         @makeEntities()
+        # @makeStars()
 
-        @healthBar = $ "#health"
-        @injuryBar = $ "#injury"
+        @healthFull = $("#healthContainer")
+        @healthBar  = $("#health")
+        @injuryBar  = $("#injury")
+        @scoreBar   = $("#score")
 
     makeEntities: () ->
         @defender = new Defender(DEFENDER_SIZE, view.center.x, view.center.y)
@@ -296,6 +304,22 @@ class Game
                 @defender
             )
 
+    makeStars: () ->
+        starLayer = new Layer({
+            # children: ,
+            strokeColor: 'white'
+            strokeWidth: 3
+            position: view.center
+        })
+
+        for i in [0..$(window).width() / 3] by 1
+            starLayer.children.push new Path.Circle {
+                radius: _.random 5, 5
+                point: _.random $(window).width(), $(window).height()
+                strokeColor: 'white'
+                strokeWidth: 3
+                }
+
     handleInput: () ->
         if Key.isDown("a") or Key.isDown("left") # left
             @defender.v.x -= @defender.accel if @defender.v.x > -@defender.maxVelocity
@@ -306,7 +330,7 @@ class Game
         if Key.isDown("s") or Key.isDown("down") # down
             @defender.v.y += @defender.accel if @defender.v.y < @defender.maxVelocity
         if Key.isDown("shift")
-            console.log @entities # "shiftaki"
+            console.log "shiftaki"
         if Key.isDown("space")
             if @defender.canFireMahLazarz()
                 @fireMahLazarz()
@@ -338,6 +362,19 @@ class Game
                             # ♡ —
 
     updateScoreBar: () ->
+        animation = "animated pulse"
+        animationEnd = 'webkitAnimationEnd mozAnimationEnd MSAnimationEnd oanimationend animationend'
+
+        @scoreBar.text(@defender.score)
+
+        if @defender.score >= 5 and @defender.score < 10
+            @defender.healthMax = 14
+            @healthBar.addClass(animation)
+            @injuryBar.addClass(animation)
+            @healthBar.one(animationEnd, ->
+                $(this).removeClass(animation)
+                $("#injury").removeClass(animation)
+                );
 
     kill: (entity) ->
         entity.alive = false
@@ -345,7 +382,9 @@ class Game
     destroyDeadEntities: () ->
         for entity in @entities
             if entity.alive == false
-                @spawnAttacker() if entity.type == "attacker"
+                if entity.type == "attacker"
+                    @spawnAttacker()
+                    @defender.score += entity.scoreValue
                 entity.body.remove()
                 @entities.splice(@entities.indexOf(entity), 1)
 
@@ -442,7 +481,7 @@ setTimeout(() ->
 , 0)
 setTimeout(() ->
     $("#countdownText").text("TWO")
-, 750)
+, 750) # 1000 ms is too long, 750 is better, even though it's not a full second
 setTimeout(() ->
     $("#countdownText").text("ONE")
 , 750 * 2)
