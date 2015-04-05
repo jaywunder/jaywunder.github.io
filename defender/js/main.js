@@ -571,7 +571,7 @@
     };
 
     Game.prototype.updateRandomSpawns = function() {
-      if (_.random(-75, 1) === _.random(-1, 75)) {
+      if (_.random(300) === 1) {
         return this.entities.push(new HealthUp(view.center.x + _.random(-500, 500), view.center.y + _.random(-500, 500)));
       }
     };

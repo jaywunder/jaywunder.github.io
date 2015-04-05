@@ -449,7 +449,7 @@ class Game
                 @entities.splice(@entities.indexOf(entity), 1) #remove entity from @entities array
 
     updateRandomSpawns: () ->
-        if _.random(-75, 1) == _.random(-1, 75)
+        if _.random(300) == 1
             @entities.push new HealthUp(
                 view.center.x + _.random(-500, 500),
                 view.center.y + _.random(-500, 500)
