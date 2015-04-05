@@ -1,5 +1,5 @@
 (function() {
-  var $mainCanvas, ATTACKER_SIZE, Attacker, DEFENDER_SIZE, Defender, Entity, FRICTION, Game, LASER_SIZE, Laser, SPRING, TRACKING, game, mainloop,
+  var $mainCanvas, ATTACKER_DEATH, ATTACKER_SIZE, Attacker, DEFENDER_SIZE, Defender, Entity, FRICTION, Game, HEALTH_GAIN, LASER_SIZE, Laser, SPRING, TRACKING, game, mainloop,
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -8,6 +8,10 @@
   };
 
   $mainCanvas = $("#mainCanvas");
+
+  ATTACKER_DEATH = "attacker-death";
+
+  HEALTH_GAIN = "health-gain";
 
   FRICTION = 0.6;
 
@@ -82,6 +86,7 @@
       this.lazarRate = 1;
       this.currentCheckPoint = 0;
       this.makeBody();
+      this.makeBindings();
     }
 
     Defender.prototype.makeBody = function() {
@@ -121,8 +126,15 @@
         strokeColor: this.secondaryColor,
         strokeWidth: this.strokeWidth
       });
-      this.body = new Group([this.arm0, this.arm1, this.arm2, this.arm3, this.outerCircle, this.innerCircle]);
-      return console.log(this.innerCircle.segments);
+      return this.body = new Group([this.arm0, this.arm1, this.arm2, this.arm3, this.outerCircle, this.innerCircle]);
+    };
+
+    Defender.prototype.makeBindings = function() {
+      var $this;
+      $this = this;
+      return $mainCanvas.on(ATTACKER_DEATH, function(event, entity) {
+        return $this.onScore(entity);
+      });
     };
 
     Defender.prototype.update = function() {
@@ -184,6 +196,18 @@
         strokeColor: this.secondaryColor,
         strokeWidth: this.strokeWidth
       });
+    };
+
+    Defender.prototype.raiseHealth = function() {
+      this.maxHealth += 2;
+      return $mainCanvas.trigger(HEALTH_GAIN);
+    };
+
+    Defender.prototype.onScore = function(entity) {
+      this.score += entity.scoreValue;
+      if (this.score % 10 === 0) {
+        return this.raiseHealth();
+      }
     };
 
     return Defender;
@@ -327,6 +351,7 @@
       this.ATTACKER_AMOUNT = Math.floor(this.difficulty * 3);
       this.numAttackers = 0;
       this.makeEntities();
+      this.makeBindings();
       this.healthFull = $("#healthContainer");
       this.healthBar = $("#health");
       this.injuryBar = $("#injury");
@@ -343,6 +368,17 @@
         _results.push(this.entities.push(new Attacker(ATTACKER_SIZE, view.center.x + _.random(-500, 500), view.center.y + _.random(-500, 500), this.defender)));
       }
       return _results;
+    };
+
+    Game.prototype.makeBindings = function() {
+      var $this;
+      $this = this;
+      $mainCanvas.on(ATTACKER_DEATH, function() {
+        return $this.spawnAttacker();
+      });
+      return $mainCanvas.on(HEALTH_GAIN, function() {
+        return $this.animateHealthBar();
+      });
     };
 
     Game.prototype.makeStars = function() {
@@ -429,23 +465,23 @@
     };
 
     Game.prototype.updateScoreBar = function() {
-      var animation, animationEnd;
-      animation = "animated pulse";
-      animationEnd = 'webkitAnimationEnd mozAnimationEnd MSAnimationEnd oanimationend animationend';
-      this.scoreBar.text(this.defender.score);
-      if (this.defender.score >= 5 && this.defender.score < 10) {
-        this.defender.healthMax = 14;
-        this.healthBar.addClass(animation);
-        this.injuryBar.addClass(animation);
-        return this.healthBar.one(animationEnd, function() {
-          $(this).removeClass(animation);
-          return $("#injury").removeClass(animation);
-        });
-      }
+      return this.scoreBar.text(this.defender.score);
     };
 
     Game.prototype.kill = function(entity) {
       return entity.alive = false;
+    };
+
+    Game.prototype.animateHealthBar = function() {
+      var animation, animationEnd;
+      animation = "animated rubberBand";
+      animationEnd = 'webkitAnimationEnd mozAnimationEnd MSAnimationEnd oanimationend animationend';
+      this.healthBar.addClass(animation);
+      this.injuryBar.addClass(animation);
+      return this.healthBar.one(animationEnd, function() {
+        $(this).removeClass(animation);
+        return $("#injury").removeClass(animation);
+      });
     };
 
     Game.prototype.destroyDeadEntities = function() {
@@ -456,8 +492,7 @@
         entity = _ref[_i];
         if (entity.alive === false) {
           if (entity.type === "attacker") {
-            this.spawnAttacker();
-            this.defender.score += entity.scoreValue;
+            $mainCanvas.trigger(ATTACKER_DEATH, entity);
           }
           entity.body.remove();
           _results.push(this.entities.splice(this.entities.indexOf(entity), 1));

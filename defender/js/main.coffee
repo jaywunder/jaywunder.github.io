@@ -4,6 +4,9 @@ String.prototype.repeat = ( num ) ->
 
 $mainCanvas = $("#mainCanvas")
 
+ATTACKER_DEATH = "attacker-death"
+HEALTH_GAIN = "health-gain"
+
 FRICTION = 0.6
 SPRING = 0.6
 DEFENDER_SIZE = $(window).width() / 50
@@ -72,6 +75,7 @@ class Defender extends Entity
         @currentCheckPoint = 0
 
         @makeBody()
+        @makeBindings()
 
     makeBody: () ->
         #Bottom Right
@@ -116,7 +120,12 @@ class Defender extends Entity
             })
 
         @body = new Group([@arm0, @arm1, @arm2, @arm3, @outerCircle, @innerCircle])
-        console.log @innerCircle.segments
+
+    makeBindings: () ->
+        $this = this
+        $mainCanvas.on(ATTACKER_DEATH, (event, entity) ->
+            $this.onScore(entity)
+            )
 
     update: () ->
         @move()
@@ -165,7 +174,13 @@ class Defender extends Entity
                 strokeWidth: @strokeWidth
             })
 
+    raiseHealth: () ->
+        @maxHealth += 2
+        $mainCanvas.trigger(HEALTH_GAIN)
 
+    onScore: (entity) ->
+        @score += entity.scoreValue
+        @raiseHealth() if @score % 10 == 0
 
 ################################################################################
 #LASER##########################################################################
@@ -284,6 +299,7 @@ class Game
         @numAttackers = 0
 
         @makeEntities()
+        @makeBindings()
         # @makeStars()
 
         @healthFull = $("#healthContainer")
@@ -303,6 +319,12 @@ class Game
                 view.center.y + _.random(-500, 500),
                 @defender
             )
+
+    makeBindings: () ->
+        $this = this
+        $mainCanvas.on(ATTACKER_DEATH, -> $this.spawnAttacker())
+        $mainCanvas.on(HEALTH_GAIN, -> $this.animateHealthBar())
+
 
     makeStars: () ->
         starLayer = new Layer({
@@ -362,29 +384,26 @@ class Game
                             # ♡ —
 
     updateScoreBar: () ->
-        animation = "animated pulse"
-        animationEnd = 'webkitAnimationEnd mozAnimationEnd MSAnimationEnd oanimationend animationend'
-
         @scoreBar.text(@defender.score)
-
-        if @defender.score >= 5 and @defender.score < 10
-            @defender.healthMax = 14
-            @healthBar.addClass(animation)
-            @injuryBar.addClass(animation)
-            @healthBar.one(animationEnd, ->
-                $(this).removeClass(animation)
-                $("#injury").removeClass(animation)
-                );
 
     kill: (entity) ->
         entity.alive = false
 
+    animateHealthBar: () ->
+        animation = "animated rubberBand"
+        animationEnd = 'webkitAnimationEnd mozAnimationEnd MSAnimationEnd oanimationend animationend'
+
+        @healthBar.addClass(animation)
+        @injuryBar.addClass(animation)
+        @healthBar.one(animationEnd, ->
+            $(this).removeClass(animation)
+            $("#injury").removeClass(animation)
+            );
+
     destroyDeadEntities: () ->
         for entity in @entities
             if entity.alive == false
-                if entity.type == "attacker"
-                    @spawnAttacker()
-                    @defender.score += entity.scoreValue
+                $mainCanvas.trigger(ATTACKER_DEATH, entity) if entity.type == "attacker"
                 entity.body.remove()
                 @entities.splice(@entities.indexOf(entity), 1)
 
