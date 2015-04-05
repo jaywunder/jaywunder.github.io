@@ -1,5 +1,5 @@
 (function() {
-  var $mainCanvas, ATTACKER_DEATH, ATTACKER_SIZE, Attacker, DEFENDER_SIZE, Defender, Entity, FRICTION, Game, HEALTH_GAIN, HealthUp, LASER_SIZE, Laser, MAX_HEALTH_GAIN, POWERUP_SIZE, Powerup, SPRING, TRACKING, game, mainloop,
+  var $mainCanvas, ATTACKER_DEATH, ATTACKER_SIZE, Attacker, DEFENDER_SIZE, Defender, Entity, FRICTION, Game, HEALTH_GAIN, HEALTH_GAIN_DOUBLE, HealthUp, HealthUpDouble, LASER_SIZE, Laser, MAX_HEALTH_GAIN, POWERUP_SIZE, Powerup, SPRING, TRACKING, game, mainloop,
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -14,6 +14,8 @@
   MAX_HEALTH_GAIN = "maxHealth-gain";
 
   HEALTH_GAIN = "health-gain";
+
+  HEALTH_GAIN_DOUBLE = "health-gain-double";
 
   FRICTION = 0.6;
 
@@ -186,6 +188,38 @@
 
   })(Powerup);
 
+  HealthUpDouble = (function(_super) {
+    __extends(HealthUpDouble, _super);
+
+    function HealthUpDouble(x, y) {
+      HealthUpDouble.__super__.constructor.call(this, x, y);
+      this.makeBody();
+    }
+
+    HealthUpDouble.prototype.trigger = HEALTH_GAIN_DOUBLE;
+
+    HealthUpDouble.prototype.makeBody = function() {
+      this.heart1 = new PointText({
+        point: [this.pos.x, this.pos.y],
+        content: "♡",
+        fillColor: '#f24e3f',
+        fontFamily: 'Courier New',
+        fontSize: 25
+      });
+      this.heart2 = new PointText({
+        point: [this.pos.x + 7, this.pos.y - 7],
+        content: "♡",
+        fillColor: '#f24e3f',
+        fontFamily: 'Courier New',
+        fontSize: 25
+      });
+      return this.body = new Group([this.heart1, this.heart2]);
+    };
+
+    return HealthUpDouble;
+
+  })(Powerup);
+
   Defender = (function(_super) {
     __extends(Defender, _super);
 
@@ -256,8 +290,11 @@
       $mainCanvas.on(ATTACKER_DEATH, function(event, entity) {
         return $this.onScore(entity);
       });
-      return $mainCanvas.on(HEALTH_GAIN, function() {
-        return $this.onHealthGain();
+      $mainCanvas.on(HEALTH_GAIN, function() {
+        return $this.onHealthGain(1);
+      });
+      return $mainCanvas.on(HEALTH_GAIN_DOUBLE, function() {
+        return $this.onHealthGain(2);
       });
     };
 
@@ -334,9 +371,9 @@
       }
     };
 
-    Defender.prototype.onHealthGain = function() {
+    Defender.prototype.onHealthGain = function(amount) {
       if (this.health < this.healthMax) {
-        return this.health++;
+        return this.health += amount;
       }
     };
 
@@ -443,7 +480,7 @@
       var i, _i, _ref, _results;
       this.defender = new Defender(view.center.x, view.center.y);
       this.entities.push(this.defender);
-      this.entities.push(new HealthUp(view.center.x + 100, view.center.y + 100));
+      this.entities.push(new HealthUpDouble(view.center.x + 100, view.center.y + 100));
       _results = [];
       for (i = _i = 0, _ref = this.ATTACKER_AMOUNT; _i <= _ref; i = _i += 1) {
         this.numAttackers++;
@@ -571,8 +608,10 @@
     };
 
     Game.prototype.updateRandomSpawns = function() {
-      if (_.random(300) === 1) {
+      if (_.random(500) === 1) {
         return this.entities.push(new HealthUp(view.center.x + _.random(-500, 500), view.center.y + _.random(-500, 500)));
+      } else if (_.random(700) === 1) {
+        return this.entities.push(new HealthUpDouble(view.center.x + _.random(-500, 500), view.center.y + _.random(-500, 500)));
       }
     };
 

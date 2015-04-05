@@ -7,6 +7,7 @@ $mainCanvas = $("#mainCanvas")
 ATTACKER_DEATH = "attacker-death"
 MAX_HEALTH_GAIN = "maxHealth-gain"
 HEALTH_GAIN = "health-gain"
+HEALTH_GAIN_DOUBLE = "health-gain-double"
 
 FRICTION = 0.6
 SPRING = 0.6
@@ -146,6 +147,32 @@ class HealthUp extends Powerup
             fontSize: 25
         });
 
+class HealthUpDouble extends Powerup
+    constructor: (x, y) ->
+        super x, y
+        @makeBody()
+
+    trigger: HEALTH_GAIN_DOUBLE
+
+    makeBody: () ->
+        @heart1 = new PointText(
+            point: [@pos.x, @pos.y],
+            content: "♡",
+            fillColor: '#f24e3f',
+            fontFamily: 'Courier New',
+            fontSize: 25
+        );
+
+        @heart2 = new PointText(
+            point: [@pos.x + 7, @pos.y - 7],
+            content: "♡",
+            fillColor: '#f24e3f',
+            fontFamily: 'Courier New',
+            fontSize: 25
+        );
+
+        @body = new Group([@heart1, @heart2])
+
 ################################################################################
 #DEFENDER#######################################################################
 ################################################################################
@@ -219,7 +246,8 @@ class Defender extends Entity
     makeBindings: () ->
         $this = this
         $mainCanvas.on(ATTACKER_DEATH, (event, entity) -> $this.onScore(entity))
-        $mainCanvas.on(HEALTH_GAIN, -> $this.onHealthGain())
+        $mainCanvas.on(HEALTH_GAIN, -> $this.onHealthGain(1))
+        $mainCanvas.on(HEALTH_GAIN_DOUBLE, -> $this.onHealthGain(2))
 
     update: () ->
         @move()
@@ -275,8 +303,8 @@ class Defender extends Entity
         @score += entity.scoreValue
         @raiseHealth() if @score % 10 == 0
 
-    onHealthGain: () ->
-        @health++ if @health < @healthMax
+    onHealthGain: (amount) ->
+        @health += amount if @health < @healthMax
 
 ################################################################################
 #ATTACKER#######################################################################
@@ -365,7 +393,7 @@ class Game
         @defender = new Defender(view.center.x, view.center.y)
         @entities.push @defender
 
-        @entities.push new HealthUp(view.center.x + 100, view.center.y + 100)
+        @entities.push new HealthUpDouble(view.center.x + 100, view.center.y + 100)
 
         for i in [0..@ATTACKER_AMOUNT] by 1
             @numAttackers++
@@ -449,8 +477,13 @@ class Game
                 @entities.splice(@entities.indexOf(entity), 1) #remove entity from @entities array
 
     updateRandomSpawns: () ->
-        if _.random(300) == 1
+        if _.random(500) == 1
             @entities.push new HealthUp(
+                view.center.x + _.random(-500, 500),
+                view.center.y + _.random(-500, 500)
+            )
+        else if _.random(700) == 1
+            @entities.push new HealthUpDouble(
                 view.center.x + _.random(-500, 500),
                 view.center.y + _.random(-500, 500)
             )
