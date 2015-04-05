@@ -5,13 +5,15 @@ String.prototype.repeat = ( num ) ->
 $mainCanvas = $("#mainCanvas")
 
 ATTACKER_DEATH = "attacker-death"
+MAX_HEALTH_GAIN = "maxHealth-gain"
 HEALTH_GAIN = "health-gain"
 
 FRICTION = 0.6
 SPRING = 0.6
 DEFENDER_SIZE = $(window).width() / 50
 ATTACKER_SIZE = $(window).width() / 50
-LASER_SIZE =    $(window).width() / 60
+LASER_SIZE    = $(window).width() / 60
+POWERUP_SIZE  = $(window).width() / 65
 TRACKING = false
 
 ################################################################################
@@ -36,6 +38,10 @@ class Entity
         # @direction.segments[0] = new Segment({ point: [@pos.x, @pos.y]})
         # @direction.segments[1] = new Segment({ point: [@pos.x + (@v.x * 10), @pos.y + (@v.y * 10)]})
 
+    update: () ->
+        @move()
+        @rotate()
+
     makeBody: () ->
         @body = new Path.Circle({
             center: [@pos.x, @pos.y],
@@ -51,12 +57,101 @@ class Entity
 
     damage: (type) ->
 
+    move: () ->
+        @pos += @v # add velocity to position
+        @body.position = @pos # move @body to @pos
+
+    rotate: () ->
+
+################################################################################
+#LASER##########################################################################
+################################################################################
+class Laser extends Entity
+    constructor: (num, defender) ->
+        # onsole.log "Laser #{num} at the ready!"
+        @reference = defender["arm" + num]
+        @from = @reference.segments[0].point
+        @to   = @reference.segments[1].point
+        vx = (@to.x - @from.x) / 2
+        vy = (@to.y - @from.y) / 2
+        super  LASER_SIZE, @reference.position.x, @reference.position.y, vx, vy
+        @num = num
+        @defender = defender
+        @primaryColor = "#23e96b"
+        @type = "laser"
+        @magnitude = 15
+
+        @makeBody()
+
+    makeBody: () ->
+        @pos.x = @reference.position.x
+        @pos.y = @reference.position.y
+
+        @body = new Path.Line({
+            from: [@from.x, @from.y]
+            to:   [@to.x, @to.y]
+            strokeColor: @primaryColor
+            strokeWidth: DEFENDER_SIZE / 7
+        })
+
+    update: () ->
+        @move()
+
+    move: () ->
+        @pos += @v
+        @body.position = @pos
+
+    damage: (type) ->
+        if type == "true"
+            @alive = false
+
+################################################################################
+#POWERUPS#######################################################################
+################################################################################
+class Powerup extends Entity
+    constructor: (x, y) ->
+        super POWERUP_SIZE, x, y, 0, 0
+        # @makeBody()
+
+    type: "powerup"
+    trigger: "nothing"
+
+    makeBody: () ->
+        @body = new PointText({
+            point: [50, 50],
+            content: "P",
+            fillColor: 'black',
+            fontFamily: 'Courier New',
+            fontSize: 25
+        });
+
+    damage: (type) ->
+        if type == "laser" or type == "defender"
+            $mainCanvas.trigger(@trigger)
+            @alive = false
+
+class HealthUp extends Powerup
+    constructor: (x, y) ->
+        super x, y
+        @makeBody()
+
+    trigger: HEALTH_GAIN
+
+    makeBody: () ->
+        @body = new PointText({
+            point: [@pos.x, @pos.y],
+            content: "♡",
+            fillColor: '#f24e3f',
+            fontFamily: 'Courier New',
+            fontSize: 25
+        });
+
 ################################################################################
 #DEFENDER#######################################################################
 ################################################################################
 class Defender extends Entity
-    constructor: (size, x, y) ->
-        super size, x, y, 0, 0
+    constructor: (x, y) ->
+        super DEFENDER_SIZE, x, y, 0, 0
 
         @health = @healthMax = 12
         @score = 0
@@ -123,9 +218,8 @@ class Defender extends Entity
 
     makeBindings: () ->
         $this = this
-        $mainCanvas.on(ATTACKER_DEATH, (event, entity) ->
-            $this.onScore(entity)
-            )
+        $mainCanvas.on(ATTACKER_DEATH, (event, entity) -> $this.onScore(entity))
+        $mainCanvas.on(HEALTH_GAIN, -> $this.onHealthGain())
 
     update: () ->
         @move()
@@ -146,7 +240,6 @@ class Defender extends Entity
 
     move: () ->
         @pos += @v # add velocity to position
-
         @body.position = @pos # move @body to @pos
 
     rotate: () ->
@@ -176,53 +269,14 @@ class Defender extends Entity
 
     raiseHealth: () ->
         @maxHealth += 2
-        $mainCanvas.trigger(HEALTH_GAIN)
+        $mainCanvas.trigger(MAX_HEALTH_GAIN)
 
     onScore: (entity) ->
         @score += entity.scoreValue
         @raiseHealth() if @score % 10 == 0
 
-################################################################################
-#LASER##########################################################################
-################################################################################
-class Laser extends Entity
-    constructor: (num, defender) ->
-        # onsole.log "Laser #{num} at the ready!"
-        @reference = defender["arm" + num]
-        @from = @reference.segments[0].point
-        @to   = @reference.segments[1].point
-        vx = (@to.x - @from.x) / 2
-        vy = (@to.y - @from.y) / 2
-        super  LASER_SIZE, @reference.position.x, @reference.position.y, vx, vy
-        @num = num
-        @defender = defender
-        @primaryColor = "#23e96b"
-        @type = "laser"
-        @magnitude = 15
-
-        @makeBody()
-
-    makeBody: () ->
-        @pos.x = @reference.position.x
-        @pos.y = @reference.position.y
-
-        @body = new Path.Line({
-            from: [@from.x, @from.y]
-            to:   [@to.x, @to.y]
-            strokeColor: @primaryColor
-            strokeWidth: DEFENDER_SIZE / 7
-        })
-
-    update: () ->
-        @move()
-
-    move: () ->
-        @pos += @v
-        @body.position = @pos
-
-    damage: (type) ->
-        if type == "true"
-            @alive = false
+    onHealthGain: () ->
+        @health++
 
 ################################################################################
 #ATTACKER#######################################################################
@@ -308,8 +362,10 @@ class Game
         @scoreBar   = $("#score")
 
     makeEntities: () ->
-        @defender = new Defender(DEFENDER_SIZE, view.center.x, view.center.y)
+        @defender = new Defender(view.center.x, view.center.y)
         @entities.push @defender
+
+        @entities.push new HealthUp(view.center.x + 100, view.center.y + 100)
 
         for i in [0..@ATTACKER_AMOUNT] by 1
             @numAttackers++
@@ -323,8 +379,7 @@ class Game
     makeBindings: () ->
         $this = this
         $mainCanvas.on(ATTACKER_DEATH, -> $this.spawnAttacker())
-        $mainCanvas.on(HEALTH_GAIN, -> $this.animateHealthBar())
-
+        $mainCanvas.on(MAX_HEALTH_GAIN, -> $this.animateHealthBar())
 
     makeStars: () ->
         starLayer = new Layer({
@@ -364,9 +419,10 @@ class Game
         @updateEntities()
         @checkCollisions()
         @keepInBounds()
+        @updateRandomSpawns()
         @updateScoreBar()
         @updateHealthBar()
-        @destroyDeadEntities()
+        @updateDeadEntities()
 
         view.draw()
 
@@ -381,33 +437,45 @@ class Game
         if @defender.health >= 0
             @healthBar.text("♡".repeat(@defender.health))
             @injuryBar.text("♡".repeat(@defender.healthMax - @defender.health))
-                            # ♡ —
 
     updateScoreBar: () ->
         @scoreBar.text(@defender.score)
 
+    updateDeadEntities: () ->
+        for entity in @entities
+            if entity.alive == false
+                $mainCanvas.trigger(ATTACKER_DEATH, entity) if entity.type == "attacker" # trigger jQuery event
+                entity.body.remove() #remove the entity body from the view
+                @entities.splice(@entities.indexOf(entity), 1) #remove entity from @entities array
+
+    updateRandomSpawns: () ->
+        if _.random(-75, 1) == _.random(-1, 75)
+            @entities.push new HealthUp(
+                view.center.x + _.random(-500, 500),
+                view.center.y + _.random(-500, 500)
+            )
+
     kill: (entity) ->
+        # sets the entity to be destroyed in updateDeadEntities
         entity.alive = false
 
     animateHealthBar: () ->
+        # class to add to health and injury bars
         animation = "animated rubberBand"
+        # ton of crap to check when animations end
         animationEnd = 'webkitAnimationEnd mozAnimationEnd MSAnimationEnd oanimationend animationend'
 
+        # add animation to health bar and injury bar
         @healthBar.addClass(animation)
         @injuryBar.addClass(animation)
-        @healthBar.one(animationEnd, ->
+        @healthBar.one(animationEnd, -> # use ".one" so it will activate, then unbind
+            # remove animation classes from elements
             $(this).removeClass(animation)
             $("#injury").removeClass(animation)
             );
 
-    destroyDeadEntities: () ->
-        for entity in @entities
-            if entity.alive == false
-                $mainCanvas.trigger(ATTACKER_DEATH, entity) if entity.type == "attacker"
-                entity.body.remove()
-                @entities.splice(@entities.indexOf(entity), 1)
-
     spawnAttacker: () ->
+        #creates a new Attacker
         @entities.push new Attacker(
             ATTACKER_SIZE,
             view.center.x + _.random(-500, 500),
@@ -418,10 +486,12 @@ class Game
     fireMahLazarz: () ->
         @defender.timeSinceLazar = 0
         for entity in @entities
+            #kill all existing lasers... just in case
             if entity.type == "laser"
                 @kill(entity)
 
         for i in [0...4] by 1
+            #spawn four new lasers
             @entities.push new Laser(i, @defender)
 
     checkCollisions: (index) ->
@@ -433,15 +503,14 @@ class Game
                 @collide(@entities[e], @entities[index])
                 @collide(@entities[index], @entities[e])
 
-                type1 = @entities[index].type
-                type2 = @entities[e].type
-                @entities[e].damage(type1)
-                @entities[index].damage(type2)
+                @entities[e].damage(@entities[index].type)
+                @entities[index].damage(@entities[e].type)
 
         if index + 1 < @entities.length
             return @checkCollisions(index + 1)
 
     collide: (e1, e2) ->
+        #math. I just know it works, I kinda understand it.
         dx = e1.pos.x - e2.pos.x
         dy = e1.pos.y - e2.pos.y
 
@@ -458,33 +527,29 @@ class Game
 
     keepInBounds: () ->
         for entity in @entities
-            kill = false
             if entity.pos.x < entity.size
                 #collide on left wall
                 entity.v *= new Point -SPRING, SPRING
                 entity.pos.x = entity.size
-                kill = true if entity.type == "laser"
+                @kill entity if entity.type == "laser"
 
             if entity.pos.y < entity.size
                 #collide on top wall
                 entity.v *= new Point SPRING, -SPRING
                 entity.pos.y = entity.size
-                kill = true if entity.type == "laser"
+                @kill entity if entity.type == "laser"
 
             if entity.pos.x > view.bounds.width - entity.size
                 #collide on right wall
                 entity.v *= new Point -SPRING, SPRING
                 entity.pos.x = view.bounds.width - entity.size
-                kill = true if entity.type == "laser"
+                @kill entity if entity.type == "laser"
 
             if entity.pos.y > view.bounds.height - entity.size
                 #collide on bottom wall
                 entity.v *= new Point SPRING, -SPRING
                 entity.pos.y = view.bounds.height - entity.size
-                kill = true if entity.type == "laser"
-
-            if kill == true
-                @kill entity
+                @kill entity if entity.type == "laser"
 
 ################################################################################
 #MAIN###########################################################################
