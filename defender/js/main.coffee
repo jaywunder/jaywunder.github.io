@@ -6,8 +6,9 @@ $mainCanvas = $("#mainCanvas")
 
 ATTACKER_DEATH = "attacker-death"
 MAX_HEALTH_GAIN = "maxHealth-gain"
-HEALTH_GAIN = "health-gain"
-HEALTH_GAIN_DOUBLE = "health-gain-double"
+DEFENDER_HEALTH_GAIN = "defender-health-gain"
+# DEFENDER_HEALTH_GAIN_DOUBLE = "defender-health-gain-double"
+DEFENDER_DAMAGED = 'defender-damaged'
 
 FRICTION = 0.6
 SPRING = 0.6
@@ -25,9 +26,9 @@ class Entity
         @size = size
         @pos = new Point(x, y)
         @v = new Point(vx, vy)
-        @alive = true
+    alive: true
 
-        @primaryColor = '#bab8b5'
+    primaryColor: '#bab8b5'
         # @direction = new Path.Line({
         #     from: [@pos.x, @pos.y]
         #     to:   [@pos.x + (@v.x * 10), @pos.y + (@v.y * 10)]
@@ -69,7 +70,7 @@ class Entity
 ################################################################################
 class Laser extends Entity
     constructor: (num, defender) ->
-        # onsole.log "Laser #{num} at the ready!"
+
         @reference = defender["arm" + num]
         @from = @reference.segments[0].point
         @to   = @reference.segments[1].point
@@ -116,19 +117,20 @@ class Powerup extends Entity
 
     type: "powerup"
     trigger: "nothing"
+    args: {}
 
     makeBody: () ->
         @body = new PointText({
             point: [50, 50],
             content: "P",
-            fillColor: 'black',
+            fillColor: 'white',
             fontFamily: 'Courier New',
             fontSize: 25
         });
 
     damage: (type) ->
         if type == "laser" or type == "defender"
-            $mainCanvas.trigger(@trigger)
+            $mainCanvas.trigger(@trigger, @args)
             @alive = false
 
 class HealthUp extends Powerup
@@ -136,7 +138,10 @@ class HealthUp extends Powerup
         super x, y
         @makeBody()
 
-    trigger: HEALTH_GAIN
+    trigger: DEFENDER_HEALTH_GAIN
+    args: {
+        amount: 1
+    }
 
     makeBody: () ->
         @body = new PointText({
@@ -152,7 +157,10 @@ class HealthUpDouble extends Powerup
         super x, y
         @makeBody()
 
-    trigger: HEALTH_GAIN_DOUBLE
+    trigger: DEFENDER_HEALTH_GAIN
+    args: {
+        amount: 2
+    }
 
     makeBody: () ->
         @heart1 = new PointText(
@@ -246,8 +254,7 @@ class Defender extends Entity
     makeBindings: () ->
         $this = this
         $mainCanvas.on(ATTACKER_DEATH, (event, entity) -> $this.onScore(entity))
-        $mainCanvas.on(HEALTH_GAIN, -> $this.onHealthGain(1))
-        $mainCanvas.on(HEALTH_GAIN_DOUBLE, -> $this.onHealthGain(2))
+        $mainCanvas.on(DEFENDER_HEALTH_GAIN, (event, args)-> $this.onHealthGain(args.amount))
 
     update: () ->
         @move()
@@ -406,8 +413,14 @@ class Game
 
     makeBindings: () ->
         $this = this
-        $mainCanvas.on(ATTACKER_DEATH, -> $this.spawnAttacker())
-        $mainCanvas.on(MAX_HEALTH_GAIN, -> $this.animateHealthBar())
+        $mainCanvas.on(ATTACKER_DEATH, ->
+            $this.spawnAttacker()
+            $this.animateScoreBar()
+        )
+        $mainCanvas.on(MAX_HEALTH_GAIN, ->
+            $this.animateHealthBar()
+        )
+        # $mainCanvas.on()
 
     makeStars: () ->
         starLayer = new Layer({
@@ -505,7 +518,14 @@ class Game
             # remove animation classes from elements
             $(this).removeClass(animation)
             $("#injury").removeClass(animation)
-            );
+        )
+
+    animateScoreBar: () ->
+        #see comments above in animateHealthBar
+        animation = "animated rubberBand"
+        animationEnd = 'webkitAnimationEnd mozAnimationEnd MSAnimationEnd oanimationend animationend'
+        @scoreBar.addClass(animation)
+        @scoreBar.one(animationEnd, -> $(this).removeClass(animation))
 
     spawnAttacker: () ->
         #creates a new Attacker
@@ -543,7 +563,7 @@ class Game
             return @checkCollisions(index + 1)
 
     collide: (e1, e2) ->
-        #math. I just know it works, I kinda understand it.
+        #math. I just know it works. I kinda understand it... but not well
         dx = e1.pos.x - e2.pos.x
         dy = e1.pos.y - e2.pos.y
 

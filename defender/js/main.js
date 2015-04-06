@@ -1,5 +1,5 @@
 (function() {
-  var $mainCanvas, ATTACKER_DEATH, ATTACKER_SIZE, Attacker, DEFENDER_SIZE, Defender, Entity, FRICTION, Game, HEALTH_GAIN, HEALTH_GAIN_DOUBLE, HealthUp, HealthUpDouble, LASER_SIZE, Laser, MAX_HEALTH_GAIN, POWERUP_SIZE, Powerup, SPRING, TRACKING, game, mainloop,
+  var $mainCanvas, ATTACKER_DEATH, ATTACKER_SIZE, Attacker, DEFENDER_DAMAGED, DEFENDER_HEALTH_GAIN, DEFENDER_SIZE, Defender, Entity, FRICTION, Game, HealthUp, HealthUpDouble, LASER_SIZE, Laser, MAX_HEALTH_GAIN, POWERUP_SIZE, Powerup, SPRING, TRACKING, game, mainloop,
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -13,9 +13,9 @@
 
   MAX_HEALTH_GAIN = "maxHealth-gain";
 
-  HEALTH_GAIN = "health-gain";
+  DEFENDER_HEALTH_GAIN = "defender-health-gain";
 
-  HEALTH_GAIN_DOUBLE = "health-gain-double";
+  DEFENDER_DAMAGED = 'defender-damaged';
 
   FRICTION = 0.6;
 
@@ -36,9 +36,11 @@
       this.size = size;
       this.pos = new Point(x, y);
       this.v = new Point(vx, vy);
-      this.alive = true;
-      this.primaryColor = '#bab8b5';
     }
+
+    Entity.prototype.alive = true;
+
+    Entity.prototype.primaryColor = '#bab8b5';
 
     Entity.prototype.updateDirection = function() {};
 
@@ -143,11 +145,13 @@
 
     Powerup.prototype.trigger = "nothing";
 
+    Powerup.prototype.args = {};
+
     Powerup.prototype.makeBody = function() {
       return this.body = new PointText({
         point: [50, 50],
         content: "P",
-        fillColor: 'black',
+        fillColor: 'white',
         fontFamily: 'Courier New',
         fontSize: 25
       });
@@ -155,7 +159,7 @@
 
     Powerup.prototype.damage = function(type) {
       if (type === "laser" || type === "defender") {
-        $mainCanvas.trigger(this.trigger);
+        $mainCanvas.trigger(this.trigger, this.args);
         return this.alive = false;
       }
     };
@@ -172,7 +176,11 @@
       this.makeBody();
     }
 
-    HealthUp.prototype.trigger = HEALTH_GAIN;
+    HealthUp.prototype.trigger = DEFENDER_HEALTH_GAIN;
+
+    HealthUp.prototype.args = {
+      amount: 1
+    };
 
     HealthUp.prototype.makeBody = function() {
       return this.body = new PointText({
@@ -196,7 +204,11 @@
       this.makeBody();
     }
 
-    HealthUpDouble.prototype.trigger = HEALTH_GAIN_DOUBLE;
+    HealthUpDouble.prototype.trigger = DEFENDER_HEALTH_GAIN;
+
+    HealthUpDouble.prototype.args = {
+      amount: 2
+    };
 
     HealthUpDouble.prototype.makeBody = function() {
       this.heart1 = new PointText({
@@ -290,11 +302,8 @@
       $mainCanvas.on(ATTACKER_DEATH, function(event, entity) {
         return $this.onScore(entity);
       });
-      $mainCanvas.on(HEALTH_GAIN, function() {
-        return $this.onHealthGain(1);
-      });
-      return $mainCanvas.on(HEALTH_GAIN_DOUBLE, function() {
-        return $this.onHealthGain(2);
+      return $mainCanvas.on(DEFENDER_HEALTH_GAIN, function(event, args) {
+        return $this.onHealthGain(args.amount);
       });
     };
 
@@ -493,7 +502,8 @@
       var $this;
       $this = this;
       $mainCanvas.on(ATTACKER_DEATH, function() {
-        return $this.spawnAttacker();
+        $this.spawnAttacker();
+        return $this.animateScoreBar();
       });
       return $mainCanvas.on(MAX_HEALTH_GAIN, function() {
         return $this.animateHealthBar();
@@ -628,6 +638,16 @@
       return this.healthBar.one(animationEnd, function() {
         $(this).removeClass(animation);
         return $("#injury").removeClass(animation);
+      });
+    };
+
+    Game.prototype.animateScoreBar = function() {
+      var animation, animationEnd;
+      animation = "animated rubberBand";
+      animationEnd = 'webkitAnimationEnd mozAnimationEnd MSAnimationEnd oanimationend animationend';
+      this.scoreBar.addClass(animation);
+      return this.scoreBar.one(animationEnd, function() {
+        return $(this).removeClass(animation);
       });
     };
 
