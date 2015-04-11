@@ -1,0 +1,21 @@
+{
+  "name": "grunt101",
+  "version": "1.0.0",
+  "description": "grunt tutorial",
+  "main": "index.js",
+  "private": "true",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "browserify index.js > js/bundle.js",
+    "watch": "watchify -t coffeeify index.coffee -o js/bundle.js -v"
+  },
+  "author": "jacob",
+  "license": "MIT",
+  "devDependencies": {
+    "browserify": "^9.0.8",
+    "grunt": "^0.4.5",
+    "grunt-browserify": "^3.7.0",
+    "underscore": "^1.8.3",
+    "watchify": "^3.1.0"
+  }
+}
