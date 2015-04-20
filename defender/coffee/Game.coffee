@@ -109,14 +109,14 @@ class Game
             @defender.v = new Point(0, 0) # stop defender
 
     mainloop: () ->
-        @handleInput()
+        # @handleInput()
         @updateEntities()
-        @checkCollisions()
-        @keepInBounds()
-        @updateRandomSpawns()
-        @updateScoreBar()
-        @updateHealthBar()
-        @updateDeadEntities()
+        # @checkCollisions()
+        # @keepInBounds()
+        # @updateRandomSpawns()
+        # @updateScoreBar()
+        # @updateHealthBar()
+        # @updateDeadEntities()
 
         view.draw()
 

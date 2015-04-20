@@ -134,14 +134,7 @@ Game = (function() {
   };
 
   Game.prototype.mainloop = function() {
-    this.handleInput();
     this.updateEntities();
-    this.checkCollisions();
-    this.keepInBounds();
-    this.updateRandomSpawns();
-    this.updateScoreBar();
-    this.updateHealthBar();
-    this.updateDeadEntities();
     return view.draw();
   };
 
@@ -902,11 +895,23 @@ module.exports = {
 
 
 },{}],11:[function(require,module,exports){
-var Game, game;
+var Game, game, path;
+
+paper.install(window);
+
+paper.setup('mainCanvas');
 
 Game = require('./Game.coffee');
 
 game = new Game();
+
+path = new Path.Circle({
+  center: view.center,
+  radius: 30,
+  strokeColor: 'white'
+});
+
+view.draw();
 
 
 

@@ -6,8 +6,8 @@
   "README": "meh",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "watch": "watchify -t coffeeify coffee/main.coffee -o js/bundle.js",
-    "build": "browserify -t coffeeify coffee/main.coffee -o js/bundle.js"
+    "watch": "watchify -t coffeeify coffee/main.coffee -o js/bundle.js -v",
+    "build": "browserify -t coffeeify coffee/main.coffee -o js/bundle.js -v"
   },
   "repository": {
     "type": "git",
