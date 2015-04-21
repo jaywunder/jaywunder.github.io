@@ -1,29 +1,29 @@
 <div id="gameContent">
-    <!-- // <script type="text/paperscript" src="js/bundle.js" canvas="mainCanvas"></script> -->
-    <script type="text/javascript" src="js/bundle.js"></script>
-    <script id="gameScript">
-        // $gameScript = $('#gameScript');
-        // $gameScript.type   = 'text/paperscript';
-        // $gameScript.src    = 'js/bundle.js';
-        // $gameScript.canvas = 'mainCanvas';
-    </script>
-    <h1>HELLO</h1>
     <div class="wrapper">
-        <canvas id="mainCanvas" resize class="pink" style="border: 10px solid pink"></canvas>
+        <canvas id="mainCanvas" resize></canvas>
     </div>
     <div class="header">
         <ul>
             <li>
                 <div id="healthContainer">
-                    <span id="health">woo</span> <span id="injury">t</span>
+                    <span id="health"></span> <span id="injury"></span>
                 </div>
             </li>
             <li>
-                <span id="countdown"> <h1 id="countdownText">WHAT</h1></span>
+                <span id="countdown"> <h1 id="countdownText"></h1></span>
             </li>
             <li>
-                <span id="score">hello</span>
+                <span id="score"></span>
             </li>
         </ul>
     </div>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            elem = '<script type="text/paperscript" src="js/bundle.js" canvas="mainCanvas"><\/script>';
+            setTimeout(function() {
+                $('head').append(elem);
+                paper.PaperScript.load(); // <-- The fix!
+            }, 500);
+        });
+    </script>
 </div>

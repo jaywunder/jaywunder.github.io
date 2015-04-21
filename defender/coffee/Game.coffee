@@ -109,14 +109,14 @@ class Game
             @defender.v = new Point(0, 0) # stop defender
 
     mainloop: () ->
-        # @handleInput()
+        @handleInput()
         @updateEntities()
-        # @checkCollisions()
-        # @keepInBounds()
-        # @updateRandomSpawns()
-        # @updateScoreBar()
-        # @updateHealthBar()
-        # @updateDeadEntities()
+        @checkCollisions()
+        @keepInBounds()
+        @updateRandomSpawns()
+        @updateScoreBar()
+        @updateHealthBar()
+        @updateDeadEntities()
 
         view.draw()
 
@@ -203,17 +203,17 @@ class Game
     checkCollisions: (index) ->
         index ?= 0
 
-        for e in [index + 1...@entities.length] by 1
-            if @entities[index].pos.getDistance(@entities[e].pos) <= @entities[index].size + @entities[e].size
-                #collide each entity with the other entity
-                @collide(@entities[e], @entities[index])
-                @collide(@entities[index], @entities[e])
-
-                @entities[e].damage(@entities[index].type)
-                @entities[index].damage(@entities[e].type)
-
-        if index + 1 < @entities.length
-            return @checkCollisions(index + 1)
+        # for e in [index + 1...@entities.length] by 1
+        #     if @entities[index].pos.getDistance(@entities[e].pos) <= @entities[index].size + @entities[e].size
+        #         #collide each entity with the other entity
+        #         @collide(@entities[e], @entities[index])
+        #         @collide(@entities[index], @entities[e])
+        #
+        #         @entities[e].damage(@entities[index].type)
+        #         @entities[index].damage(@entities[e].type)
+        #
+        # if index + 1 < @entities.length
+        #     return @checkCollisions(index + 1)
 
     collide: (e1, e2) ->
         #math. I just know it works. I kinda understand it... but not well

@@ -3,10 +3,20 @@ function ay(n) {
     console.log("ay " + n);
 }
 
-console.log(paper);
-
 function loadGame() {
     $("#content").load("ajax/game.html", function() {
         ay('game');
     });
-}
+};
+
+function loadStart() {
+    $('#content').load('ajax/start.html', function () {
+        ay('start');
+    });
+};
+
+function loadScores() {
+    $('#content').load('ajax/scores.html', function () {
+        ay('scores');
+    });
+};

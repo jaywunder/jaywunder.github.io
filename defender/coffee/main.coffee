@@ -1,5 +1,5 @@
-paper.install(window);
-paper.setup('mainCanvas');
+# paper.install(window);
+# paper.setup('mainCanvas');
 
 Game = require './Game.coffee'
 
