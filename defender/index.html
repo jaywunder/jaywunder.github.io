@@ -11,14 +11,12 @@
     <script src="../lib/underscore-min.js"></script>
     <script src="../lib/backbone-min.js"></script>
     <script src="../lib/paper-full.min.js"></script>
-
+    <script src="js/loading.js"></script>
 </head>
 <body>
     <div id="content"></div>
-    <script charset="utf-8">
-        $(document).ready(function () {
-            $("#content").load("ajax/start.html")
-        })
+    <script>
+        loadStart();
     </script>
 </body>
 </html>

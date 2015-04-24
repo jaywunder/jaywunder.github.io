@@ -168,7 +168,7 @@ module.exports = Defender;
 
 
 
-},{"../globals.coffee":3,"./Entity.coffee":2}],2:[function(require,module,exports){
+},{"../globals.coffee":4,"./Entity.coffee":2}],2:[function(require,module,exports){
 var Entity, GLOBALS;
 
 GLOBALS = require('../globals.coffee');
@@ -229,7 +229,64 @@ module.exports = Entity;
 
 
 
-},{"../globals.coffee":3}],3:[function(require,module,exports){
+},{"../globals.coffee":4}],3:[function(require,module,exports){
+var Entity, GLOBALS, Laser,
+  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+  hasProp = {}.hasOwnProperty;
+
+Entity = require('./Entity.coffee');
+
+GLOBALS = require('../globals.coffee');
+
+Laser = (function(superClass) {
+  extend(Laser, superClass);
+
+  function Laser(num, defender) {
+    var vx, vy;
+    this.num = num;
+    this.defender = defender;
+    this.reference = this.defender['arm' + this.num];
+    this.from = this.reference.segments[0].point;
+    this.to = this.reference.segments[1].point;
+    vx = (this.to.x - this.from.x) / 2;
+    vy = (this.to.y - this.from.y) / 2;
+    Laser.__super__.constructor.call(this, GLOBALS.LASER_SIZE, this.reference.position.x, this.reference.position.y, vx, vy);
+    this.primaryColor = '#23e96b';
+    this.type = 'laser';
+    this.magnitude = 15;
+    this.makeBody();
+  }
+
+  Laser.prototype.makeBody = function() {
+    this.pos.x = this.reference.position.x;
+    this.pos.y = this.reference.position.y;
+    return this.body = new Path.Line({
+      from: [this.from.x, this.from.y],
+      to: [this.to.x, this.to.y],
+      strokeColor: this.primaryColor,
+      strokeWidth: GLOBALS.DEFENDER_SIZE / 7
+    });
+  };
+
+  Laser.prototype.update = function() {
+    return this.move();
+  };
+
+  Laser.prototype.damage = function(type) {
+    if (type === 'true') {
+      return this.alive = false;
+    }
+  };
+
+  return Laser;
+
+})(Entity);
+
+module.exports = Laser;
+
+
+
+},{"../globals.coffee":4,"./Entity.coffee":2}],4:[function(require,module,exports){
 module.exports = {
   $mainCanvas: $('#mainCanvas'),
   ATTACKER_DEATH: 'attacker-death',
@@ -247,25 +304,231 @@ module.exports = {
 
 
 
-},{}],4:[function(require,module,exports){
-var Defender, armSize, pos, primaryColor, secondaryColor, size, strokeWidth;
+},{}],5:[function(require,module,exports){
+var Defender, GLOBALS, Game, Laser;
 
-size = $(window).width() / 6;
+String.prototype.repeat = function(num) {
+  return new Array(num + 1).join(this);
+};
 
-pos = new Point($(window).width() / 2, $(window).height() / 3);
+Defender = require('../entities/Defender.coffee');
 
-armSize = 1.5;
+Laser = require('../entities/Laser.coffee');
 
-strokeWidth = this.size / 7;
+GLOBALS = require('../globals.coffee');
 
-primaryColor = '#00b3ff';
+Game = (function() {
+  function Game() {
+    this.entities = [];
+    this.makeEntities();
+    this.makeBindings();
+    this.init();
+  }
 
-secondaryColor = '#23e96b';
+  Game.prototype.init = function() {
+    var $this, mainloop;
+    $this = this;
+    mainloop = function() {
+      return $this.mainloop();
+    };
+    return setInterval(mainloop, 16);
+  };
 
-Defender = require('./entities/Defender.coffee');
+  Game.prototype.makeEntities = function() {
+    this.defender = new Defender(view.center.x, view.center.y - 200);
+    this.defender.v = new Point(_.random(-5, 5), _.random(-5, 5));
+    return this.entities.push(this.defender);
+  };
 
-new Defender(0, 0);
+  Game.prototype.makeBindings = function() {
+    var $this;
+    return $this = this;
+  };
+
+  Game.prototype.handleInput = function() {
+    if (Key.isDown('a') || Key.isDown('left')) {
+      if (this.defender.v.x > -this.defender.maxVelocity) {
+        this.defender.v.x -= this.defender.accel;
+      }
+    }
+    if (Key.isDown('w') || Key.isDown('up')) {
+      if (this.defender.v.y > -this.defender.maxVelocity) {
+        this.defender.v.y -= this.defender.accel;
+      }
+    }
+    if (Key.isDown('d') || Key.isDown('right')) {
+      if (this.defender.v.x < this.defender.maxVelocity) {
+        this.defender.v.x += this.defender.accel;
+      }
+    }
+    if (Key.isDown('s') || Key.isDown('down')) {
+      if (this.defender.v.y < this.defender.maxVelocity) {
+        this.defender.v.y += this.defender.accel;
+      }
+    }
+    if (Key.isDown('shift')) {
+      console.log('shiftaki');
+    }
+    if (Key.isDown('space')) {
+      if (this.defender.canFireMahLazarz()) {
+        this.fireMahLazarz();
+      }
+    }
+    if (Key.isDown('escape')) {
+      return this.defender.v = new Point(0, 0);
+    }
+  };
+
+  Game.prototype.mainloop = function() {
+    this.handleInput();
+    this.updateEntities();
+    this.checkCollisions();
+    this.keepInBounds();
+    this.updateDeadEntities();
+    console.log;
+    return view.draw();
+  };
+
+  Game.prototype.updateEntities = function() {
+    var entity, j, len, ref;
+    ref = this.entities;
+    for (j = 0, len = ref.length; j < len; j++) {
+      entity = ref[j];
+      entity.update();
+    }
+    if (this.numAttackers < this.ATTACKER_AMOUNT) {
+      return this.spawnAttacker();
+    }
+  };
+
+  Game.prototype.updateDeadEntities = function() {
+    var entity, j, len, ref, results;
+    ref = this.entities;
+    results = [];
+    for (j = 0, len = ref.length; j < len; j++) {
+      entity = ref[j];
+      if (entity.alive === false) {
+        if (entity.type === 'attacker') {
+          GLOBALS.$mainCanvas.trigger(GLOBALS.ATTACKER_DEATH, entity);
+        }
+        entity.body.remove();
+        results.push(this.entities.splice(this.entities.indexOf(entity), 1));
+      } else {
+        results.push(void 0);
+      }
+    }
+    return results;
+  };
+
+  Game.prototype.kill = function(entity) {
+    return entity.alive = false;
+  };
+
+  Game.prototype.fireMahLazarz = function() {
+    var entity, i, j, k, len, ref, results;
+    this.defender.timeSinceLazar = 0;
+    ref = this.entities;
+    for (j = 0, len = ref.length; j < len; j++) {
+      entity = ref[j];
+      if (entity.type === 'laser') {
+        this.kill(entity);
+      }
+    }
+    results = [];
+    for (i = k = 0; k < 4; i = k += 1) {
+      results.push(this.entities.push(new Laser(i, this.defender)));
+    }
+    return results;
+  };
+
+  Game.prototype.checkCollisions = function(index) {
+    var e, j, ref, ref1;
+    if (index == null) {
+      index = 0;
+    }
+    for (e = j = ref = index + 1, ref1 = this.entities.length; j < ref1; e = j += 1) {
+      if (this.entities[index].pos.getDistance(this.entities[e].pos) <= this.entities[index].size + this.entities[e].size) {
+        this.collide(this.entities[e], this.entities[index]);
+        this.collide(this.entities[index], this.entities[e]);
+        this.entities[e].damage(this.entities[index].type);
+        this.entities[index].damage(this.entities[e].type);
+      }
+    }
+    if (index + 1 < this.entities.length) {
+      return this.checkCollisions(index + 1);
+    }
+  };
+
+  Game.prototype.collide = function(e1, e2) {
+    var angle, ax, ay, dx, dy, minDist, targetX, targetY;
+    dx = e1.pos.x - e2.pos.x;
+    dy = e1.pos.y - e2.pos.y;
+    angle = Math.atan2(dy, dx);
+    minDist = e1.size + e2.size;
+    targetX = e1.pos.x + Math.cos(angle) * minDist;
+    targetY = e2.pos.y + Math.sin(angle) * minDist;
+    ax = (targetX - e2.pos.x) * GLOBALS.SPRING / 50;
+    ay = (targetY - e2.pos.y) * GLOBALS.SPRING / 50;
+    return e1.v += new Point(ax, ay);
+  };
+
+  Game.prototype.keepInBounds = function() {
+    var entity, j, len, ref, results;
+    ref = this.entities;
+    results = [];
+    for (j = 0, len = ref.length; j < len; j++) {
+      entity = ref[j];
+      if (entity.pos.x < entity.size) {
+        entity.v *= new Point(-GLOBALS.SPRING, GLOBALS.SPRING);
+        entity.pos.x = entity.size;
+        if (entity.type === 'laser') {
+          this.kill(entity);
+        }
+      }
+      if (entity.pos.y < entity.size) {
+        entity.v *= new Point(GLOBALS.SPRING, -GLOBALS.SPRING);
+        entity.pos.y = entity.size;
+        if (entity.type === 'laser') {
+          this.kill(entity);
+        }
+      }
+      if (entity.pos.x > view.bounds.width - entity.size) {
+        entity.v *= new Point(-GLOBALS.SPRING, GLOBALS.SPRING);
+        entity.pos.x = view.bounds.width - entity.size;
+        if (entity.type === 'laser') {
+          this.kill(entity);
+        }
+      }
+      if (entity.pos.y > view.bounds.height - entity.size) {
+        entity.v *= new Point(GLOBALS.SPRING, -GLOBALS.SPRING);
+        entity.pos.y = view.bounds.height - entity.size;
+        if (entity.type === 'laser') {
+          results.push(this.kill(entity));
+        } else {
+          results.push(void 0);
+        }
+      } else {
+        results.push(void 0);
+      }
+    }
+    return results;
+  };
+
+  return Game;
+
+})();
+
+module.exports = Game;
 
 
 
-},{"./entities/Defender.coffee":1}]},{},[4]);
+},{"../entities/Defender.coffee":1,"../entities/Laser.coffee":3,"../globals.coffee":4}],6:[function(require,module,exports){
+var Background, background;
+
+Background = require('./screens/Background.coffee');
+
+background = new Background();
+
+
+
+},{"./screens/Background.coffee":5}]},{},[6]);

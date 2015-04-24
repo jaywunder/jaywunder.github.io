@@ -2,15 +2,15 @@ String::repeat = ( num ) ->
     #I'm sorry for extending a primitive type, but it must be done
     return new Array( num + 1 ).join( this );
 
-Defender = require './entities/Defender.coffee'
-Attacker = require './entities/Attacker.coffee'
-Laser = require './entities/Laser.coffee'
-HealthUp = require './entities/powerups/HealthUp.coffee'
-HealthUpDouble = require './entities/powerups/HealthUpDouble.coffee'
-InvulnerableUp = require './entities/powerups/InvulnerableUp.coffee'
-GLOBALS = require './globals.coffee'
+Defender = require '../entities/Defender.coffee'
+Attacker = require '../entities/Attacker.coffee'
+Laser = require '../entities/Laser.coffee'
+HealthUp = require '../entities/powerups/HealthUp.coffee'
+HealthUpDouble = require '../entities/powerups/HealthUpDouble.coffee'
+InvulnerableUp = require '../entities/powerups/InvulnerableUp.coffee'
+GLOBALS = require '../globals.coffee'
 
-# #TODO: make level class also
+#TODO: make level class
 class Game
     constructor: () ->
         @entities = []
@@ -203,17 +203,17 @@ class Game
     checkCollisions: (index) ->
         index ?= 0
 
-        # for e in [index + 1...@entities.length] by 1
-        #     if @entities[index].pos.getDistance(@entities[e].pos) <= @entities[index].size + @entities[e].size
-        #         #collide each entity with the other entity
-        #         @collide(@entities[e], @entities[index])
-        #         @collide(@entities[index], @entities[e])
-        #
-        #         @entities[e].damage(@entities[index].type)
-        #         @entities[index].damage(@entities[e].type)
-        #
-        # if index + 1 < @entities.length
-        #     return @checkCollisions(index + 1)
+        for e in [index + 1...@entities.length] by 1
+            if @entities[index].pos.getDistance(@entities[e].pos) <= @entities[index].size + @entities[e].size
+                #collide each entity with the other entity
+                @collide(@entities[e], @entities[index])
+                @collide(@entities[index], @entities[e])
+
+                @entities[e].damage(@entities[index].type)
+                @entities[index].damage(@entities[e].type)
+
+        if index + 1 < @entities.length
+            return @checkCollisions(index + 1)
 
     collide: (e1, e2) ->
         #math. I just know it works. I kinda understand it... but not well

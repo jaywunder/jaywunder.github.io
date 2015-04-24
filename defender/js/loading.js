@@ -1,22 +1,19 @@
-function ay(n) {
-    n = n || '';
-    console.log("ay " + n);
-}
-
 function loadGame() {
-    $("#content").load("ajax/game.html", function() {
-        ay('game');
-    });
+    $('#paper').remove()
+    $("#content").load("ajax/game.html");
 };
 
 function loadStart() {
-    $('#content').load('ajax/start.html', function () {
-        ay('start');
-    });
+    $('#paper').remove()
+    $('#content').load('ajax/start.html');
 };
 
 function loadScores() {
-    $('#content').load('ajax/scores.html', function () {
-        ay('scores');
-    });
+    $('#paper').remove()
+    $('#content').load('ajax/scores.html');
+};
+
+function loadDeath() {
+    $('#paper').remove()
+    $('#content').load('ajax/death.html');
 };

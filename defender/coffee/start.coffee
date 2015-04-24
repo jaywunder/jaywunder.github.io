@@ -1,10 +1,9 @@
-size = $(window).width() / 6
-pos = new Point($(window).width() / 2, $(window).height() / 3)
-armSize = 1.5
-strokeWidth = @size / 7
-primaryColor = '#00b3ff'
-secondaryColor = '#23e96b'
+Background = require('./screens/Background.coffee')
 
-Defender = require './entities/Defender.coffee'
+background = new Background();
 
-new Defender(0, 0)
+# path = new Path.Circle({
+#     center: [100, 100],
+#     radius: 30,
+#     strokeColor: 'white'
+# })

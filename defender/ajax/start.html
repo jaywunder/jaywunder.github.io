@@ -2,15 +2,18 @@
     <div class="wrapper">
         <canvas id="mainCanvas" resize></canvas>
     </div>
-    <script src="js/loading.js"></script>
+    <!-- // <script src="js/loading.js"></script> -->
     <div class="wrapper">
         <div>
             <ul class="centered startUl">
                 <li>
-                    <button class="startButton btn" type="button" onclick="loadGame()">Start Game</button>
+                    <button class="startButton btn" type="button" onclick="loadGame()">Ready for Battle</button>
                 </li>
                 <li>
-                    <button class="startButton btn" type="button">High Scores</button>
+                    <button class="startButton btn" type="button" onclick="loadScores()">High Scores</button>
+                </li>
+                <li>
+                    <button class="startButton btn" type="button" onclick="loadInstructions()">Instructions</button>
                 </li>
             </ul>
 
@@ -18,7 +21,7 @@
     </div>
     <script type="text/javascript">
         $(document).ready(function () {
-            elem = '<script type="text/paperscript" src="js/start.js" canvas="mainCanvas"><\/script>';
+            elem = '<script id="paper" type="text/paperscript" src="js/start.js" canvas="mainCanvas"><\/script>';
             setTimeout(function() {
                 $('head').append(elem);
                 paper.PaperScript.load(); // <-- The fix!

@@ -243,7 +243,21 @@ Game = (function() {
   };
 
   Game.prototype.checkCollisions = function(index) {
-    return index != null ? index : index = 0;
+    var e, j, ref, ref1;
+    if (index == null) {
+      index = 0;
+    }
+    for (e = j = ref = index + 1, ref1 = this.entities.length; j < ref1; e = j += 1) {
+      if (this.entities[index].pos.getDistance(this.entities[e].pos) <= this.entities[index].size + this.entities[e].size) {
+        this.collide(this.entities[e], this.entities[index]);
+        this.collide(this.entities[index], this.entities[e]);
+        this.entities[e].damage(this.entities[index].type);
+        this.entities[index].damage(this.entities[e].type);
+      }
+    }
+    if (index + 1 < this.entities.length) {
+      return this.checkCollisions(index + 1);
+    }
   };
 
   Game.prototype.collide = function(e1, e2) {
@@ -888,19 +902,11 @@ module.exports = {
 
 
 },{}],11:[function(require,module,exports){
-var Game, game, path;
+var Game, game;
 
 Game = require('./Game.coffee');
 
 game = new Game();
-
-path = new Path.Circle({
-  center: view.center,
-  radius: 30,
-  strokeColor: 'white'
-});
-
-view.draw();
 
 
 

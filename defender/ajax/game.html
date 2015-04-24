@@ -19,7 +19,7 @@
     </div>
     <script type="text/javascript">
         $(document).ready(function () {
-            elem = '<script type="text/paperscript" src="js/game.js" canvas="mainCanvas"><\/script>';
+            elem = '<script id="paper" type="text/paperscript" src="js/game.js" canvas="mainCanvas"><\/script>';
             setTimeout(function() {
                 $('head').append(elem);
                 paper.PaperScript.load(); // <-- The fix!
