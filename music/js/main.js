@@ -3,7 +3,7 @@ var scale = "A B C# D E F# G#";
 var bpm = 120;
 var beat = 60 / bpm;
 
-var OctaveGenerator = function(scale, pattern) {
+function *OctaveGenerator(scale, pattern) {
   var octStart = _.random(2, 4)
   var index = 0;
   this.next = function () {
@@ -12,7 +12,7 @@ var OctaveGenerator = function(scale, pattern) {
   }
 }
 
-var NoteGenerator = function (scale, pattern) {
+function *NoteGenerator(scale, pattern) {
   var odds = [];
   for (var i = 0; i < scale.length; i+=2) {
     odds.push(scale[i]);
@@ -24,13 +24,13 @@ var NoteGenerator = function (scale, pattern) {
   }
 }
 
-var metronome = function(step) {
+function *metronome(step) {
   var step = step;
   var time = 0;
 
   this.next = function() {
     time += step;
-    return beat * time;
+    yield beat * time;
   }
 }
 

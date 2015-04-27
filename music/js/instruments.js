@@ -1,4 +1,4 @@
-var Instruments = {
+module.exports = {
   bass: {
     id: "bass",
     wad: new Wad({

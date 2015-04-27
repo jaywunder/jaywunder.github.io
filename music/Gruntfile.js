@@ -9,7 +9,8 @@ module.exports = function(grunt) {
       dist: {
         files: {
           //compile to: compile from
-          "dist/app.js": "js/app.js"
+          "dist/index.js": "index.js",
+
         }
       }
     }
