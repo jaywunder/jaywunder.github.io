@@ -1,37 +1,26 @@
-function* foo() {
-    yield 1;
-    yield 2;
-    yield 3;
-    yield 4;
-    yield 5;
-}
+let GLOBALS = require('./globals.js');
+let ui = require('./ui.js');
 
-// 1 2 3 4 5
-for (var v of foo()) {
-    console.log( v );
+for (let v of Number.range(5)) {
+  console.log( v );
 }
 
 // let Instruments = require('./instruments.js');
-//
-// let bpm = 120; // 68
-// let beat = 60 / bpm;
-// let bass = Instruments.bass.wad;
-// let snare = Instruments.snare.wad;
-// let flute = Instruments.flute.wad;
-// let piano = Instruments.piano.wad;
-//
-// let notes = ['C3', 'C2', 'C3', 'C2', 'C3', 'C2', 'C3', 'C2', 'C3', 'C2', 'C3', 'C2', 'C3', 'C2', 'C3', 'C2'];
-//
-// let time = 0;
-// for (let note of notes) {
+// let Generators = require('./generators.js');
+
+//for bug testing
+// var piano = Instruments.piano;
+// piano.play({pitch: 'C#4'});
+
+let time = 0;
+// for (let note of Generators) {
 //   time += 0.5;
-//   // bass.play({ pitch : 'C3',  wait : beat * .5})
 //   bass.play({
 //     pitch: note,
 //     wait: beat * time
 //     });
 // }
-//
+
 // piano.play({pitch: 'C4'});
 // piano.play();
 // bass.play({ pitch : 'C3',  wait : beat * .5})
