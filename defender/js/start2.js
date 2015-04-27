@@ -527,10 +527,10 @@ var Background, background;
 
 console.log('entering start');
 
-Background = require('./screens/StartScreen.coffee');
+Background = require('./screens/Background.coffee');
 
 background = new Background();
 
 
 
-},{"./screens/StartScreen.coffee":5}]},{},[6]);
+},{"./screens/Background.coffee":5}]},{},[6]);

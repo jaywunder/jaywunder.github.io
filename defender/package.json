@@ -6,8 +6,10 @@
   "README": "meh",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "watch": "watchify -t coffeeify coffee/main.coffee -o js/game.js -v",
-    "build": "browserify -t coffeeify coffee/main.coffee -o js/game.js -v"
+    "watch-game": "watchify -t coffeeify coffee/main.coffee -o js/game.js -v",
+    "watch-start": "watchify -t coffeeify coffee/start.coffee -o js/start.js -v",
+    "watch": "watchify -t coffeeify -v",
+    "build": "browserify -t coffeeify coffee/main.coffee -o js/game.js coffee/start.coffee -0 js/start.js -v"
   },
   "repository": {
     "type": "git",

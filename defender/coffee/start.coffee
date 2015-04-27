@@ -1,6 +1,7 @@
-Background = require('./screens/Background.coffee')
+console.log 'entering start'
+Background = require('./screens/StartScreen.coffee')
 
-background = new Background();
+background = new Background()
 
 # path = new Path.Circle({
 #     center: [100, 100],

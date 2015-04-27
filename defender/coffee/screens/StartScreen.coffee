@@ -3,30 +3,15 @@ String::repeat = ( num ) ->
     return new Array( num + 1 ).join( this );
 
 Defender = require '../entities/Defender.coffee'
-Attacker = require '../entities/Attacker.coffee'
 Laser = require '../entities/Laser.coffee'
-HealthUp = require '../entities/powerups/HealthUp.coffee'
-HealthUpDouble = require '../entities/powerups/HealthUpDouble.coffee'
-InvulnerableUp = require '../entities/powerups/InvulnerableUp.coffee'
 GLOBALS = require '../globals.coffee'
 
 #TODO: make level class
 class Game
     constructor: () ->
         @entities = []
-        @difficulty = 1
-        @ATTACKER_AMOUNT = Math.floor(@difficulty * 3)
-        @numAttackers = 0
-
         @makeEntities()
         @makeBindings()
-        # @makeStars()
-
-        @healthFull = $('#healthContainer')
-        @healthBar  = $('#health')
-        @injuryBar  = $('#injury')
-        @scoreBar   = $('#score')
-
         @init()
 
     init: () ->
@@ -34,62 +19,15 @@ class Game
         mainloop = () ->
             $this.mainloop()
 
-        setTimeout () ->
-            $('#countdownText').text('THREE')
-        , 0
-
-        setTimeout ->
-            $('#countdownText').text('TWO')
-        , 750 # 1000 ms is too long, 750 is better, even though it's not a full second
-        setTimeout ->
-            $('#countdownText').text('ONE')
-        , 750 * 2
-
-        setTimeout ->
-            $('#countdownText').text('')
-            setInterval(mainloop, 16)
-        , 750 * 3
+        setInterval(mainloop, 16)
 
     makeEntities: () ->
-        @defender = new Defender(view.center.x, view.center.y)
+        @defender = new Defender(view.center.x, view.center.y - 200)
+        @defender.v = new Point(_.random(-5, 5), _.random(-5, 5))
         @entities.push @defender
-
-        @entities.push new InvulnerableUp(view.center.x + 100, view.center.y + 100)
-
-        for i in [0..@ATTACKER_AMOUNT] by 1
-            @numAttackers++
-            @entities.push new Attacker(
-                GLOBALS.ATTACKER_SIZE,
-                view.center.x + _.random(-500, 500),
-                view.center.y + _.random(-500, 500),
-                @defender
-            )
 
     makeBindings: () ->
         $this = this
-        GLOBALS.$mainCanvas.on(GLOBALS.ATTACKER_DEATH, ->
-            $this.spawnAttacker()
-            $this.animateScoreBar()
-        )
-        GLOBALS.$mainCanvas.on(GLOBALS.MAX_HEALTH_GAIN, ->
-            $this.animateHealthBar()
-        )
-
-    makeStars: () ->
-        starLayer = new Layer({
-            # children: ,
-            strokeColor: 'white'
-            strokeWidth: 3
-            position: view.center
-        })
-
-        for i in [0..$(window).width() / 3] by 1
-            starLayer.children.push new Path.Circle {
-                radius: _.random 5, 5
-                point: _.random $(window).width(), $(window).height()
-                strokeColor: 'white'
-                strokeWidth: 3
-                }
 
     handleInput: () ->
         if Key.isDown('a') or Key.isDown('left') # left
@@ -113,11 +51,8 @@ class Game
         @updateEntities()
         @checkCollisions()
         @keepInBounds()
-        @updateRandomSpawns()
-        @updateScoreBar()
-        @updateHealthBar()
         @updateDeadEntities()
-
+        console.log
         view.draw()
 
     updateEntities: () ->
@@ -127,14 +62,6 @@ class Game
         if @numAttackers < @ATTACKER_AMOUNT
             @spawnAttacker()
 
-    updateHealthBar: () ->
-        if @defender.health >= 0
-            @healthBar.text('♡'.repeat(@defender.health))
-            @injuryBar.text('♡'.repeat(@defender.healthMax - @defender.health))
-
-    updateScoreBar: () ->
-        @scoreBar.text(@defender.score)
-
     updateDeadEntities: () ->
         for entity in @entities
             if entity.alive == false
@@ -142,52 +69,9 @@ class Game
                 entity.body.remove() #remove the entity body from the view
                 @entities.splice(@entities.indexOf(entity), 1) #remove entity from @entities array
 
-    updateRandomSpawns: () ->
-        if _.random(500) == 1
-            @entities.push new HealthUp(
-                view.center.x + _.random(-500, 500),
-                view.center.y + _.random(-500, 500)
-            )
-        else if _.random(700) == 1
-            @entities.push new HealthUpDouble(
-                view.center.x + _.random(-500, 500),
-                view.center.y + _.random(-500, 500)
-            )
-
     kill: (entity) ->
         # sets the entity to be destroyed in updateDeadEntities
         entity.alive = false
-
-    animateHealthBar: () ->
-        # class to add to health and injury bars
-        animation = 'animated rubberBand'
-        # ton of crap to check when animations end
-        animationEnd = 'webkitAnimationEnd mozAnimationEnd MSAnimationEnd oanimationend animationend'
-
-        # add animation to health bar and injury bar
-        @healthBar.addClass(animation)
-        @injuryBar.addClass(animation)
-        @healthBar.one(animationEnd, -> # use '.one' so it will activate, then unbind
-            # remove animation classes from elements
-            $(this).removeClass(animation)
-            $('#injury').removeClass(animation)
-        )
-
-    animateScoreBar: () ->
-        #see comments above in animateHealthBar
-        animation = 'animated rubberBand'
-        animationEnd = 'webkitAnimationEnd mozAnimationEnd MSAnimationEnd oanimationend animationend'
-        @scoreBar.addClass(animation)
-        @scoreBar.one(animationEnd, -> $(this).removeClass(animation))
-
-    spawnAttacker: () ->
-        #creates a new Attacker
-        @entities.push new Attacker(
-            GLOBALS.ATTACKER_SIZE,
-            view.center.x + _.random(-500, 500),
-            view.center.y + _.random(-500, 500),
-            @defender
-        )
 
     fireMahLazarz: () ->
         @defender.timeSinceLazar = 0

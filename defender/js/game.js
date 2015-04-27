@@ -1,23 +1,610 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+var Attacker, Entity, GLOBALS,
+  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+  hasProp = {}.hasOwnProperty;
+
+Entity = require('./Entity.coffee');
+
+GLOBALS = require('../globals.coffee');
+
+Attacker = (function(superClass) {
+  extend(Attacker, superClass);
+
+  function Attacker(size, x, y, target) {
+    Attacker.__super__.constructor.call(this, size, x, y, _.random(-5, 5), _.random(-5, 5));
+    this.rotation = 0;
+    this.target = target;
+    this.type = 'attacker';
+    this.maxVelocity = 10;
+    this.strokeWidth = this.size / 10;
+    this.primaryColor = '#f24e3f';
+    this.accel = 0.1;
+    this.scoreValue = 1;
+    this.makeBody();
+  }
+
+  Attacker.prototype.makeBody = function() {
+    return this.body = new Path({
+      segments: [
+        new Segment({
+          point: [this.pos.x + this.size, this.pos.y - this.size]
+        }), new Segment({
+          point: [this.pos.x - this.size, this.pos.y - this.size]
+        }), new Segment({
+          point: [this.pos.x, this.pos.y + this.size]
+        })
+      ],
+      strokeColor: this.primaryColor,
+      strokeWidth: this.strokeWidth,
+      closed: true
+    });
+  };
+
+  Attacker.prototype.update = function() {
+    this.trackTarget();
+    this.move();
+    return this.updateDirection();
+  };
+
+  Attacker.prototype.trackTarget = function() {
+    if (this.target.pos.x < this.pos.x) {
+      this.v.x -= this.accel;
+    }
+    if (this.target.pos.y < this.pos.y) {
+      this.v.y -= this.accel;
+    }
+    if (this.target.pos.x > this.pos.x) {
+      this.v.x += this.accel;
+    }
+    if (this.target.pos.y > this.pos.y) {
+      return this.v.y += this.accel;
+    }
+  };
+
+  Attacker.prototype.move = function() {
+    this.pos += this.v;
+    return this.body.position = this.pos;
+  };
+
+  Attacker.prototype.rotate = function() {
+    var theta;
+    theta = Math.atan(this.v.y / this.v.x) * (180 / Math.PI) - 90;
+    if (this.v.x < 0) {
+      theta += 180;
+    }
+    if (theta !== this.body.data.rotation) {
+      this.body.rotation = theta;
+    }
+    return this.body.data.rotation = theta;
+  };
+
+  Attacker.prototype.damage = function(type) {
+    if (type === 'laser') {
+      return this.alive = false;
+    }
+  };
+
+  return Attacker;
+
+})(Entity);
+
+module.exports = Attacker;
+
+
+
+},{"../globals.coffee":9,"./Entity.coffee":3}],2:[function(require,module,exports){
+var Defender, Entity, GLOBALS,
+  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+  hasProp = {}.hasOwnProperty;
+
+Entity = require('./Entity.coffee');
+
+GLOBALS = require('../globals.coffee');
+
+Defender = (function(superClass) {
+  extend(Defender, superClass);
+
+  function Defender(x, y) {
+    Defender.__super__.constructor.call(this, GLOBALS.DEFENDER_SIZE, x, y, 0, 0);
+    this.health = this.healthMax = 12;
+    this.score = 0;
+    this.type = 'defender';
+    this.armSize = 1.5;
+    this.strokeWidth = this.size / 7;
+    this.primaryColor = '#00b3ff';
+    this.secondaryColor = '#23e96b';
+    this.maxVelocity = 5;
+    this.accel = 0.5;
+    this.timeSinceDamaged = 0;
+    this.DAMAGE_COOLDOWN = 30;
+    this.timeSinceLazar = 0;
+    this.LAZAR_COOLDOWN = 100;
+    this.lazarRate = 1;
+    this.currentCheckPoint = 0;
+    this.makeBody();
+    this.makeBindings();
+  }
+
+  Defender.prototype.makeBody = function() {
+    this.arm0 = new Path.Line({
+      from: this.pos + this.size,
+      to: this.pos + (this.size * this.armSize),
+      strokeColor: this.secondaryColor,
+      strokeWidth: this.strokeWidth
+    });
+    this.arm1 = new Path.Line({
+      from: [this.pos.x + this.size, this.pos.y - this.size],
+      to: [this.pos.x + (this.size * this.armSize), this.pos.y - (this.size * this.armSize)],
+      strokeColor: this.secondaryColor,
+      strokeWidth: this.strokeWidth
+    });
+    this.arm2 = new Path.Line({
+      from: this.pos - this.size,
+      to: this.pos + (this.size * this.armSize * -1),
+      strokeColor: this.secondaryColor,
+      strokeWidth: this.strokeWidth
+    });
+    this.arm3 = new Path.Line({
+      from: [this.pos.x - this.size, this.pos.y + this.size],
+      to: [this.pos.x - (this.size * this.armSize), this.pos.y + (this.size * this.armSize)],
+      strokeColor: this.secondaryColor,
+      strokeWidth: this.strokeWidth
+    });
+    this.outerCircle = new Path.Circle({
+      center: this.pos,
+      radius: this.size,
+      strokeColor: this.primaryColor,
+      strokeWidth: this.strokeWidth
+    });
+    this.innerCircle = new Path.Circle({
+      center: this.pos,
+      radius: 1,
+      strokeColor: this.secondaryColor,
+      strokeWidth: this.strokeWidth
+    });
+    return this.body = new Group([this.arm0, this.arm1, this.arm2, this.arm3, this.outerCircle, this.innerCircle]);
+  };
+
+  Defender.prototype.makeBindings = function() {
+    var $this;
+    $this = this;
+    GLOBALS.$mainCanvas.on(GLOBALS.ATTACKER_DEATH, function(event, entity) {
+      return $this.onScore(entity);
+    });
+    return GLOBALS.$mainCanvas.on(GLOBALS.DEFENDER_HEALTH_GAIN, function(event, args) {
+      return $this.onHealthGain(args.amount);
+    });
+  };
+
+  Defender.prototype.update = function() {
+    Defender.__super__.update.call(this);
+    this.updateDirection();
+    this.updateStats();
+    return this.updateLazar();
+  };
+
+  Defender.prototype.updateStats = function() {
+    if (this.score > 2) {
+      return this.healthMax = 14;
+    }
+  };
+
+  Defender.prototype.updateLazar = function() {
+    var radius;
+    if (this.timeSinceLazar < this.LAZAR_COOLDOWN) {
+      this.timeSinceLazar += this.lazarRate;
+    }
+    radius = this.size / (this.LAZAR_COOLDOWN / this.timeSinceLazar);
+    this.setInnerCircle(radius);
+    if (this.timeSinceDamaged < this.DAMAGE_COOLDOWN) {
+      return this.timeSinceDamaged += 1;
+    }
+  };
+
+  Defender.prototype.move = function() {
+    this.pos += this.v;
+    return this.body.position = this.pos;
+  };
+
+  Defender.prototype.rotate = function() {
+    return this.body.rotate(0.6);
+  };
+
+  Defender.prototype.damage = function(type) {
+    if (type === 'attacker' && this.timeSinceDamaged === this.DAMAGE_COOLDOWN) {
+      this.health--;
+      this.timeSinceDamaged = 0;
+      return this.timeSinceLazar = 0;
+    }
+  };
+
+  Defender.prototype.canFireMahLazarz = function() {
+    if (this.timeSinceLazar >= this.LAZAR_COOLDOWN) {
+      return true;
+    } else {
+      return false;
+    }
+  };
+
+  Defender.prototype.setInnerCircle = function(radius) {
+    this.innerCircle.remove();
+    return this.innerCircle = new Path.Circle({
+      center: this.pos,
+      radius: radius,
+      strokeColor: this.secondaryColor,
+      strokeWidth: this.strokeWidth
+    });
+  };
+
+  Defender.prototype.raiseHealth = function() {
+    this.maxHealth += 2;
+    return GLOBALS.$mainCanvas.trigger(GLOBALS.MAX_HEALTH_GAIN);
+  };
+
+  Defender.prototype.onScore = function(entity) {
+    this.score += entity.scoreValue;
+    if (this.score % 10 === 0) {
+      return this.raiseHealth();
+    }
+  };
+
+  Defender.prototype.onHealthGain = function(amount) {
+    if (this.health < this.healthMax) {
+      return this.health += amount;
+    }
+  };
+
+  return Defender;
+
+})(Entity);
+
+module.exports = Defender;
+
+
+
+},{"../globals.coffee":9,"./Entity.coffee":3}],3:[function(require,module,exports){
+var Entity, GLOBALS;
+
+GLOBALS = require('../globals.coffee');
+
+Entity = (function() {
+  function Entity(size, x, y, vx, vy) {
+    this.size = size;
+    this.pos = new Point(x, y);
+    this.v = new Point(vx, vy);
+    this.alive = true;
+    this.primaryColor = '#bab8b5';
+  }
+
+  Entity.prototype.updateDirection = function() {};
+
+  Entity.prototype.update = function() {
+    this.move();
+    return this.rotate();
+  };
+
+  Entity.prototype.makeBody = function() {
+    return this.body = new Path.Circle({
+      center: [this.pos.x, this.pos.y],
+      radius: this.size,
+      strokeColor: this.strokeColor
+    });
+  };
+
+  Entity.prototype.limitVelocity = function() {
+    if (v.x > this.maxVelocity) {
+      v.x = this.maxVelocity;
+    }
+    if (v.x < -this.maxVelocity) {
+      v.x = -this.maxVelocity;
+    }
+    if (v.y > this.maxVelocity) {
+      v.y = this.maxVelocity;
+    }
+    if (v.y < -this.maxVelocity) {
+      return v.y = -this.maxVelocity;
+    }
+  };
+
+  Entity.prototype.damage = function(type) {};
+
+  Entity.prototype.move = function() {
+    this.pos += this.v;
+    return this.body.position = this.pos;
+  };
+
+  Entity.prototype.rotate = function() {};
+
+  return Entity;
+
+})();
+
+module.exports = Entity;
+
+
+
+},{"../globals.coffee":9}],4:[function(require,module,exports){
+var Entity, GLOBALS, Laser,
+  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+  hasProp = {}.hasOwnProperty;
+
+Entity = require('./Entity.coffee');
+
+GLOBALS = require('../globals.coffee');
+
+Laser = (function(superClass) {
+  extend(Laser, superClass);
+
+  function Laser(num, defender) {
+    var vx, vy;
+    this.num = num;
+    this.defender = defender;
+    this.reference = this.defender['arm' + this.num];
+    this.from = this.reference.segments[0].point;
+    this.to = this.reference.segments[1].point;
+    vx = (this.to.x - this.from.x) / 2;
+    vy = (this.to.y - this.from.y) / 2;
+    Laser.__super__.constructor.call(this, GLOBALS.LASER_SIZE, this.reference.position.x, this.reference.position.y, vx, vy);
+    this.primaryColor = '#23e96b';
+    this.type = 'laser';
+    this.magnitude = 15;
+    this.makeBody();
+  }
+
+  Laser.prototype.makeBody = function() {
+    this.pos.x = this.reference.position.x;
+    this.pos.y = this.reference.position.y;
+    return this.body = new Path.Line({
+      from: [this.from.x, this.from.y],
+      to: [this.to.x, this.to.y],
+      strokeColor: this.primaryColor,
+      strokeWidth: GLOBALS.DEFENDER_SIZE / 7
+    });
+  };
+
+  Laser.prototype.update = function() {
+    return this.move();
+  };
+
+  Laser.prototype.damage = function(type) {
+    if (type === 'true') {
+      return this.alive = false;
+    }
+  };
+
+  return Laser;
+
+})(Entity);
+
+module.exports = Laser;
+
+
+
+},{"../globals.coffee":9,"./Entity.coffee":3}],5:[function(require,module,exports){
+var GLOBALS, HealthUp, Powerup,
+  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+  hasProp = {}.hasOwnProperty;
+
+Powerup = require('./Powerup.coffee');
+
+GLOBALS = require('../../globals.coffee');
+
+HealthUp = (function(superClass) {
+  extend(HealthUp, superClass);
+
+  function HealthUp(x, y) {
+    HealthUp.__super__.constructor.call(this, x, y);
+    this.makeBody();
+  }
+
+  HealthUp.prototype.trigger = GLOBALS.DEFENDER_HEALTH_GAIN;
+
+  HealthUp.prototype.args = {
+    amount: 1
+  };
+
+  HealthUp.prototype.makeBody = function() {
+    return this.body = new PointText({
+      point: [this.pos.x, this.pos.y],
+      content: '♡',
+      fillColor: '#f24e3f',
+      fontFamily: 'Courier New',
+      fontSize: 25
+    });
+  };
+
+  return HealthUp;
+
+})(Powerup);
+
+module.exports = HealthUp;
+
+
+
+},{"../../globals.coffee":9,"./Powerup.coffee":8}],6:[function(require,module,exports){
+var GLOBALS, HealthUpDouble, Powerup,
+  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+  hasProp = {}.hasOwnProperty;
+
+Powerup = require('./Powerup.coffee');
+
+GLOBALS = require('../../globals.coffee');
+
+HealthUpDouble = (function(superClass) {
+  extend(HealthUpDouble, superClass);
+
+  function HealthUpDouble(x, y) {
+    HealthUpDouble.__super__.constructor.call(this, x, y);
+    this.makeBody();
+  }
+
+  HealthUpDouble.prototype.trigger = GLOBALS.DEFENDER_HEALTH_GAIN;
+
+  HealthUpDouble.prototype.args = {
+    amount: 2
+  };
+
+  HealthUpDouble.prototype.makeBody = function() {
+    this.heart1 = new PointText({
+      point: [this.pos.x, this.pos.y],
+      content: '♡',
+      fillColor: '#f24e3f',
+      fontFamily: 'Courier New',
+      fontSize: 25
+    });
+    this.heart2 = new PointText({
+      point: [this.pos.x + 7, this.pos.y - 7],
+      content: '♡',
+      fillColor: '#f24e3f',
+      fontFamily: 'Courier New',
+      fontSize: 25
+    });
+    return this.body = new Group([this.heart1, this.heart2]);
+  };
+
+  return HealthUpDouble;
+
+})(Powerup);
+
+module.exports = HealthUpDouble;
+
+
+
+},{"../../globals.coffee":9,"./Powerup.coffee":8}],7:[function(require,module,exports){
+var GLOBALS, InvulnerableUp, Powerup,
+  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+  hasProp = {}.hasOwnProperty;
+
+Powerup = require('./Powerup.coffee');
+
+GLOBALS = require('../../globals.coffee');
+
+InvulnerableUp = (function(superClass) {
+  extend(InvulnerableUp, superClass);
+
+  function InvulnerableUp(x, y) {
+    InvulnerableUp.__super__.constructor.call(this, x, y);
+    this.makeBody();
+  }
+
+  InvulnerableUp.prototype.trigger = GLOBALS.DEFENDER_INVULNERABLE;
+
+  InvulnerableUp.prototype.args = {
+    updates: 200
+  };
+
+  InvulnerableUp.prototype.makeBody = function() {
+    return this.body = new PointText({
+      point: [this.pos.x + 7, this.pos.y - 7],
+      content: '★',
+      fillColor: '#f1d317',
+      fontFamily: 'Courier New',
+      fontSize: 25
+    });
+  };
+
+  return InvulnerableUp;
+
+})(Powerup);
+
+module.exports = InvulnerableUp;
+
+
+
+},{"../../globals.coffee":9,"./Powerup.coffee":8}],8:[function(require,module,exports){
+var Entity, GLOBALS, Powerup,
+  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+  hasProp = {}.hasOwnProperty;
+
+Entity = require('../Entity.coffee');
+
+GLOBALS = require('../../globals.coffee');
+
+Powerup = (function(superClass) {
+  extend(Powerup, superClass);
+
+  function Powerup(x, y) {
+    Powerup.__super__.constructor.call(this, GLOBALS.POWERUP_SIZE, x, y, 0, 0);
+  }
+
+  Powerup.prototype.type = 'powerup';
+
+  Powerup.prototype.trigger = 'nothing';
+
+  Powerup.prototype.args = {};
+
+  Powerup.prototype.makeBody = function() {
+    return this.body = new PointText({
+      point: [50, 50],
+      content: 'P',
+      fillColor: 'white',
+      fontFamily: 'Courier New',
+      fontSize: 25
+    });
+  };
+
+  Powerup.prototype.damage = function(type) {
+    if (type === 'laser' || type === 'defender') {
+      GLOBALS.$mainCanvas.trigger(this.trigger, this.args);
+      return this.alive = false;
+    }
+  };
+
+  return Powerup;
+
+})(Entity);
+
+module.exports = Powerup;
+
+
+
+},{"../../globals.coffee":9,"../Entity.coffee":3}],9:[function(require,module,exports){
+module.exports = {
+  $mainCanvas: $('#mainCanvas'),
+  ATTACKER_DEATH: 'attacker-death',
+  MAX_HEALTH_GAIN: 'maxHealth-gain',
+  DEFENDER_HEALTH_GAIN: 'defender-health-gain',
+  DEFENDER_INVULNERABLE: 'defender-invulnerable',
+  DEFENDER_DAMAGED: 'defender-damaged',
+  FRICTION: 0.6,
+  SPRING: 0.6,
+  DEFENDER_SIZE: $(window).width() / 50,
+  ATTACKER_SIZE: $(window).width() / 50,
+  LASER_SIZE: $(window).width() / 60,
+  POWERUP_SIZE: $(window).width() / 65
+};
+
+
+
+},{}],10:[function(require,module,exports){
+var Game, game;
+
+Game = require('./screens/Game.coffee');
+
+game = new Game();
+
+
+
+},{"./screens/Game.coffee":11}],11:[function(require,module,exports){
 var Attacker, Defender, GLOBALS, Game, HealthUp, HealthUpDouble, InvulnerableUp, Laser;
 
 String.prototype.repeat = function(num) {
   return new Array(num + 1).join(this);
 };
 
-Defender = require('./entities/Defender.coffee');
+Defender = require('../entities/Defender.coffee');
 
-Attacker = require('./entities/Attacker.coffee');
+Attacker = require('../entities/Attacker.coffee');
 
-Laser = require('./entities/Laser.coffee');
+Laser = require('../entities/Laser.coffee');
 
-HealthUp = require('./entities/powerups/HealthUp.coffee');
+HealthUp = require('../entities/powerups/HealthUp.coffee');
 
-HealthUpDouble = require('./entities/powerups/HealthUpDouble.coffee');
+HealthUpDouble = require('../entities/powerups/HealthUpDouble.coffee');
 
-InvulnerableUp = require('./entities/powerups/InvulnerableUp.coffee');
+InvulnerableUp = require('../entities/powerups/InvulnerableUp.coffee');
 
-GLOBALS = require('./globals.coffee');
+GLOBALS = require('../globals.coffee');
 
 Game = (function() {
   function Game() {
@@ -323,591 +910,4 @@ module.exports = Game;
 
 
 
-},{"./entities/Attacker.coffee":2,"./entities/Defender.coffee":3,"./entities/Laser.coffee":5,"./entities/powerups/HealthUp.coffee":6,"./entities/powerups/HealthUpDouble.coffee":7,"./entities/powerups/InvulnerableUp.coffee":8,"./globals.coffee":10}],2:[function(require,module,exports){
-var Attacker, Entity, GLOBALS,
-  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-  hasProp = {}.hasOwnProperty;
-
-Entity = require('./Entity.coffee');
-
-GLOBALS = require('../globals.coffee');
-
-Attacker = (function(superClass) {
-  extend(Attacker, superClass);
-
-  function Attacker(size, x, y, target) {
-    Attacker.__super__.constructor.call(this, size, x, y, _.random(-5, 5), _.random(-5, 5));
-    this.rotation = 0;
-    this.target = target;
-    this.type = 'attacker';
-    this.maxVelocity = 10;
-    this.strokeWidth = this.size / 10;
-    this.primaryColor = '#f24e3f';
-    this.accel = 0.1;
-    this.scoreValue = 1;
-    this.makeBody();
-  }
-
-  Attacker.prototype.makeBody = function() {
-    return this.body = new Path({
-      segments: [
-        new Segment({
-          point: [this.pos.x + this.size, this.pos.y - this.size]
-        }), new Segment({
-          point: [this.pos.x - this.size, this.pos.y - this.size]
-        }), new Segment({
-          point: [this.pos.x, this.pos.y + this.size]
-        })
-      ],
-      strokeColor: this.primaryColor,
-      strokeWidth: this.strokeWidth,
-      closed: true
-    });
-  };
-
-  Attacker.prototype.update = function() {
-    this.trackTarget();
-    this.move();
-    return this.updateDirection();
-  };
-
-  Attacker.prototype.trackTarget = function() {
-    if (this.target.pos.x < this.pos.x) {
-      this.v.x -= this.accel;
-    }
-    if (this.target.pos.y < this.pos.y) {
-      this.v.y -= this.accel;
-    }
-    if (this.target.pos.x > this.pos.x) {
-      this.v.x += this.accel;
-    }
-    if (this.target.pos.y > this.pos.y) {
-      return this.v.y += this.accel;
-    }
-  };
-
-  Attacker.prototype.move = function() {
-    this.pos += this.v;
-    return this.body.position = this.pos;
-  };
-
-  Attacker.prototype.rotate = function() {
-    var theta;
-    theta = Math.atan(this.v.y / this.v.x) * (180 / Math.PI) - 90;
-    if (this.v.x < 0) {
-      theta += 180;
-    }
-    if (theta !== this.body.data.rotation) {
-      this.body.rotation = theta;
-    }
-    return this.body.data.rotation = theta;
-  };
-
-  Attacker.prototype.damage = function(type) {
-    if (type === 'laser') {
-      return this.alive = false;
-    }
-  };
-
-  return Attacker;
-
-})(Entity);
-
-module.exports = Attacker;
-
-
-
-},{"../globals.coffee":10,"./Entity.coffee":4}],3:[function(require,module,exports){
-var Defender, Entity, GLOBALS,
-  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-  hasProp = {}.hasOwnProperty;
-
-Entity = require('./Entity.coffee');
-
-GLOBALS = require('../globals.coffee');
-
-Defender = (function(superClass) {
-  extend(Defender, superClass);
-
-  function Defender(x, y) {
-    Defender.__super__.constructor.call(this, GLOBALS.DEFENDER_SIZE, x, y, 0, 0);
-    this.health = this.healthMax = 12;
-    this.score = 0;
-    this.type = 'defender';
-    this.armSize = 1.5;
-    this.strokeWidth = this.size / 7;
-    this.primaryColor = '#00b3ff';
-    this.secondaryColor = '#23e96b';
-    this.maxVelocity = 5;
-    this.accel = 0.5;
-    this.timeSinceDamaged = 0;
-    this.DAMAGE_COOLDOWN = 30;
-    this.timeSinceLazar = 0;
-    this.LAZAR_COOLDOWN = 100;
-    this.lazarRate = 1;
-    this.currentCheckPoint = 0;
-    this.makeBody();
-    this.makeBindings();
-  }
-
-  Defender.prototype.makeBody = function() {
-    this.arm0 = new Path.Line({
-      from: this.pos + this.size,
-      to: this.pos + (this.size * this.armSize),
-      strokeColor: this.secondaryColor,
-      strokeWidth: this.strokeWidth
-    });
-    this.arm1 = new Path.Line({
-      from: [this.pos.x + this.size, this.pos.y - this.size],
-      to: [this.pos.x + (this.size * this.armSize), this.pos.y - (this.size * this.armSize)],
-      strokeColor: this.secondaryColor,
-      strokeWidth: this.strokeWidth
-    });
-    this.arm2 = new Path.Line({
-      from: this.pos - this.size,
-      to: this.pos + (this.size * this.armSize * -1),
-      strokeColor: this.secondaryColor,
-      strokeWidth: this.strokeWidth
-    });
-    this.arm3 = new Path.Line({
-      from: [this.pos.x - this.size, this.pos.y + this.size],
-      to: [this.pos.x - (this.size * this.armSize), this.pos.y + (this.size * this.armSize)],
-      strokeColor: this.secondaryColor,
-      strokeWidth: this.strokeWidth
-    });
-    this.outerCircle = new Path.Circle({
-      center: this.pos,
-      radius: this.size,
-      strokeColor: this.primaryColor,
-      strokeWidth: this.strokeWidth
-    });
-    this.innerCircle = new Path.Circle({
-      center: this.pos,
-      radius: 1,
-      strokeColor: this.secondaryColor,
-      strokeWidth: this.strokeWidth
-    });
-    return this.body = new Group([this.arm0, this.arm1, this.arm2, this.arm3, this.outerCircle, this.innerCircle]);
-  };
-
-  Defender.prototype.makeBindings = function() {
-    var $this;
-    $this = this;
-    GLOBALS.$mainCanvas.on(GLOBALS.ATTACKER_DEATH, function(event, entity) {
-      return $this.onScore(entity);
-    });
-    return GLOBALS.$mainCanvas.on(GLOBALS.DEFENDER_HEALTH_GAIN, function(event, args) {
-      return $this.onHealthGain(args.amount);
-    });
-  };
-
-  Defender.prototype.update = function() {
-    Defender.__super__.update.call(this);
-    this.updateDirection();
-    this.updateStats();
-    return this.updateLazar();
-  };
-
-  Defender.prototype.updateStats = function() {
-    if (this.score > 2) {
-      return this.healthMax = 14;
-    }
-  };
-
-  Defender.prototype.updateLazar = function() {
-    var radius;
-    if (this.timeSinceLazar < this.LAZAR_COOLDOWN) {
-      this.timeSinceLazar += this.lazarRate;
-    }
-    radius = this.size / (this.LAZAR_COOLDOWN / this.timeSinceLazar);
-    this.setInnerCircle(radius);
-    if (this.timeSinceDamaged < this.DAMAGE_COOLDOWN) {
-      return this.timeSinceDamaged += 1;
-    }
-  };
-
-  Defender.prototype.move = function() {
-    this.pos += this.v;
-    return this.body.position = this.pos;
-  };
-
-  Defender.prototype.rotate = function() {
-    return this.body.rotate(0.6);
-  };
-
-  Defender.prototype.damage = function(type) {
-    if (type === 'attacker' && this.timeSinceDamaged === this.DAMAGE_COOLDOWN) {
-      this.health--;
-      this.timeSinceDamaged = 0;
-      return this.timeSinceLazar = 0;
-    }
-  };
-
-  Defender.prototype.canFireMahLazarz = function() {
-    if (this.timeSinceLazar >= this.LAZAR_COOLDOWN) {
-      return true;
-    } else {
-      return false;
-    }
-  };
-
-  Defender.prototype.setInnerCircle = function(radius) {
-    this.innerCircle.remove();
-    return this.innerCircle = new Path.Circle({
-      center: this.pos,
-      radius: radius,
-      strokeColor: this.secondaryColor,
-      strokeWidth: this.strokeWidth
-    });
-  };
-
-  Defender.prototype.raiseHealth = function() {
-    this.maxHealth += 2;
-    return GLOBALS.$mainCanvas.trigger(GLOBALS.MAX_HEALTH_GAIN);
-  };
-
-  Defender.prototype.onScore = function(entity) {
-    this.score += entity.scoreValue;
-    if (this.score % 10 === 0) {
-      return this.raiseHealth();
-    }
-  };
-
-  Defender.prototype.onHealthGain = function(amount) {
-    if (this.health < this.healthMax) {
-      return this.health += amount;
-    }
-  };
-
-  return Defender;
-
-})(Entity);
-
-module.exports = Defender;
-
-
-
-},{"../globals.coffee":10,"./Entity.coffee":4}],4:[function(require,module,exports){
-var Entity, GLOBALS;
-
-GLOBALS = require('../globals.coffee');
-
-Entity = (function() {
-  function Entity(size, x, y, vx, vy) {
-    this.size = size;
-    this.pos = new Point(x, y);
-    this.v = new Point(vx, vy);
-    this.alive = true;
-    this.primaryColor = '#bab8b5';
-  }
-
-  Entity.prototype.updateDirection = function() {};
-
-  Entity.prototype.update = function() {
-    this.move();
-    return this.rotate();
-  };
-
-  Entity.prototype.makeBody = function() {
-    return this.body = new Path.Circle({
-      center: [this.pos.x, this.pos.y],
-      radius: this.size,
-      strokeColor: this.strokeColor
-    });
-  };
-
-  Entity.prototype.limitVelocity = function() {
-    if (v.x > this.maxVelocity) {
-      v.x = this.maxVelocity;
-    }
-    if (v.x < -this.maxVelocity) {
-      v.x = -this.maxVelocity;
-    }
-    if (v.y > this.maxVelocity) {
-      v.y = this.maxVelocity;
-    }
-    if (v.y < -this.maxVelocity) {
-      return v.y = -this.maxVelocity;
-    }
-  };
-
-  Entity.prototype.damage = function(type) {};
-
-  Entity.prototype.move = function() {
-    this.pos += this.v;
-    return this.body.position = this.pos;
-  };
-
-  Entity.prototype.rotate = function() {};
-
-  return Entity;
-
-})();
-
-module.exports = Entity;
-
-
-
-},{"../globals.coffee":10}],5:[function(require,module,exports){
-var Entity, GLOBALS, Laser,
-  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-  hasProp = {}.hasOwnProperty;
-
-Entity = require('./Entity.coffee');
-
-GLOBALS = require('../globals.coffee');
-
-Laser = (function(superClass) {
-  extend(Laser, superClass);
-
-  function Laser(num, defender) {
-    var vx, vy;
-    this.num = num;
-    this.defender = defender;
-    this.reference = this.defender['arm' + this.num];
-    this.from = this.reference.segments[0].point;
-    this.to = this.reference.segments[1].point;
-    vx = (this.to.x - this.from.x) / 2;
-    vy = (this.to.y - this.from.y) / 2;
-    Laser.__super__.constructor.call(this, GLOBALS.LASER_SIZE, this.reference.position.x, this.reference.position.y, vx, vy);
-    this.primaryColor = '#23e96b';
-    this.type = 'laser';
-    this.magnitude = 15;
-    this.makeBody();
-  }
-
-  Laser.prototype.makeBody = function() {
-    this.pos.x = this.reference.position.x;
-    this.pos.y = this.reference.position.y;
-    return this.body = new Path.Line({
-      from: [this.from.x, this.from.y],
-      to: [this.to.x, this.to.y],
-      strokeColor: this.primaryColor,
-      strokeWidth: GLOBALS.DEFENDER_SIZE / 7
-    });
-  };
-
-  Laser.prototype.update = function() {
-    return this.move();
-  };
-
-  Laser.prototype.damage = function(type) {
-    if (type === 'true') {
-      return this.alive = false;
-    }
-  };
-
-  return Laser;
-
-})(Entity);
-
-module.exports = Laser;
-
-
-
-},{"../globals.coffee":10,"./Entity.coffee":4}],6:[function(require,module,exports){
-var GLOBALS, HealthUp, Powerup,
-  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-  hasProp = {}.hasOwnProperty;
-
-Powerup = require('./Powerup.coffee');
-
-GLOBALS = require('../../globals.coffee');
-
-HealthUp = (function(superClass) {
-  extend(HealthUp, superClass);
-
-  function HealthUp(x, y) {
-    HealthUp.__super__.constructor.call(this, x, y);
-    this.makeBody();
-  }
-
-  HealthUp.prototype.trigger = GLOBALS.DEFENDER_HEALTH_GAIN;
-
-  HealthUp.prototype.args = {
-    amount: 1
-  };
-
-  HealthUp.prototype.makeBody = function() {
-    return this.body = new PointText({
-      point: [this.pos.x, this.pos.y],
-      content: '♡',
-      fillColor: '#f24e3f',
-      fontFamily: 'Courier New',
-      fontSize: 25
-    });
-  };
-
-  return HealthUp;
-
-})(Powerup);
-
-module.exports = HealthUp;
-
-
-
-},{"../../globals.coffee":10,"./Powerup.coffee":9}],7:[function(require,module,exports){
-var GLOBALS, HealthUpDouble, Powerup,
-  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-  hasProp = {}.hasOwnProperty;
-
-Powerup = require('./Powerup.coffee');
-
-GLOBALS = require('../../globals.coffee');
-
-HealthUpDouble = (function(superClass) {
-  extend(HealthUpDouble, superClass);
-
-  function HealthUpDouble(x, y) {
-    HealthUpDouble.__super__.constructor.call(this, x, y);
-    this.makeBody();
-  }
-
-  HealthUpDouble.prototype.trigger = GLOBALS.DEFENDER_HEALTH_GAIN;
-
-  HealthUpDouble.prototype.args = {
-    amount: 2
-  };
-
-  HealthUpDouble.prototype.makeBody = function() {
-    this.heart1 = new PointText({
-      point: [this.pos.x, this.pos.y],
-      content: '♡',
-      fillColor: '#f24e3f',
-      fontFamily: 'Courier New',
-      fontSize: 25
-    });
-    this.heart2 = new PointText({
-      point: [this.pos.x + 7, this.pos.y - 7],
-      content: '♡',
-      fillColor: '#f24e3f',
-      fontFamily: 'Courier New',
-      fontSize: 25
-    });
-    return this.body = new Group([this.heart1, this.heart2]);
-  };
-
-  return HealthUpDouble;
-
-})(Powerup);
-
-module.exports = HealthUpDouble;
-
-
-
-},{"../../globals.coffee":10,"./Powerup.coffee":9}],8:[function(require,module,exports){
-var GLOBALS, InvulnerableUp, Powerup,
-  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-  hasProp = {}.hasOwnProperty;
-
-Powerup = require('./Powerup.coffee');
-
-GLOBALS = require('../../globals.coffee');
-
-InvulnerableUp = (function(superClass) {
-  extend(InvulnerableUp, superClass);
-
-  function InvulnerableUp(x, y) {
-    InvulnerableUp.__super__.constructor.call(this, x, y);
-    this.makeBody();
-  }
-
-  InvulnerableUp.prototype.trigger = GLOBALS.DEFENDER_INVULNERABLE;
-
-  InvulnerableUp.prototype.args = {
-    updates: 200
-  };
-
-  InvulnerableUp.prototype.makeBody = function() {
-    return this.body = new PointText({
-      point: [this.pos.x + 7, this.pos.y - 7],
-      content: '★',
-      fillColor: '#f1d317',
-      fontFamily: 'Courier New',
-      fontSize: 25
-    });
-  };
-
-  return InvulnerableUp;
-
-})(Powerup);
-
-module.exports = InvulnerableUp;
-
-
-
-},{"../../globals.coffee":10,"./Powerup.coffee":9}],9:[function(require,module,exports){
-var Entity, GLOBALS, Powerup,
-  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-  hasProp = {}.hasOwnProperty;
-
-Entity = require('../Entity.coffee');
-
-GLOBALS = require('../../globals.coffee');
-
-Powerup = (function(superClass) {
-  extend(Powerup, superClass);
-
-  function Powerup(x, y) {
-    Powerup.__super__.constructor.call(this, GLOBALS.POWERUP_SIZE, x, y, 0, 0);
-  }
-
-  Powerup.prototype.type = 'powerup';
-
-  Powerup.prototype.trigger = 'nothing';
-
-  Powerup.prototype.args = {};
-
-  Powerup.prototype.makeBody = function() {
-    return this.body = new PointText({
-      point: [50, 50],
-      content: 'P',
-      fillColor: 'white',
-      fontFamily: 'Courier New',
-      fontSize: 25
-    });
-  };
-
-  Powerup.prototype.damage = function(type) {
-    if (type === 'laser' || type === 'defender') {
-      GLOBALS.$mainCanvas.trigger(this.trigger, this.args);
-      return this.alive = false;
-    }
-  };
-
-  return Powerup;
-
-})(Entity);
-
-module.exports = Powerup;
-
-
-
-},{"../../globals.coffee":10,"../Entity.coffee":4}],10:[function(require,module,exports){
-module.exports = {
-  $mainCanvas: $('#mainCanvas'),
-  ATTACKER_DEATH: 'attacker-death',
-  MAX_HEALTH_GAIN: 'maxHealth-gain',
-  DEFENDER_HEALTH_GAIN: 'defender-health-gain',
-  DEFENDER_INVULNERABLE: 'defender-invulnerable',
-  DEFENDER_DAMAGED: 'defender-damaged',
-  FRICTION: 0.6,
-  SPRING: 0.6,
-  DEFENDER_SIZE: $(window).width() / 50,
-  ATTACKER_SIZE: $(window).width() / 50,
-  LASER_SIZE: $(window).width() / 60,
-  POWERUP_SIZE: $(window).width() / 65
-};
-
-
-
-},{}],11:[function(require,module,exports){
-var Game, game;
-
-Game = require('./Game.coffee');
-
-game = new Game();
-
-
-
-},{"./Game.coffee":1}]},{},[11]);
+},{"../entities/Attacker.coffee":1,"../entities/Defender.coffee":2,"../entities/Laser.coffee":4,"../entities/powerups/HealthUp.coffee":5,"../entities/powerups/HealthUpDouble.coffee":6,"../entities/powerups/InvulnerableUp.coffee":7,"../globals.coffee":9}]},{},[10]);

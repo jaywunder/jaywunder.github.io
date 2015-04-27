@@ -1,4 +1,4 @@
-Game = require './screens/Game.coffee'
+Game = require './screens/GameScreen.coffee'
 
 game = new Game()
 

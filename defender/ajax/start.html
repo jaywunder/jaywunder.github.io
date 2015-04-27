@@ -1,8 +1,7 @@
 <div id="startContent">
     <div class="wrapper">
-        <canvas id="mainCanvas" resize></canvas>
+        <canvas id="startCanvas" resize></canvas>
     </div>
-    <!-- // <script src="js/loading.js"></script> -->
     <div class="wrapper">
         <div>
             <ul class="centered startUl">
@@ -21,7 +20,7 @@
     </div>
     <script type="text/javascript">
         $(document).ready(function () {
-            elem = '<script id="paper" type="text/paperscript" src="js/start.js" canvas="mainCanvas"><\/script>';
+            elem = '<script id="paper" type="text/paperscript" src="js/start.js" canvas="startCanvas"><\/script>';
             setTimeout(function() {
                 $('head').append(elem);
                 paper.PaperScript.load(); // <-- The fix!
