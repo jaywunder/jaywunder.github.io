@@ -39,7 +39,7 @@ var Instruments = {
         sustain: 0.2,
         hold: 0.015,
         release: 0.3
-      }, 
+      },
       filter: {
         type: 'lowpass',
         frequency: 1200,
@@ -61,7 +61,7 @@ var Instruments = {
         sustain: 0.5,
         hold: 2.5,
         release: 0.3
-      }, 
+      },
       filter: {
         type: 'lowpass',
         frequency: 600,
@@ -70,13 +70,12 @@ var Instruments = {
           attack: 0.7,
           frequency: 1600
         }
-      }, 
+      },
       vibrato: {
-        attack: 8, 
-        speed: 8, 
-        magnitude: 100 
+        attack: 8,
+        speed: 8,
+        magnitude: 100
       }
     }),
   },
 };
-
