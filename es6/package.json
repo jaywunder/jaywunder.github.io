@@ -1,19 +1,17 @@
 {
-  "name": "music",
+  "name": "es6",
   "version": "1.0.0",
-  "description": "Music Cube",
-  "main": "index.js",
+  "description": "testing babel",
+  "main": "app.js",
   "scripts": {
     "test": "echo 'nope'"
   },
   "repository": {
     "type": "git",
-    "url": "jaywunder/jaywunder.github.io/music"
+    "url": "jaywunder/jaywunder.github.io/es6"
   },
   "keywords": [
-    "music",
-    "lalalala",
-    "cubes"
+    "babel"
   ],
   "author": "Jacob Wunder",
   "license": "MIT",
