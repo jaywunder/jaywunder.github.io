@@ -27,11 +27,10 @@ let beat = GLOBALS.beat
 function foo() {
   let song = generators.instrumentGenerator({type: 'piano'})
   for (let note of song) {
-    console.log( note );
-    // console.log('note');
-    // piano.play(note);
+    console.log(note);
+    piano.play(note);
   }
-  // piano.play({pitch: 'C#4'});
+  piano.play({pitch: 'C#4'});
 }
 
 $('#playButton').on('click', () => foo())
