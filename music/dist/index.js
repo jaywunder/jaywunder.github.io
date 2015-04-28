@@ -155,6 +155,193 @@ Array.prototype.enumerate = regeneratorRuntime.mark(function callee$0$1() {
     }
   }, callee$0$1, this);
 });
+Array.prototype.enumerate3D = regeneratorRuntime.mark(function callee$0$2() {
+  var _iteratorNormalCompletion, _didIteratorError, _iteratorError, _iterator, _step, x, _iteratorNormalCompletion2, _didIteratorError2, _iteratorError2, _iterator2, _step2, y, _iteratorNormalCompletion3, _didIteratorError3, _iteratorError3, _iterator3, _step3, z;
+
+  return regeneratorRuntime.wrap(function callee$0$2$(context$1$0) {
+    while (1) switch (context$1$0.prev = context$1$0.next) {
+      case 0:
+        if (this[0][0][0]) {
+          context$1$0.next = 2;
+          break;
+        }
+
+        throw 'not a 3D array';
+
+      case 2:
+        _iteratorNormalCompletion = true;
+        _didIteratorError = false;
+        _iteratorError = undefined;
+        context$1$0.prev = 5;
+        _iterator = Number.range(this.length)[Symbol.iterator]();
+
+      case 7:
+        if (_iteratorNormalCompletion = (_step = _iterator.next()).done) {
+          context$1$0.next = 62;
+          break;
+        }
+
+        x = _step.value;
+        _iteratorNormalCompletion2 = true;
+        _didIteratorError2 = false;
+        _iteratorError2 = undefined;
+        context$1$0.prev = 12;
+        _iterator2 = Number.range(this[x].length)[Symbol.iterator]();
+
+      case 14:
+        if (_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done) {
+          context$1$0.next = 45;
+          break;
+        }
+
+        y = _step2.value;
+        _iteratorNormalCompletion3 = true;
+        _didIteratorError3 = false;
+        _iteratorError3 = undefined;
+        context$1$0.prev = 19;
+        _iterator3 = Number.range(this[x][y].length)[Symbol.iterator]();
+
+      case 21:
+        if (_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done) {
+          context$1$0.next = 28;
+          break;
+        }
+
+        z = _step3.value;
+        context$1$0.next = 25;
+        return [x + this[x].length * (y + this[x][y].length * z), this.get3D(x, y, z)];
+
+      case 25:
+        _iteratorNormalCompletion3 = true;
+        context$1$0.next = 21;
+        break;
+
+      case 28:
+        context$1$0.next = 34;
+        break;
+
+      case 30:
+        context$1$0.prev = 30;
+        context$1$0.t19 = context$1$0['catch'](19);
+        _didIteratorError3 = true;
+        _iteratorError3 = context$1$0.t19;
+
+      case 34:
+        context$1$0.prev = 34;
+        context$1$0.prev = 35;
+
+        if (!_iteratorNormalCompletion3 && _iterator3['return']) {
+          _iterator3['return']();
+        }
+
+      case 37:
+        context$1$0.prev = 37;
+
+        if (!_didIteratorError3) {
+          context$1$0.next = 40;
+          break;
+        }
+
+        throw _iteratorError3;
+
+      case 40:
+        return context$1$0.finish(37);
+
+      case 41:
+        return context$1$0.finish(34);
+
+      case 42:
+        _iteratorNormalCompletion2 = true;
+        context$1$0.next = 14;
+        break;
+
+      case 45:
+        context$1$0.next = 51;
+        break;
+
+      case 47:
+        context$1$0.prev = 47;
+        context$1$0.t20 = context$1$0['catch'](12);
+        _didIteratorError2 = true;
+        _iteratorError2 = context$1$0.t20;
+
+      case 51:
+        context$1$0.prev = 51;
+        context$1$0.prev = 52;
+
+        if (!_iteratorNormalCompletion2 && _iterator2['return']) {
+          _iterator2['return']();
+        }
+
+      case 54:
+        context$1$0.prev = 54;
+
+        if (!_didIteratorError2) {
+          context$1$0.next = 57;
+          break;
+        }
+
+        throw _iteratorError2;
+
+      case 57:
+        return context$1$0.finish(54);
+
+      case 58:
+        return context$1$0.finish(51);
+
+      case 59:
+        _iteratorNormalCompletion = true;
+        context$1$0.next = 7;
+        break;
+
+      case 62:
+        context$1$0.next = 68;
+        break;
+
+      case 64:
+        context$1$0.prev = 64;
+        context$1$0.t21 = context$1$0['catch'](5);
+        _didIteratorError = true;
+        _iteratorError = context$1$0.t21;
+
+      case 68:
+        context$1$0.prev = 68;
+        context$1$0.prev = 69;
+
+        if (!_iteratorNormalCompletion && _iterator['return']) {
+          _iterator['return']();
+        }
+
+      case 71:
+        context$1$0.prev = 71;
+
+        if (!_didIteratorError) {
+          context$1$0.next = 74;
+          break;
+        }
+
+        throw _iteratorError;
+
+      case 74:
+        return context$1$0.finish(71);
+
+      case 75:
+        return context$1$0.finish(68);
+
+      case 76:
+      case 'end':
+        return context$1$0.stop();
+    }
+  }, callee$0$2, this, [[5, 64, 68, 76], [12, 47, 51, 59], [19, 30, 34, 42], [35,, 37, 41], [52,, 54, 58], [69,, 71, 75]]);
+});
+Array.prototype.get3D = function (x, y, z) {
+  if (!this[0][0][0]) throw 'not a 3D array';
+  try {
+    return this[x][y][z];
+  } catch (err) {
+    console.log(err);
+  }
+};
 
 module.exports = {
   bpm: 120,
@@ -178,7 +365,8 @@ var boxes = [];
 var boxWidth = 30;
 var boxHeight = 30;
 var boxDepth = 30;
-var boxDistance = 15;
+var boxPadding = 60;
+var boxAmount = 8;
 
 init();
 animate();
@@ -187,7 +375,7 @@ function init() {
 
   scene = new THREE.Scene();
 
-  camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 10000);
+  camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 1000);
   camera.position.z = 1000;
 
   // let backgroundGeometry = new THREE.BoxGeometry(1000, 1000, 1000);
@@ -203,29 +391,38 @@ function init() {
   var _iteratorError = undefined;
 
   try {
-    for (var _iterator = Number.range(8)[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+    for (var _iterator = Number.range(boxAmount)[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
       var x = _step.value;
+
+      var row = [];
       var _iteratorNormalCompletion2 = true;
       var _didIteratorError2 = false;
       var _iteratorError2 = undefined;
 
       try {
-        for (var _iterator2 = Number.range(8)[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+        for (var _iterator2 = Number.range(boxAmount)[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
           var y = _step2.value;
+
+          var depth = [];
           var _iteratorNormalCompletion3 = true;
           var _didIteratorError3 = false;
           var _iteratorError3 = undefined;
 
           try {
-            for (var _iterator3 = Number.range(8)[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
+            for (var _iterator3 = Number.range(boxAmount)[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
               var z = _step3.value;
 
+              //convert position into a color
+              var color = '#' + Math.floor(256 * (y / 7) - 1).toString(16) + '' + Math.floor(256 * (y / 7) - 1).toString(16) + '' + Math.floor(256 * (z / 7) - 1).toString(16);
+              material = new THREE.MeshBasicMaterial({ color: color, wireframe: true });
               var _mesh = new THREE.Mesh(geometry, material);
-              _mesh.position.x = x * 220 - 4 * 220;
-              _mesh.position.y = y * 220 - 4 * 220;
-              _mesh.position.z = z * 220 - 4 * 220;
+
+              _mesh.position.x = x * boxPadding - boxAmount / 2 * boxPadding;
+              _mesh.position.y = y * boxPadding - boxAmount / 2 * boxPadding;
+              _mesh.position.z = z * boxPadding - boxAmount / 2 * boxPadding;
+
               scene.add(_mesh);
-              boxes.push(_mesh);
+              depth.push(_mesh);
             }
           } catch (err) {
             _didIteratorError3 = true;
@@ -241,6 +438,8 @@ function init() {
               }
             }
           }
+
+          row.push(depth);
         }
       } catch (err) {
         _didIteratorError2 = true;
@@ -256,6 +455,8 @@ function init() {
           }
         }
       }
+
+      boxes.push(row);
     }
   } catch (err) {
     _didIteratorError = true;
@@ -286,14 +487,14 @@ function animate() {
   var _iteratorError4 = undefined;
 
   try {
-    for (var _iterator4 = boxes.enumerate()[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
+    for (var _iterator4 = boxes.enumerate3D()[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
       var _step4$value = _slicedToArray(_step4.value, 2);
 
       var i = _step4$value[0];
       var box = _step4$value[1];
 
-      box.position.x += 0;
-      box.position.y += 0;
+      // box.rotation.x += 0.05;
+      box.rotation.y += 0.05;
     }
   } catch (err) {
     _didIteratorError4 = true;
@@ -313,7 +514,7 @@ function animate() {
   renderer.render(scene, camera);
 }
 
-modules.exports = {
+module.exports = {
   boxes: boxes
 };
 
