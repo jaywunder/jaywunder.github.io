@@ -36,9 +36,9 @@ function init() {
       let depth = [];
       for (let z of Number.range(boxAmount)) {
         //convert position into a color
-        let color = `#${Math.floor(256 * (x / 9) - 1).toString(16)}` +
-                    `${Math.floor(256 * (y / 9) - 1).toString(16)}` +
-                    `${Math.floor(256 * (z / 9) - 1).toString(16)}`
+        let color = `#${Math.floor(255 * ((x + 1) / 9)).toString(16)}` +
+                    `${Math.floor(255 * ((y + 1) / 9)).toString(16)}` +
+                    `${Math.floor(255 * ((z + 1) / 9)).toString(16)}`
         material = new THREE.MeshBasicMaterial( { color: color , wireframe: false } );
         let mesh = new THREE.Mesh( geometry, material );
 
