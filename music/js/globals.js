@@ -35,5 +35,5 @@ Array.prototype.get3D = function(x, y, z) {
 
 module.exports = {
   bpm: 120,
-  beat: 60 / module.exports.bpm,
+  beat: 60 / 120,
 }

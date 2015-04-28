@@ -1,6 +1,6 @@
 let GLOBALS = require('./globals.js');
 
-let scene, camera, renderer;
+let scene, camera, renderer, controls;
 let geometry, material, mesh;
 
 let boxes = [];
@@ -17,8 +17,10 @@ function init() {
 
   scene = new THREE.Scene();
 
-  camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 1, 1000 );
+  camera = new THREE.PerspectiveCamera( 35, window.innerWidth / window.innerHeight, 1, 1000 );
   camera.position.z = 1000;
+
+  controls = new THREE.OrbitControls(camera)
 
   // let backgroundGeometry = new THREE.BoxGeometry(1000, 1000, 1000);
   // let backgroundMaterial = new THREE.MeshBasicMaterial({color: 0x4a19dc});
@@ -26,7 +28,7 @@ function init() {
   // scene.add(backgroundMesh);
 
   geometry = new THREE.BoxGeometry( boxWidth, boxHeight, boxDepth );
-  material = new THREE.MeshBasicMaterial( { color: 0xf0ff50, wireframe: true } );
+  material = new THREE.MeshBasicMaterial( { color: 0xf0ff50, wireframe: false } );
 
   for (let x of Number.range(boxAmount)) {
     let row = [];
@@ -34,8 +36,8 @@ function init() {
       let depth = [];
       for (let z of Number.range(boxAmount)) {
         //convert position into a color
-        let color = `#${Math.floor(256 * (y / 7) - 1).toString(16)}${Math.floor(256 * (y / 7) - 1).toString(16)}${Math.floor(256 * (z / 7) - 1).toString(16)}`
-        material = new THREE.MeshBasicMaterial( { color: color , wireframe: true } );
+        let color = `#${Math.floor(256 * (y / 9) - 1).toString(16)}${Math.floor(256 * (y / 14) - 1).toString(16)}${Math.floor(256 * (z / 14) - 1).toString(16)}`
+        material = new THREE.MeshBasicMaterial( { color: color , wireframe: false } );
         let mesh = new THREE.Mesh( geometry, material );
 
         mesh.position.x = (x * boxPadding) - ((boxAmount/2) * boxPadding);

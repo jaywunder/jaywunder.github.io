@@ -1,4 +1,4 @@
-modules.exports = {
+module.exports = {
   scales: [
     "A B C# D E F# G#",
   ],

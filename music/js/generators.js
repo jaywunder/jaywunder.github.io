@@ -1,43 +1,73 @@
-let patters = require('./patterns.js')
-
-function *OctaveGenerator(scale, pattern) {
-  let octStart = _.random(2, 4)
-  let index = 0;
-  this.next = function () {
-    return octStart + pattern[index % pattern.length];
-    index += 1;
+let GLOBALS = require('./globals.js');
+let patterns = require('./patterns.js');
+/**
+ * yields time for note
+ */
+function *metronome({step: step}) {
+  console.log(step);
+  let time = 0;
+  while (true) {
+    time += step;
+    yield GLOBALS.beat * time;
   }
 }
-
-function *NoteGenerator(scale, pattern) {
+/**
+ * yields note from scale
+ */
+function *noteGenerator({scale: scale, pattern: pattern}) {
   let odds = [];
   for (let i = 0; i < scale.length; i += 2) {
     odds.push(scale[i]);
   }
-  let noteStart = _.random(0, 5)
   let index = 0;
-  this.next = function() {
-    return index += 1;
-  }
-}
-
-function *Metronome(step) {
-  let time = 0;
   while (true) {
-    time += step;
-    yield beat * time;
+    yield odds[index % odds.length];
+    index++;
   }
 }
-
-function *SongGenerator(length) {
-
+/**
+ * yields octange from range
+ */
+function *octaveGenerator({range: range, pattern: pattern}) {
+  let index = -1;
+  while (true) {
+    index++;
+    index %= pattern.length
+    yield range[pattern[index]];
+  }
 }
-
-
+/**
+ * yields current intrument info for song
+ */
+function *instrumentGenerator({type:type}) {
+  console.log(type);
+  let metro = new metronome({
+    step: 0.5
+  });
+  console.log('metro');
+  let noteGen = new noteGenerator({
+    scale: patterns.scales[0],
+    pattern: patterns.scalePatters
+  });
+  console.log('noteGen');
+  let octaveGen = new octaveGenerator({
+    range: [2,3,4],
+    pattern: patterns.octavePatterns[0]
+  })
+  console.log('octaveGen');
+  // while (true) {
+  for (let i of Number.range(10)) {
+    console.log(i);
+    yield {
+      pitch: noteGen.next().value + octaveGen.next().value,
+      wait: metro.next().value
+    }
+  }
+}
 
 module.exports = {
-  NoteGenerator: NoteGenerator,
-  OctaveGenerator: OctaveGenerator,
-  Metronome: Metronome,
-  SongGenerator: SongGenerator
+  *noteGenerator: noteGenerator,
+  *octaveGenerator: octaveGenerator,
+  *metronome: metronome,
+  *instrumentGenerator: instrumentGenerator
 }
