@@ -1,17 +1,14 @@
 module.exports = {
-  bass: {
-    id: "bass",
-    wad: new Wad({
-      source : 'sine',
-      env: {
-        attack: 0.02,
-        decay: 0.1,
-        sustain: 0.9,
-        hold: 0.4,
-        release: 0.1
-      }
-    }),
-  },
+  bass: new Wad({
+    source : 'sine',
+    env: {
+      attack: 0.02,
+      decay: 0.1,
+      sustain: 0.9,
+      hold: 0.4,
+      release: 0.1
+    }
+  }),
   snare: new Wad({
     source: "noise",
     env: {
@@ -51,7 +48,7 @@ module.exports = {
       attack: 0.015,
       decay: 0.002,
       sustain: 0.5,
-      hold: 2.5,
+      hold: .25,
       release: 0.3
     },
     filter: {

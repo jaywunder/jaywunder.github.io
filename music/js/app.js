@@ -8,8 +8,8 @@ for (let v of Number.range(5)) {
 let instruments = require('./instruments.js');
 let generators = require('./generators.js');
 
-var piano = instruments.piano;
-piano.play({pitch: 'C#4'});
+let inst = instruments.flute;
+inst.play({pitch: 'C#4'});
 
 let time = 0;
 let beat = GLOBALS.beat
@@ -28,9 +28,9 @@ function foo() {
   let song = generators.instrumentGenerator({type: 'piano'})
   for (let note of song) {
     console.log(note);
-    piano.play(note);
+    inst.play(note);
   }
-  piano.play({pitch: 'C#4'});
+  // bass.play({pitch: 'C#4'});
 }
 
 $('#playButton').on('click', () => foo())

@@ -16,14 +16,15 @@ function *metronome({step: step}) {
  * yields note from scale
  */
 function *noteGenerator({scale: scale, pattern: pattern}) {
-  scale = scale.split(' ');
-  let odds = [];
-  for (let i = 0; i < scale.length; i += 2) {
-    odds.push(scale[i]);
+  scale = scale.split(' '); // split scale into an array
+  let finalScale = [];
+  for (let i = _.random(0,1); i < scale.length; i += 2) { //start at either 0 or 1
+    finalScale.push(scale[i]); // get the odds from the scale into 'finalScale'
   }
+
   let index = 0;
   while (true) {
-    yield odds[index % odds.length];
+    yield finalScale[index % finalScale.length]; //play notes from finalScale
     index++;
   }
 }

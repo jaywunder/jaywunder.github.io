@@ -39,8 +39,8 @@ try {
 var instruments = require('./instruments.js');
 var generators = require('./generators.js');
 
-var piano = instruments.piano;
-piano.play({ pitch: 'C#4' });
+var inst = instruments.flute;
+inst.play({ pitch: 'C#4' });
 
 var time = 0;
 var beat = GLOBALS.beat;
@@ -66,8 +66,9 @@ function foo() {
       var note = _step2.value;
 
       console.log(note);
-      piano.play(note);
+      inst.play(note);
     }
+    // bass.play({pitch: 'C#4'});
   } catch (err) {
     _didIteratorError2 = true;
     _iteratorError2 = err;
@@ -82,8 +83,6 @@ function foo() {
       }
     }
   }
-
-  piano.play({ pitch: 'C#4' });
 }
 
 $('#playButton').on('click', function () {
@@ -135,16 +134,17 @@ function metronome(_ref) {
 function noteGenerator(_ref2) {
   var scale = _ref2.scale;
   var pattern = _ref2.pattern;
-  var odds, i, index;
+  var finalScale, i, index;
   return regeneratorRuntime.wrap(function noteGenerator$(context$1$0) {
     while (1) switch (context$1$0.prev = context$1$0.next) {
       case 0:
-        scale = scale.split(' ');
-        odds = [];
+        scale = scale.split(' ');finalScale = [];
 
-        for (i = 0; i < scale.length; i += 2) {
-          odds.push(scale[i]);
+        for (i = _.random(0, 1); i < scale.length; i += 2) {
+          //start at either 0 or 1
+          finalScale.push(scale[i]); // get the odds from the scale into 'finalScale'
         }
+
         index = 0;
 
       case 4:
@@ -154,9 +154,10 @@ function noteGenerator(_ref2) {
         }
 
         context$1$0.next = 7;
-        return odds[index % odds.length];
+        return finalScale[index % finalScale.length];
 
       case 7:
+        //play notes from finalScale
         index++;
         context$1$0.next = 4;
         break;
@@ -252,9 +253,9 @@ function instrumentGenerator(_ref4) {
 
       case 17:
         context$1$0.prev = 17;
-        context$1$0.t84 = context$1$0['catch'](6);
+        context$1$0.t90 = context$1$0['catch'](6);
         _didIteratorError = true;
-        _iteratorError = context$1$0.t84;
+        _iteratorError = context$1$0.t90;
 
       case 21:
         context$1$0.prev = 21;
@@ -293,6 +294,7 @@ module.exports = {
   metronome: metronome,
   instrumentGenerator: instrumentGenerator
 };
+// split scale into an array
 
 //instantiate generators
 
@@ -561,23 +563,21 @@ module.exports = {
   beat: 60 / 120 };
 
 },{}],5:[function(require,module,exports){
-"use strict";
+'use strict';
 
 module.exports = {
-  bass: {
-    id: "bass",
-    wad: new Wad({
-      source: "sine",
-      env: {
-        attack: 0.02,
-        decay: 0.1,
-        sustain: 0.9,
-        hold: 0.4,
-        release: 0.1
-      }
-    }) },
+  bass: new Wad({
+    source: 'sine',
+    env: {
+      attack: 0.02,
+      decay: 0.1,
+      sustain: 0.9,
+      hold: 0.4,
+      release: 0.1
+    }
+  }),
   snare: new Wad({
-    source: "noise",
+    source: 'noise',
     env: {
       attack: 0.001,
       decay: 0.01,
@@ -585,13 +585,13 @@ module.exports = {
       release: 0.02
     },
     filter: {
-      type: "bandpass",
+      type: 'bandpass',
       frequency: 300,
       q: 0.18
     }
   }),
   piano: new Wad({
-    source: "square",
+    source: 'square',
     env: {
       attack: 0.01,
       decay: 0.005,
@@ -600,7 +600,7 @@ module.exports = {
       release: 0.3
     },
     filter: {
-      type: "lowpass",
+      type: 'lowpass',
       frequency: 1200,
       q: 8.5,
       env: {
@@ -610,16 +610,16 @@ module.exports = {
     }
   }),
   flute: new Wad({
-    source: "square",
+    source: 'square',
     env: {
       attack: 0.015,
       decay: 0.002,
       sustain: 0.5,
-      hold: 2.5,
+      hold: 0.25,
       release: 0.3
     },
     filter: {
-      type: "lowpass",
+      type: 'lowpass',
       frequency: 600,
       q: 7,
       env: {
