@@ -1,57 +1,19 @@
 <!DOCTYPE html>
-<html lang="">
+<html>
 <head>
     <meta charset="UTF-8">
     <title>Music Testing</title>
-	<meta name="Author" content="">
-	<link rel="stylesheet" type="text/css" href="style.css">
+    <meta name="Author" content="Jacob Wunder">
+    <style>
+			body { margin: 0; color: #000}
+			canvas { width: 100%; height: 100% }
+		</style>
+    <link rel="stylesheet" type="text/css" href="css/style.css">
+    <script src="../lib/jquery-1.11.2.min.js"></script>
     <script src="lib/wad-min.js"></script>
-    <script src="lib/underscore-min.js"></script>
-    <script src="js/instruments.js"></script>
-    <script src="js/patterns.js"></script>
-    <script src="js/main.js"></script>
+    <script src="lib/three.min.js"></script>
+    <script src="../lib/threejs/OrbitControls.js"></script>
 </head>
-<body>
-    <script>    
-    var bpm = 120; // 68
-    var beat = 60 / bpm;
-    var bass = Instruments.bass.wad;
-    var snare = Instruments.snare.wad;
-    var flute = Instruments.flute.wad;
-    var piano = Instruments.piano.wad;
-    
-//    piano.play({pitch: 'C4'});
-//    piano.play();
-//    bass.play({ pitch : 'C3',  wait : beat * .5})
-//    bass.play({ pitch : 'C2',  wait : beat * 1})
-//    bass.play({ pitch : 'C3',  wait : beat * 1.5})
-//    bass.play({ pitch : 'C2',  wait : beat * 2})
-//    bass.play({ pitch : 'C3',  wait : beat * 2.5})
-//    bass.play({ pitch : 'C2',  wait : beat * 3})
-//    bass.play({ pitch : 'C3',  wait : beat * 3.5})
-//    bass.play({ pitch : 'F2',  wait : beat * 4})
-//    bass.play({ pitch : 'F3',  wait : beat * 4.5})
-//    bass.play({ pitch : 'F2',  wait : beat * 5})
-//    bass.play({ pitch : 'F3',  wait : beat * 5.5})
-//    bass.play({ pitch : 'F2',  wait : beat * 6})
-//    bass.play({ pitch : 'F3',  wait : beat * 6.5})
-//    bass.play({ pitch : 'F2',  wait : beat * 7})
-//    bass.play({ pitch : 'F3',  wait : beat * 7.5})
-//    bass.play({ pitch : 'Ab2', wait : beat * 8})
-//    bass.play({ pitch : 'Ab3', wait : beat * 8.5})
-//    bass.play({ pitch : 'Ab2', wait : beat * 9})
-//    bass.play({ pitch : 'Ab3', wait : beat * 9.5})
-//    bass.play({ pitch : 'Ab2', wait : beat * 10})
-//    bass.play({ pitch : 'Ab3', wait : beat * 10.5})
-//    bass.play({ pitch : 'Ab2', wait : beat * 11})
-//    bass.play({ pitch : 'Ab3', wait : beat * 11.5})
-//    bass.play({ pitch : 'G2',  wait : beat * 12})
-//    bass.play({ pitch : 'G3',  wait : beat * 12.5})
-//    bass.play({ pitch : 'G2',  wait : beat * 13})
-//    bass.play({ pitch : 'G3',  wait : beat * 13.5})
-//    bass.play({ pitch : 'G2',  wait : beat * 14})
-//    bass.play({ pitch : 'G3',  wait : beat * 14.5})
-//    bass.play({ pitch : 'G2',  wait : beat * 15})
-    </script>
-</body>
+<body></body>
+<script src="dist/index.js"></script>
 </html>
