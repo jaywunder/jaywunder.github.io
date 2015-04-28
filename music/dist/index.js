@@ -663,7 +663,7 @@ var boxes = [];
 var boxWidth = 30;
 var boxHeight = 30;
 var boxDepth = 30;
-var boxPadding = 60;
+var boxPadding = 40;
 var boxAmount = 8;
 
 init();
@@ -713,7 +713,7 @@ function init() {
               var z = _step3.value;
 
               //convert position into a color
-              var color = '#' + Math.floor(256 * (y / 9) - 1).toString(16) + '' + Math.floor(256 * (y / 14) - 1).toString(16) + '' + Math.floor(256 * (z / 14) - 1).toString(16);
+              var color = '#' + Math.floor(256 * (x / 9) - 1).toString(16) + ('' + Math.floor(256 * (y / 9) - 1).toString(16)) + ('' + Math.floor(256 * (z / 9) - 1).toString(16));
               material = new THREE.MeshBasicMaterial({ color: color, wireframe: false });
               var _mesh = new THREE.Mesh(geometry, material);
 

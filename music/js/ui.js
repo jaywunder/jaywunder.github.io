@@ -7,7 +7,7 @@ let boxes = [];
 let boxWidth = 30;
 let boxHeight = 30;
 let boxDepth = 30;
-let boxPadding = 60;
+let boxPadding = 40;
 let boxAmount = 8;
 
 init();
@@ -36,7 +36,9 @@ function init() {
       let depth = [];
       for (let z of Number.range(boxAmount)) {
         //convert position into a color
-        let color = `#${Math.floor(256 * (y / 9) - 1).toString(16)}${Math.floor(256 * (y / 14) - 1).toString(16)}${Math.floor(256 * (z / 14) - 1).toString(16)}`
+        let color = `#${Math.floor(256 * (x / 9) - 1).toString(16)}` +
+                    `${Math.floor(256 * (y / 9) - 1).toString(16)}` +
+                    `${Math.floor(256 * (z / 9) - 1).toString(16)}`
         material = new THREE.MeshBasicMaterial( { color: color , wireframe: false } );
         let mesh = new THREE.Mesh( geometry, material );
 
