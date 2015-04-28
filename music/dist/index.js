@@ -792,9 +792,6 @@ function animate() {
 
       var i = _step4$value[0];
       var box = _step4$value[1];
-
-      // box.rotation.x += 0.05;
-      box.rotation.y += 0.05;
     }
   } catch (err) {
     _didIteratorError4 = true;
@@ -817,6 +814,9 @@ function animate() {
 module.exports = {
   boxes: boxes
 };
+
+// box.rotation.y += 0.05;
+// box.rotation.z += 0.05;
 
 },{"./globals.js":4}],8:[function(require,module,exports){
 (function (global){

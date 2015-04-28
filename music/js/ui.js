@@ -65,8 +65,8 @@ function animate() {
   requestAnimationFrame( animate );
 
   for (let [i, box] of boxes.enumerate3D()) {
-    // box.rotation.x += 0.05;
-    box.rotation.y += 0.05;
+    // box.rotation.y += 0.05;
+    // box.rotation.z += 0.05;
   }
   renderer.render( scene, camera );
 }
