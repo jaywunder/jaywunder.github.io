@@ -8,7 +8,7 @@ for (let v of Number.range(5)) {
 let instruments = require('./instruments.js');
 let generators = require('./generators.js');
 
-let inst = instruments.flute;
+let inst = instruments.piano;
 inst.play({pitch: 'C#4'});
 
 let time = 0;

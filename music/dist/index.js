@@ -39,7 +39,7 @@ try {
 var instruments = require('./instruments.js');
 var generators = require('./generators.js');
 
-var inst = instruments.flute;
+var inst = instruments.piano;
 inst.play({ pitch: 'C#4' });
 
 var time = 0;
@@ -227,7 +227,7 @@ function instrumentGenerator(_ref4) {
         _didIteratorError = false;
         _iteratorError = undefined;
         context$1$0.prev = 6;
-        _iterator = Number.range(16)[Symbol.iterator]();
+        _iterator = Number.range(32)[Symbol.iterator]();
 
       case 8:
         if (_iteratorNormalCompletion = (_step = _iterator.next()).done) {
@@ -253,9 +253,9 @@ function instrumentGenerator(_ref4) {
 
       case 17:
         context$1$0.prev = 17;
-        context$1$0.t90 = context$1$0['catch'](6);
+        context$1$0.t95 = context$1$0['catch'](6);
         _didIteratorError = true;
-        _iteratorError = context$1$0.t90;
+        _iteratorError = context$1$0.t95;
 
       case 21:
         context$1$0.prev = 21;
@@ -437,9 +437,9 @@ Array.prototype.enumerate3D = regeneratorRuntime.mark(function callee$0$2() {
 
       case 30:
         context$1$0.prev = 30;
-        context$1$0.t72 = context$1$0['catch'](19);
+        context$1$0.t92 = context$1$0['catch'](19);
         _didIteratorError3 = true;
-        _iteratorError3 = context$1$0.t72;
+        _iteratorError3 = context$1$0.t92;
 
       case 34:
         context$1$0.prev = 34;
@@ -476,9 +476,9 @@ Array.prototype.enumerate3D = regeneratorRuntime.mark(function callee$0$2() {
 
       case 47:
         context$1$0.prev = 47;
-        context$1$0.t73 = context$1$0['catch'](12);
+        context$1$0.t93 = context$1$0['catch'](12);
         _didIteratorError2 = true;
-        _iteratorError2 = context$1$0.t73;
+        _iteratorError2 = context$1$0.t93;
 
       case 51:
         context$1$0.prev = 51;
@@ -515,9 +515,9 @@ Array.prototype.enumerate3D = regeneratorRuntime.mark(function callee$0$2() {
 
       case 64:
         context$1$0.prev = 64;
-        context$1$0.t74 = context$1$0['catch'](5);
+        context$1$0.t94 = context$1$0['catch'](5);
         _didIteratorError = true;
-        _iteratorError = context$1$0.t74;
+        _iteratorError = context$1$0.t94;
 
       case 68:
         context$1$0.prev = 68;
@@ -581,8 +581,8 @@ module.exports = {
     env: {
       attack: 0.001,
       decay: 0.01,
-      sustain: 0.2,
-      release: 0.02
+      sustain: 0.1,
+      release: 0.01
     },
     filter: {
       type: 'bandpass',
@@ -639,9 +639,16 @@ module.exports = {
 "use strict";
 
 module.exports = {
-  scales: ["A B C# D E F# G#", "A B C D E F G"],
-  notePatterns: [[0, 2, 3, 4], [0, 1, 1, 0], [0, 1, 0, 0]],
-  octavePatterns: [[0, 0, 0, 0], [1, 1, 1, 0]]
+  scales: [
+  //major scales
+  "C D E F G A B C", "G A B C D E F# G", "D E F# G A B C# D", "A B C# D E F# G#", "E F# G# A B C# D# E", "B C# D# E F# G# A# B", "F# G# A# B C# D# E# F#", "C# D# E# F# G# A# B# C#", "F G A Bb C D E F", "Bb C D Eb F G A Bb", "Eb F G Ab Bb C D Eb", "Ab Bb C Db Eb F G Ab", "Db Eb F Gb Ab Bb C Db", "Gb Ab Bb Cb Db Eb F Gb", "Cb Db Eb Fb Gb Ab Bb Cb",
+  //minor scales
+  //lower 3, 6, 7
+  "C D Eb F G A B C", "G A Bb C D E F# G", "D E F G A B C# D", "A B C D E F# G#", "E F# G A B C# D# E", "B C# D E F# G# A# B", "F# G# A B C# D# E# F#", "C# D# E F# G# A# B# C#", "F G A A C D E F", "Bb C D D F G A Bb", "Eb F G G Bb C D Eb", "Ab Bb C C Eb F G Ab", "Db Eb F F Ab Bb C Db", "Gb Ab Bb B Db Eb F Gb", "Cb Db Eb G Gb Ab Bb Cb"],
+  notePatterns: [[0, 2, 3, 4], [0, 1, 1, 0], [0, 1, 0, 0], [3, 2, 3, 3, 4]
+  // [1, 4]
+  ],
+  octavePatterns: [[0, 0, 0, 0], [1, 1, 1, 0], [1, 0, 1, 0], [0, 0, 1, 0], [1, 0, 1, 1]]
 };
 
 },{}],7:[function(require,module,exports){
@@ -670,21 +677,18 @@ init();
 animate();
 
 function init() {
-
-  scene = new THREE.Scene();
-
-  camera = new THREE.PerspectiveCamera(35, window.innerWidth / window.innerHeight, 1, 1000);
+  //make a scene
+  scene = new THREE.Scene({ background: 15794000 });
+  //fov, apect ratio, near, far
+  camera = new THREE.PerspectiveCamera(35, window.innerWidth / window.innerHeight, 1, 1500);
   camera.position.z = 1000;
 
   controls = new THREE.OrbitControls(camera);
 
-  // let backgroundGeometry = new THREE.BoxGeometry(1000, 1000, 1000);
-  // let backgroundMaterial = new THREE.MeshBasicMaterial({color: 0x4a19dc});
-  // let backgroundMesh = new THREE.Mesh(backgroundGeometry, backgroundMaterial);
-  // scene.add(backgroundMesh);
+  var light = new THREE.AmbientLight(16768256); // soft white light
+  scene.add(light);
 
   geometry = new THREE.BoxGeometry(boxWidth, boxHeight, boxDepth);
-  material = new THREE.MeshBasicMaterial({ color: 15794000, wireframe: false });
 
   var _iteratorNormalCompletion = true;
   var _didIteratorError = false;
@@ -777,9 +781,10 @@ function init() {
   renderer.setSize(window.innerWidth, window.innerHeight);
   $('body').append(renderer.domElement);
 }
-
+var frame = 0;
+var currentBox = 0;
 function animate() {
-
+  frame += 0.005;
   requestAnimationFrame(animate);
 
   var _iteratorNormalCompletion4 = true;
@@ -808,15 +813,17 @@ function animate() {
     }
   }
 
+  boxes[0][0][0].material.color = 0;
+
+  camera.position.x = Math.cos(frame) * 700;
+  camera.position.z = Math.sin(frame) * 700;
+  camera.lookAt(new THREE.Vector3(0, 0, 0));
   renderer.render(scene, camera);
 }
 
 module.exports = {
   boxes: boxes
 };
-
-// box.rotation.y += 0.05;
-// box.rotation.z += 0.05;
 
 },{"./globals.js":4}],8:[function(require,module,exports){
 (function (global){

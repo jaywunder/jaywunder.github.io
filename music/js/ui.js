@@ -14,21 +14,18 @@ init();
 animate();
 
 function init() {
-
-  scene = new THREE.Scene();
-
-  camera = new THREE.PerspectiveCamera( 35, window.innerWidth / window.innerHeight, 1, 1000 );
+  //make a scene
+  scene = new THREE.Scene({background: 0xf0ff50});
+  //fov, apect ratio, near, far
+  camera = new THREE.PerspectiveCamera( 35, window.innerWidth / window.innerHeight, 1, 1500 );
   camera.position.z = 1000;
 
   controls = new THREE.OrbitControls(camera)
 
-  // let backgroundGeometry = new THREE.BoxGeometry(1000, 1000, 1000);
-  // let backgroundMaterial = new THREE.MeshBasicMaterial({color: 0x4a19dc});
-  // let backgroundMesh = new THREE.Mesh(backgroundGeometry, backgroundMaterial);
-  // scene.add(backgroundMesh);
+  let light = new THREE.AmbientLight( 0xffdd00 ); // soft white light
+  scene.add(light);
 
   geometry = new THREE.BoxGeometry( boxWidth, boxHeight, boxDepth );
-  material = new THREE.MeshBasicMaterial( { color: 0xf0ff50, wireframe: false } );
 
   for (let x of Number.range(boxAmount)) {
     let row = [];
@@ -37,8 +34,8 @@ function init() {
       for (let z of Number.range(boxAmount)) {
         //convert position into a color
         let color = `#${Math.floor(255 * ((x + 1) / 9)).toString(16)}` +
-                    `${Math.floor(255 * ((y + 1) / 9)).toString(16)}` +
-                    `${Math.floor(255 * ((z + 1) / 9)).toString(16)}`
+                     `${Math.floor(255 * ((y + 1) / 9)).toString(16)}` +
+                     `${Math.floor(255 * ((z + 1) / 9)).toString(16)}`
         material = new THREE.MeshBasicMaterial( { color: color , wireframe: false } );
         let mesh = new THREE.Mesh( geometry, material );
 
@@ -59,15 +56,20 @@ function init() {
   renderer.setSize( window.innerWidth, window.innerHeight );
   $('body').append(renderer.domElement)
 }
-
+let frame = 0;
+let currentBox = 0;
 function animate() {
-
+  frame += 0.005;
   requestAnimationFrame( animate );
 
   for (let [i, box] of boxes.enumerate3D()) {
-    // box.rotation.y += 0.05;
-    // box.rotation.z += 0.05;
+
   }
+  boxes[0][0][0].material.color = 0x000
+
+  camera.position.x = Math.cos(frame) * 700
+  camera.position.z = Math.sin(frame) * 700
+  camera.lookAt(new THREE.Vector3(0, 0, 0))
   renderer.render( scene, camera );
 }
 

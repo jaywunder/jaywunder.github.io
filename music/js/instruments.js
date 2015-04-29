@@ -14,8 +14,8 @@ module.exports = {
     env: {
       attack: 0.001,
       decay: 0.01,
-      sustain: 0.2,
-      release : 0.02
+      sustain: 0.1,
+      release : 0.01
     },
     filter: {
       type: 'bandpass',

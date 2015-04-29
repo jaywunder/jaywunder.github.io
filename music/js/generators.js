@@ -56,7 +56,7 @@ function *instrumentGenerator({type:type}) {
     pattern: _.sample(patterns.octavePatterns) // random octave pattern
   })
   // do generator magic
-  for (let i of Number.range(16)) {
+  for (let i of Number.range(32)) {
     yield {
       pitch: noteGen.next().value + octaveGen.next().value, // concatonate note and octave
       wait: metro.next().value // get time value
