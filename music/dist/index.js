@@ -8,6 +8,8 @@ require('./js/app.js');
 },{"./js/app.js":2,"babel/polyfill":91}],2:[function(require,module,exports){
 'use strict';
 
+var _slicedToArray = function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i['return']) _i['return'](); } finally { if (_d) throw _e; } } return _arr; } else { throw new TypeError('Invalid attempt to destructure non-iterable instance'); } };
+
 var GLOBALS = require('./globals.js');
 var ui = require('./ui.js');
 
@@ -39,24 +41,16 @@ try {
 var instruments = require('./instruments.js');
 var generators = require('./generators.js');
 
-var inst = instruments.piano;
+var inst = instruments.sineDrum;
+var inst2 = instruments.flute;
 inst.play({ pitch: 'C#4' });
 
+var piano = instruments.piano;
 var time = 0;
 var beat = GLOBALS.beat;
-// let song = ['C3', 'C2', 'C3', 'C2', 'C3', 'C2', 'C3', 'F2', 'F3', 'F2', 'F3', 'F2', 'F3', 'F2', 'F3',
-//             'Ab2', 'Ab3', 'Ab2', 'Ab3', 'Ab2', 'Ab3', 'Ab2', 'Ab3', 'G2', 'G3', 'G2', 'G3', 'G2', 'G3', 'G2']
 
-// for (let note of song) {
-//   time += 0.5;
-//   piano.play({
-//     pitch: note,
-//     wait: beat * time
-//     });
-// }
-
-function foo() {
-  var song = generators.instrumentGenerator({ type: 'piano' });
+function main() {
+  var song = generators.instrumentGenerator({ type: 'sine' });
   var _iteratorNormalCompletion2 = true;
   var _didIteratorError2 = false;
   var _iteratorError2 = undefined;
@@ -68,7 +62,6 @@ function foo() {
       console.log(note);
       inst.play(note);
     }
-    // bass.play({pitch: 'C#4'});
   } catch (err) {
     _didIteratorError2 = true;
     _iteratorError2 = err;
@@ -83,46 +76,105 @@ function foo() {
       }
     }
   }
+
+  var song2 = generators.instrumentGenerator({ type: 'sine' });
+  var _iteratorNormalCompletion3 = true;
+  var _didIteratorError3 = false;
+  var _iteratorError3 = undefined;
+
+  try {
+    for (var _iterator3 = song2[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
+      var note = _step3.value;
+
+      console.log(note);
+      inst2.play(note);
+    }
+  } catch (err) {
+    _didIteratorError3 = true;
+    _iteratorError3 = err;
+  } finally {
+    try {
+      if (!_iteratorNormalCompletion3 && _iterator3['return']) {
+        _iterator3['return']();
+      }
+    } finally {
+      if (_didIteratorError3) {
+        throw _iteratorError3;
+      }
+    }
+  }
+
+  var _iteratorNormalCompletion4 = true;
+  var _didIteratorError4 = false;
+  var _iteratorError4 = undefined;
+
+  try {
+    for (var _iterator4 = ui.boxes.enumerate3D()[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
+      var _step4$value = _slicedToArray(_step4.value, 2);
+
+      var i = _step4$value[0];
+      var box = _step4$value[1];
+
+      ui.scene.add(box);
+      box.material.color = new THREE.Color(16777215);
+      // if (JSON.stringify(box.info) === JSON.stringify() )
+    }
+  } catch (err) {
+    _didIteratorError4 = true;
+    _iteratorError4 = err;
+  } finally {
+    try {
+      if (!_iteratorNormalCompletion4 && _iterator4['return']) {
+        _iterator4['return']();
+      }
+    } finally {
+      if (_didIteratorError4) {
+        throw _iteratorError4;
+      }
+    }
+  }
 }
 
 $('#playButton').on('click', function () {
-  return foo();
+  return main();
 });
 
 },{"./generators.js":3,"./globals.js":4,"./instruments.js":5,"./ui.js":7}],3:[function(require,module,exports){
 'use strict';
 
-var marked0$0 = [metronome, noteGenerator, octaveGenerator, instrumentGenerator].map(regeneratorRuntime.mark);
+var marked0$0 = [tempoGenerator, noteGenerator, octaveGenerator, instrumentGenerator].map(regeneratorRuntime.mark);
 var GLOBALS = require('./globals.js');
 var patterns = require('./patterns.js');
 var _ = require('underscore');
 /**
  * yields time for note
  */
-function metronome(_ref) {
-  var step = _ref.step;
-  var time;
-  return regeneratorRuntime.wrap(function metronome$(context$1$0) {
+function tempoGenerator(_ref) {
+  var pattern = _ref.pattern;
+  var index, time;
+  return regeneratorRuntime.wrap(function tempoGenerator$(context$1$0) {
     while (1) switch (context$1$0.prev = context$1$0.next) {
       case 0:
-        console.log(step);
+        index = 0;
         time = 0;
 
       case 2:
         if (!true) {
-          context$1$0.next = 8;
+          context$1$0.next = 10;
           break;
         }
 
-        time += step;
-        context$1$0.next = 6;
+        index %= pattern.length;
+        time += pattern[index];
+        context$1$0.next = 7;
         return GLOBALS.beat * time;
 
-      case 6:
+      case 7:
+        index++;
         context$1$0.next = 2;
         break;
 
-      case 8:
+      case 10:
       case 'end':
         return context$1$0.stop();
     }
@@ -144,30 +196,31 @@ function noteGenerator(_ref2) {
           //start at either 0 or 1
           finalScale.push(scale[i]); // get the odds from the scale into 'finalScale'
         }
-
         index = 0;
 
       case 4:
         if (!true) {
-          context$1$0.next = 10;
+          context$1$0.next = 11;
           break;
         }
 
-        context$1$0.next = 7;
-        return finalScale[index % finalScale.length];
+        index %= finalScale.length;
+        context$1$0.next = 8;
+        return finalScale[pattern[index]];
 
-      case 7:
+      case 8:
         //play notes from finalScale
         index++;
         context$1$0.next = 4;
         break;
 
-      case 10:
+      case 11:
       case 'end':
         return context$1$0.stop();
     }
   }, marked0$0[1], this);
 }
+
 /**
  * yields octange from range
  */
@@ -201,27 +254,28 @@ function octaveGenerator(_ref3) {
     }
   }, marked0$0[2], this);
 }
+
 /**
  * yields current intrument info for song
  */
 function instrumentGenerator(_ref4) {
   var type = _ref4.type;
 
-  var metro, noteGen, octaveGen, _iteratorNormalCompletion, _didIteratorError, _iteratorError, _iterator, _step, i;
+  var tempoGen, noteGen, octaveGen, _iteratorNormalCompletion, _didIteratorError, _iteratorError, _iterator, _step, i;
 
   return regeneratorRuntime.wrap(function instrumentGenerator$(context$1$0) {
     while (1) switch (context$1$0.prev = context$1$0.next) {
       case 0:
-        metro = new metronome({
-          step: 0.5
+        tempoGen = new tempoGenerator({
+          pattern: _.sample(patterns.tempos) // get random tempo array
         });
         noteGen = new noteGenerator({
-          scale: _.sample(patterns.scales), // get random scale
-          pattern: _.sample(patterns.note) // get random note patten
+          scale: _.sample(patterns.scales), // get random scale array
+          pattern: _.sample(patterns.notePatterns) // get random note pattern array
         });
         octaveGen = new octaveGenerator({
-          range: [2, 3, 4], // no randomness on this yet
-          pattern: _.sample(patterns.octavePatterns) // random octave pattern
+          range: _.sample(patterns.octaves), // get random octaves array
+          pattern: _.sample(patterns.octavePatterns) // random octave pattern array
         });
         _iteratorNormalCompletion = true;
         _didIteratorError = false;
@@ -238,8 +292,8 @@ function instrumentGenerator(_ref4) {
         i = _step.value;
         context$1$0.next = 12;
         return {
-          pitch: noteGen.next().value + octaveGen.next().value, // concatonate note and octave
-          wait: metro.next().value // get time value
+          pitch: noteGen.next().value + octaveGen.next().value, // concatonate notes and octaves
+          wait: tempoGen.next().value // get time value
         };
 
       case 12:
@@ -253,9 +307,9 @@ function instrumentGenerator(_ref4) {
 
       case 17:
         context$1$0.prev = 17;
-        context$1$0.t95 = context$1$0['catch'](6);
+        context$1$0.t150 = context$1$0['catch'](6);
         _didIteratorError = true;
-        _iteratorError = context$1$0.t95;
+        _iteratorError = context$1$0.t150;
 
       case 21:
         context$1$0.prev = 21;
@@ -291,10 +345,12 @@ function instrumentGenerator(_ref4) {
 module.exports = {
   noteGenerator: noteGenerator,
   octaveGenerator: octaveGenerator,
-  metronome: metronome,
+  tempoGenerator: tempoGenerator,
   instrumentGenerator: instrumentGenerator
 };
+// console.log(GLOBALS.beat * time);
 // split scale into an array
+//do actual generator magic stuff
 
 //instantiate generators
 
@@ -437,9 +493,9 @@ Array.prototype.enumerate3D = regeneratorRuntime.mark(function callee$0$2() {
 
       case 30:
         context$1$0.prev = 30;
-        context$1$0.t92 = context$1$0['catch'](19);
+        context$1$0.t145 = context$1$0['catch'](19);
         _didIteratorError3 = true;
-        _iteratorError3 = context$1$0.t92;
+        _iteratorError3 = context$1$0.t145;
 
       case 34:
         context$1$0.prev = 34;
@@ -476,9 +532,9 @@ Array.prototype.enumerate3D = regeneratorRuntime.mark(function callee$0$2() {
 
       case 47:
         context$1$0.prev = 47;
-        context$1$0.t93 = context$1$0['catch'](12);
+        context$1$0.t146 = context$1$0['catch'](12);
         _didIteratorError2 = true;
-        _iteratorError2 = context$1$0.t93;
+        _iteratorError2 = context$1$0.t146;
 
       case 51:
         context$1$0.prev = 51;
@@ -515,9 +571,9 @@ Array.prototype.enumerate3D = regeneratorRuntime.mark(function callee$0$2() {
 
       case 64:
         context$1$0.prev = 64;
-        context$1$0.t94 = context$1$0['catch'](5);
+        context$1$0.t147 = context$1$0['catch'](5);
         _didIteratorError = true;
-        _iteratorError = context$1$0.t94;
+        _iteratorError = context$1$0.t147;
 
       case 68:
         context$1$0.prev = 68;
@@ -563,11 +619,46 @@ module.exports = {
   beat: 60 / 120 };
 
 },{}],5:[function(require,module,exports){
-'use strict';
+"use strict";
 
 module.exports = {
+  sineDrum: new Wad({
+    source: "sine",
+    env: {
+      attack: 0.001,
+      decay: 0.05,
+      sustain: 0.01,
+      release: 0.01 }
+  }),
+  drum: new Wad({
+    source: "/music/assets/drum.wav"
+  }),
+  square: new Wad({
+    source: "square",
+    env: {
+      attack: 0.001,
+      decay: 0.1,
+      sustain: 0.001,
+      release: 0.01
+    },
+    vibrato: {
+      shape: "sine",
+      magnitude: 3,
+      speed: 4,
+      attack: 0
+    }
+  }),
+  sine: new Wad({
+    source: "sine",
+    env: {
+      attack: 0.02,
+      decay: 0.05,
+      sustain: 0.1,
+      hold: 0.1,
+      release: 0.01
+    } }),
   bass: new Wad({
-    source: 'sine',
+    source: "sine",
     env: {
       attack: 0.02,
       decay: 0.1,
@@ -577,21 +668,15 @@ module.exports = {
     }
   }),
   snare: new Wad({
-    source: 'noise',
+    source: "noise",
     env: {
       attack: 0.001,
       decay: 0.01,
       sustain: 0.1,
       release: 0.01
-    },
-    filter: {
-      type: 'bandpass',
-      frequency: 300,
-      q: 0.18
-    }
-  }),
+    } }),
   piano: new Wad({
-    source: 'square',
+    source: "square",
     env: {
       attack: 0.01,
       decay: 0.005,
@@ -600,7 +685,7 @@ module.exports = {
       release: 0.3
     },
     filter: {
-      type: 'lowpass',
+      type: "lowpass",
       frequency: 1200,
       q: 8.5,
       env: {
@@ -610,7 +695,7 @@ module.exports = {
     }
   }),
   flute: new Wad({
-    source: 'square',
+    source: "square",
     env: {
       attack: 0.015,
       decay: 0.002,
@@ -619,7 +704,7 @@ module.exports = {
       release: 0.3
     },
     filter: {
-      type: 'lowpass',
+      type: "lowpass",
       frequency: 600,
       q: 7,
       env: {
@@ -635,6 +720,12 @@ module.exports = {
   })
 };
 
+// filter: {
+//   type: 'bandpass',
+//   frequency: 300,
+//   q: 0.180
+// }
+
 },{}],6:[function(require,module,exports){
 "use strict";
 
@@ -645,10 +736,12 @@ module.exports = {
   //minor scales
   //lower 3, 6, 7
   "C D Eb F G A B C", "G A Bb C D E F# G", "D E F G A B C# D", "A B C D E F# G#", "E F# G A B C# D# E", "B C# D E F# G# A# B", "F# G# A B C# D# E# F#", "C# D# E F# G# A# B# C#", "F G A A C D E F", "Bb C D D F G A Bb", "Eb F G G Bb C D Eb", "Ab Bb C C Eb F G Ab", "Db Eb F F Ab Bb C Db", "Gb Ab Bb B Db Eb F Gb", "Cb Db Eb G Gb Ab Bb Cb"],
-  notePatterns: [[0, 2, 3, 4], [0, 1, 1, 0], [0, 1, 0, 0], [3, 2, 3, 3, 4]
-  // [1, 4]
-  ],
-  octavePatterns: [[0, 0, 0, 0], [1, 1, 1, 0], [1, 0, 1, 0], [0, 0, 1, 0], [1, 0, 1, 1]]
+  octaves: [[2, 3, 4]],
+  tempos: [[0.5], [0.25], [0.25, 0.25, 0.5, 1], [0.5, 0.25, 0.25, 0.25], [0.5, 0.5, 0.15, 0.25]],
+  //patterns
+  notePatterns: [[0, 2, 3, 4], [0, 1, 1, 0], [0, 1, 0, 0], [3, 2, 3, 3, 4]],
+  octavePatterns: [[0, 0, 0, 0], [1, 1, 1, 0], [1, 0, 1, 0], [0, 0, 1, 0], [1, 0, 1, 1]],
+  metronomePatterns: [[1, 2, 3, 4]]
 };
 
 },{}],7:[function(require,module,exports){
@@ -685,10 +778,14 @@ function init() {
 
   controls = new THREE.OrbitControls(camera);
 
-  var light = new THREE.AmbientLight(16768256); // soft white light
+  var light = new THREE.AmbientLight(16768256); // soft white light, that doesn't work
   scene.add(light);
 
   geometry = new THREE.BoxGeometry(boxWidth, boxHeight, boxDepth);
+
+  var notes = ['A', 'B', 'C', 'D', 'E', 'F', 'G'];
+  var octaves = [1, 2, 3, 4, 5, 6, 7, 8];
+  var times = [2, 1.75, 1.5, 1.25, 1, 0.75, 0.5, 0.25];
 
   var _iteratorNormalCompletion = true;
   var _didIteratorError = false;
@@ -724,8 +821,12 @@ function init() {
               _mesh.position.x = x * boxPadding - boxAmount / 2 * boxPadding;
               _mesh.position.y = y * boxPadding - boxAmount / 2 * boxPadding;
               _mesh.position.z = z * boxPadding - boxAmount / 2 * boxPadding;
+              _mesh.info = {
+                note: notes[x],
+                octave: octaves[y],
+                time: times[z]
+              };
 
-              scene.add(_mesh);
               depth.push(_mesh);
             }
           } catch (err) {
@@ -822,7 +923,11 @@ function animate() {
 }
 
 module.exports = {
-  boxes: boxes
+  boxes: boxes,
+  scene: scene,
+  camera: camera,
+  renderer: renderer,
+  controls: controls
 };
 
 },{"./globals.js":4}],8:[function(require,module,exports){

@@ -1,4 +1,41 @@
 module.exports = {
+  sineDrum: new Wad({
+    source: "sine",
+    env: {
+      attack: 0.001,
+      decay: 0.05,
+      sustain: 0.01,
+      release: 0.01,
+    }
+  }),
+  drum: new Wad({
+    source: "/music/assets/drum.wav"
+  }),
+  square: new Wad({
+    source: 'square',
+    env: {
+      attack: 0.001,
+      decay: 0.1,
+      sustain: 0.001,
+      release: 0.01
+    },
+    vibrato: {
+      shape: 'sine',
+      magnitude: 3,
+      speed: 4,
+      attack: 0
+    }
+  }),
+  sine: new Wad({
+    source: 'sine',
+    env: {
+      attack: 0.02,
+      decay: 0.05,
+      sustain: 0.1,
+      hold: 0.1,
+      release: 0.01
+    },
+  }),
   bass: new Wad({
     source : 'sine',
     env: {
@@ -17,11 +54,11 @@ module.exports = {
       sustain: 0.1,
       release : 0.01
     },
-    filter: {
-      type: 'bandpass',
-      frequency: 300,
-      q: 0.180
-    }
+    // filter: {
+    //   type: 'bandpass',
+    //   frequency: 300,
+    //   q: 0.180
+    // }
   }),
   piano: new Wad({
     source : 'square',
@@ -48,7 +85,7 @@ module.exports = {
       attack: 0.015,
       decay: 0.002,
       sustain: 0.5,
-      hold: .25,
+      hold: 0.25,
       release: 0.3
     },
     filter: {
