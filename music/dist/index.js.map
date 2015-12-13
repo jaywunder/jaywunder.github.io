@@ -1,1 +1,0 @@
-{"version":3,"sources":["index.js"],"names":[],"mappings":";;AAAA,OAAO,CAAC,gBAAgB,CAAC,CAAC;AAC1B,OAAO,CAAC,aAAa,CAAC,CAAA","file":"index.js","sourcesContent":["require('babel/polyfill');\nrequire('./js/app.js')\n"]}
