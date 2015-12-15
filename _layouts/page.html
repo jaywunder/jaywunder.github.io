@@ -1,0 +1,43 @@
+---
+markdown: kramdown
+---
+
+<html>
+
+  {% include head.html %}
+
+  <body>
+
+    {% include header.html %}
+
+    <div class="container">
+      <div class="starter-template">
+        <header class="post-header">
+          <h1 class="post-title">{{ page.title }}</h1>
+        </header>
+
+        <article>
+            {{ content }}
+        </article>
+      </div>
+    </div>
+
+
+    {% include footer.html %}
+
+    {% include bootstrap_core.html %}
+
+  </body>
+
+</html>
+
+
+<!-- <div class="post">
+    <header class="post-header">
+        <h1 class="post-title">{{ page.title }}</h1>
+    </header>
+
+    <article class="post-content">
+        {{ content }}
+    </article>
+</div> -->
