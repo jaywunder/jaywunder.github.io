@@ -8,4 +8,15 @@ url: "http://jacobwunder.com"
 github_username: jaywunder
 
 # Build settings
-markdown: kramdown
+markdown: redcarpet
+highlighter: pygments
+permalink: /:title/
+gems:
+  - jekyll-sitemap
+  - jekyll-feed
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - LICENSE
+  - README.md
+  - CNAME
