@@ -6,7 +6,7 @@ permalink: /projects/
 ---
 
 ### [Breakout](/breakout)
-#### A clone of the game "Breakout" for the Atari.  I made this game for machine learning research, I want to make a neural network learn how to play breakout.
+#### A clone of the game "Breakout" for the Atari.  I made this game for machine learning research, I'm going to make a neural network learn how to play breakout.
 
 ### [Vector Field Visualizer](/vector-field)
 #### A visualizer for vector fields.  Just enter the equation for `dy/dx` and watch it refresh.
