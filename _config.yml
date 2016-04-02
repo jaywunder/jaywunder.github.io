@@ -9,7 +9,6 @@ github_username: jaywunder
 twitter_username: jaywunder54
 
 # Build settings
-highlighter: pygments
 permalink: /:title/
 gems:
   - jekyll-sitemap
