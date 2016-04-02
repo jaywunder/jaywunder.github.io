@@ -15,22 +15,22 @@ headerLocation: blog
   }
 </style>
 
-<div class="page-header row">
+<div class="row page-header">
   <h2>Hello, World</h2>
 </div>
 
 <div class="row">
-  <ul class="post-list row">
+  <!-- post-list -->
+  <div>
     {% for post in site.posts %}
-      <li>
-        <span class="post-meta">{{ post.date | date: "%b %-d, %Y" }}</span>
-
+      <div>
+        <span>{{ post.date | date: "%b %-d, %Y" }}</span>
         <h2>
-          <a class="post-link" href="{{ post.url | prepend: site.baseurl }}">{{ post.title }}</a>
+          <a href="{{ post.url | prepend: site.baseurl }}">{{ post.title }}</a>
         </h2>
-      </li>
+      </div>
     {% endfor %}
-  </ul>
+  </div>
 
   <p>
     <a href="{{ "/feed.xml" | prepend: site.baseurl }}">

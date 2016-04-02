@@ -2,16 +2,13 @@
 layout: default
 ---
 <div class="container">
-  <div class="starter-template">
-    <div>
-      <h2>{{ page.title }}</h2>
-      <h3>{{ page.date | date: "%b %-d, %Y" }}{% if page.author %} by {{ page.author }}{% endif %}{% if page.meta %} • {{ page.meta }}{% endif %}</h3>
-    </div>
-
-    <article>
-      {{ content }}
-    </article>
-    {% include comments.html %}
-
+  <div>
+    <h2>{{ page.title }}</h2>
+    <h3>{{ page.date | date: "%b %-d, %Y" }}{% if page.author %} by {{ page.author }}{% endif %}{% if page.meta %} • {{ page.meta }}{% endif %}</h3>
   </div>
+
+  <article>
+    {{ content }}
+  </article>
+  {% include comments.html %}
 </div>

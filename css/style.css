@@ -6,3 +6,11 @@
   padding: -15px;
   margin-top: -15px;
 }
+
+article {
+  padding-right: 30em;
+}
+
+p {
+  font-size: 1.1em;
+}
