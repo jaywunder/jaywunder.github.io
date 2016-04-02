@@ -1,8 +1,11 @@
 ---
-layout: page
-title: About
----
-permalink: /about/
+layout: page  
+title: About  
+permalink: /about/  
 
-These are the posts of a boy named Jacob Wunder.  
-He&#146;s trying his best to program cool things that entertain people.  
+---
+
+I'm a senior in high school interested in too many topics.  I've been learning how to program
+
+
+ing in computer science, robotics, art graphics.  

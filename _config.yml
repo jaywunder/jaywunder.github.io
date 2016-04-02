@@ -9,7 +9,6 @@ github_username: jaywunder
 twitter_username: jaywunder54
 
 # Build settings
-markdown: redcarpet
 highlighter: pygments
 permalink: /:title/
 gems:
