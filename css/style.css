@@ -7,9 +7,13 @@
   margin-top: -15px;
 }
 
-article {
-  padding-right: 30em;
+@media screen and (min-width: 480px) {
+  article {
+    max-width: 65%;
+    /*padding-right: 30em;*/
+  }
 }
+
 
 p {
   font-size: 1.1em;
