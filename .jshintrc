@@ -3,7 +3,8 @@
   "strict": "global",
   "asi": true,
   "browser": true,
-  "globals": [
-
+  "predef": [
+    "console",
+    "$"
   ]
 }
