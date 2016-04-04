@@ -2,10 +2,7 @@
 // jshint -W097
 'use strict';
 
-// $('body').after('<canvas id="pixi-render"></canvas>');
-var canvas = document.getElementById('pixi-render');
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
+let canvas;
 
 window.onresize = function() {
   canvas.width = window.innerWidth;
@@ -19,7 +16,7 @@ class World {
     this.stage = new PIXI.Container();
     this.renderer = PIXI.autoDetectRenderer(window.innerWidth, window.innerHeight, {
       backgroundColor: 0xffffff,
-      view: document.getElementById('pixi-render'),
+      view: document.getElementById('koi-canvas'),
       preserveDrawingBuffer: true
     });
     this.view = this.renderer.view
@@ -27,7 +24,7 @@ class World {
     this.stage.addChild(this.graphics)
 
     this.entities = [];
-    this.fishNum = 15;
+    this.fishNum = 8;
     this.createEntitites();
 
     setInterval(() => this.update(), 16)
@@ -155,6 +152,8 @@ class Fish {
     }
   }
 }
+
+$('body').after('<canvas id="koi-canvas"></canvas>');
 
 let world = new World()
 

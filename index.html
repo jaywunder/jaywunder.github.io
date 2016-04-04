@@ -1,45 +1,23 @@
 ---
 layout: default
-headerLocation: blog
+headerLocation: jw
 ---
 
-<style>
-  #pixi-render {
-    position: absolute;
-    top: 0px;
-    left: 0px;
-    z-index: -99;
-  }
-  canvas {
-    display: block;
-  }
-</style>
-
-<div class="row page-header">
-  <h2>Hello, World</h2>
+<div class="intro-jumbo jumbotron center-block text-center">
+  <h1>Jacob Wunder</h1>
 </div>
 
-<div class="row">
-  <!-- post-list -->
-  <div>
-    {% for post in site.posts %}
-      <div>
-        <span>{{ post.date | date: "%b %-d, %Y" }}</span>
-        <h2>
-          <a href="{{ post.url | prepend: site.baseurl }}">{{ post.title }}</a>
-        </h2>
-      </div>
-    {% endfor %}
-  </div>
-
+<div class="intro-text center-block">
   <p>
-    <a href="{{ "/feed.xml" | prepend: site.baseurl }}">
-      RSS!
-    </a>
+    I'm a high school student interested in code, robotics, and education.  I have experience with Javascript, Python, Java, HTML/CSS, and I'm dabbling in Rust.
+  </p>
+  <p>
+    I teach Tynker programming and Lego robotics to elementary schoolers, and javascript to highschoolers on my robotics team.
+  </p>
+  <p>
+    On this website you'll find my blog where I write idle thoughts and post papers from school that I especially like.  The Projects page is a list of my favorite/most complete projects.  To find a more complete list, go to <a href="https://github.com/jaywunder">my github page</a>.
   </p>
 </div>
-
-<canvas id="pixi-render"></canvas>
 
 <script src="/lib/pixi.min.js"></script>
 <script src="/js/canvas.js" charset="utf-8"></script>

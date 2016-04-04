@@ -7,14 +7,51 @@
   margin-top: -15px;
 }
 
+* {
+  margin: 0;
+}
+html, body {
+  height: 100%;
+}
+.wrapper {
+  min-height: calc(100% - 10em);
+  height: auto !important;
+  height: calc(100% - 10em);
+  margin: 0 auto -4em;
+}
+.footer, .push {
+  height: 4em;
+}
+
 @media screen and (min-width: 480px) {
   article {
     max-width: 65%;
-    /*padding-right: 30em;*/
   }
 }
 
-
 p {
   font-size: 1.2em;
+}
+
+#koi-canvas {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  z-index: -99;
+}
+
+canvas {
+  display: block;
+}
+
+.intro-jumbo {
+  background: rgba(0, 0, 0, 0)
+}
+
+.intro-text {
+  background: white;
+  border: 1px aliceblue solid;
+  border-radius: .3em;
+  font-size: 1.2em;
+  padding: .7em;
 }
