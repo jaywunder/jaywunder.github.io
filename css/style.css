@@ -23,11 +23,11 @@ html, body {
   height: 4em;
 }
 
-@media screen and (min-width: 480px) {
+/*@media screen and (min-width: 480px) {
   article {
     max-width: 65%;
   }
-}
+}*/
 
 p {
   font-size: 1.2em;
