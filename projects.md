@@ -7,7 +7,7 @@ permalink: /projects/
 
 ### [Breakout](/breakout)
 
-#### A clone of the game "Breakout" for the Atari.  I made this game for machine learning research, I'm going to make a neural network learn how to play breakout.
+#### A clone of the game "Breakout" for the Atari.  I programmed this game for machine learning research, I'm going to make a neural network learn how to play breakout.
 
 ### [Vector Field Visualizer](/vector-field)
 
@@ -15,7 +15,7 @@ permalink: /projects/
 
 ### [Tap Tap Pop!](/tap-tap-pop)
 
-#### A clone of "Pop the Lock" for my senior passages project about artificial intelligence. Currently there's no AI playing on the public version. I might make a scoreboard soon in the future...
+#### A clone of "Pop the Lock" for my senior passages project about artificial intelligence. Currently there's no AI playing on the public version.
 
 ### [Forest Fire](/forest-fire)
 
