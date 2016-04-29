@@ -5,6 +5,10 @@ headerLocation: projects
 permalink: /projects/
 ---
 
+### [Otek](https://github.com/jaywunder/otek)
+
+#### Otek is a command line tool to help you make new projects with ease.  Otek stores templates of projects so you don’t have to remake the same file structure every time your start developing a new idea. Just make the template once and keep getting started from that. Otek avoids being opinonated because the user knows what project format is best.
+
 ### [Breakout](/breakout)
 
 #### A clone of the game "Breakout" for the Atari.  I programmed this game for machine learning research, I'm going to make a neural network learn how to play breakout.
