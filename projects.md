@@ -5,6 +5,10 @@ headerLocation: projects
 permalink: /projects/
 ---
 
+### [Raycaster](/raycaster)
+
+#### A raycaster is a type of rendering engine that renders a 2D map to look 3D.  I did this project for a physics project to show how models of the real world can sometimes work in completely different ways.
+
 ### [Otek](https://github.com/jaywunder/otek)
 
 #### Otek is a command line tool to help you make new projects with ease.  Otek stores templates of projects so you don’t have to remake the same file structure every time your start developing a new idea. Just make the template once and keep getting started from that. Otek avoids being opinonated because the user knows what project format is best.
