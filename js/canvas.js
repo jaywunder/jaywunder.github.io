@@ -99,7 +99,7 @@ class Fish {
       this.meshPoints.push(new PIXI.Point(i * 10, 0))
     let textures = ['orange0', 'black0', 'orange1', 'black1']
     let texName = textures[Math.floor(Math.random() * textures.length)]
-    this.texture = PIXI.Texture.fromImage('./assets/koi-' + texName + '.png')
+    this.texture = PIXI.Texture.fromImage('http://jacobwunder.com/assets/koi-' + texName + '.png')
     this.mesh = new PIXI.mesh.Rope(this.texture, this.meshPoints)
 
     this.body.addChild(this.mesh)
