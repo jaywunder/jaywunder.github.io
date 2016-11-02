@@ -27,6 +27,8 @@
 
   <script>
     function resizeIframe(obj) {
+      console.log('HELLO IM AN IFRAME')
+      obj.style.height = 0
       obj.style.height = obj.contentWindow.document.body.scrollHeight + 'px';
     }
   </script>
