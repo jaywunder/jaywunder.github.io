@@ -31,6 +31,15 @@ html, body {
 
 p {
   font-size: 1.2em;
+  text-indent: 2em;
+}
+
+li p {
+  text-indent: 0em;
+}
+
+.post-title-container  {
+  padding-top: 2em;
 }
 
 #koi-canvas {
