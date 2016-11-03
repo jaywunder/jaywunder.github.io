@@ -30,6 +30,7 @@ html, body {
 }*/
 
 p {
+  line-height: 1.5em;
   font-size: 1.2em;
   text-indent: 2em;
 }
