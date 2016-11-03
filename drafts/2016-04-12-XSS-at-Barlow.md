@@ -34,7 +34,7 @@ headerLocation: blog
 
 - `%20` is the URL escape sequence for a space character
 
-​To kill two birds with one stone, I tried injecting a `script` element instead of a `strong` element.  The URL I tried looked like: `imgur.com/<script>alert('bad')</script>`.  Unfortunately that didn't work though, below is a look at the chrome dev tools when I go to that link.  This screenshot shows that when I try putting a `script` tag directly in the URL, the `anchor` element that contains the URL get's messed up and causes the page to not render properly.  So instead of `alert('bad')` being rendered, the below text is rendered.
+​To kill two birds with one stone, I tried injecting a `script` element instead of a `strong` element.  The URL I tried looked like: `imgur.com/<script>alert('bad')</script>`.  Unfortunately that didn't work though.  Below is a look at the chrome dev tools when I go to that link.  This screenshot shows that when I try putting a `script` tag directly in the URL, the `anchor` element that contains the URL get's messed up and causes the page to not render properly.  So instead of `alert('bad')` being rendered, the below text is rendered.
 
 ![img](https://lh5.googleusercontent.com/2FwAohRT5B49IfWun0gG8dKNf7R3-2n-IKYVHV-YWgw1LZv4iZ_IFkjhvCZnHVoOOFa8aD8x7OzNd_b1L2_GQN4mPeWAWkfKSOnuO1at3rVbWlGxRxnnxUrCH2WDzDLdgLN1hbA)
 
@@ -57,11 +57,11 @@ In order to study it more closely I broke it apart into the different variables 
 - `bu=imgur.com`
 - `bc=Website%20contains%20prohibited%20Adult%20Oriented%20content`
 
-What's interesting about this is that the `bu` variable – which is for the link – comes before the `bc` variable in the firewall URL.  The ordering of those two variables is important because it means I could craft a malicious URL to take advantage of it.  I tried going to `imgur.com/&bc=Some%20Random%20Text` and lo and behold "Some Random Text" was the description for why `imgur.com` was blocked, **not** "Website Contains prohibited Adult Oriented content".  
+What's interesting about this is that the `bu` variable – which is for the link – comes before the `bc` variable in the firewall URL.  The ordering of those two variables is important because it means I could craft a malicious URL to take advantage of it.  I tried going to imgur.com/&bc=Some%20Random%20Text, and lo and behold "Some Random Text" was the description for why imgur.com was blocked, instead of “Website Contains prohibited Adult Oriented content”..  
 
 With that knowledge in mind, I could *in theory* inject any HTML into a client's webpage by putting the HTML after `&bc=` in the malicious URL.  I tried going to `imgur.com/&bc=<script>alert('bad')</script>` and found good news and bad news.  The good news was that I did see the `script` element in the HTML code of the webpage.  The bad news was that the `script` didn't actually run.  
 
-​It turned out that the page was rendering the variables locally on the client's page, as we saw in the URL, the page is written in raw HTML, not rendered server-side with PHP.  The script tag wouldn't run because it was being rendered on the page after load time, and new script tags aren't run if they're added after the page loads.  After a bit of researching I found `img` tags *do* run javascript if they're put in a page after load time. So I just had to put an `img` tag with `src="not_real_image"` and `onerror="alert('this is bad')"` attributes.  
+​It turned out that the page was rendering the variables locally on the client’s page as we saw in the URL. The page is written in raw HTML, not rendered server-side with PHP.  The script tag wouldn't run because it was being rendered on the page after load time, and new script tags aren't run if they're added after the page loads.  After a bit of researching I found `img` tags *do* run javascript if they're put in a page after load time. So I just had to put an `img` tag with `src="not_real_image"` and `onerror="alert('this is bad')"` attributes.  
 
 
 
@@ -88,11 +88,11 @@ http://imgur.com/&bc=%3Cimg%20src%3D%22lolnope%22%20onerror%3D%22alert%28%27this
 
  - #### **Always** sanitize user input
 
-If the firewall had properly escaped the URL it got from the user, there wouldn't be a way to take advantage of the URL.  There would be no way to run code on a client's machine because any text a URL could contain would become actual text on the webpage.  An example of escaping user input is changing the "less than" character (`<`) into its HTML escape code "`&lt;` ".
+If the firewall had properly escaped the URL it got from the user, there wouldn't be a way to take advantage of the URL.  There would be no way to run code on a client's machine because any text a URL could contain would become actual text on the webpage.  An example of escaping user input is to change the "less than" character (`<`) into its HTML escape code "`&lt;` ".
 
  - #### Be wary of variable placement
 
-I was able to take advantage of the firewall in part because the firewall URL had bad variable placement.  If the  user input was after anything else rendered on the page, it would have been significantly more difficult to take advantage of the page.
+I was able to take advantage of the firewall page, in part, because the firewall URL had bad variable placement.  If the  user input was after anything else rendered on the page, it would have been significantly more difficult to take advantage of the page.
 
  -  #### Minify your javascript
 
