@@ -26,11 +26,16 @@ headerLocation: blog
 ​	`imgur.com/This%20text%20will%20be%20bold` 
 
 - `imgur.com` is a blocked link, so that will redirect to the firewall page
-- `` is HTML code
-- `This%20text%20will%20be%20bold` is the text that will be bolded. 
-- `%20` is the URL escape sequence for a space character​
 
-​	To kill two birds with one stone, I tried injecting a `script` element instead of a `strong` element.  The URL I tried looked like: `imgur.com/alert('bad')`.  Unfortunately that didn't work though, below is a look at the chrome dev tools when I go to that link.  This screenshot shows that when I try putting a `script` tag directly in the URL, the `anchor` element that contains the URL get's messed up and causes the page to not render properly.  So instead of `alert('bad')` being rendered, the below text is rendered. 
+- `` is HTML code
+
+- `This%20text%20will%20be%20bold` is the text that will be bolded. 
+
+- `%20` is the URL escape sequence for a space character
+
+  ​
+
+  ​	To kill two birds with one stone, I tried injecting a `script` element instead of a `strong` element.  The URL I tried looked like: `imgur.com/alert('bad')`.  Unfortunately that didn't work though, below is a look at the chrome dev tools when I go to that link.  This screenshot shows that when I try putting a `script` tag directly in the URL, the `anchor` element that contains the URL get's messed up and causes the page to not render properly.  So instead of `alert('bad')` being rendered, the below text is rendered. 
 
 ![img](https://lh5.googleusercontent.com/2FwAohRT5B49IfWun0gG8dKNf7R3-2n-IKYVHV-YWgw1LZv4iZ_IFkjhvCZnHVoOOFa8aD8x7OzNd_b1L2_GQN4mPeWAWkfKSOnuO1at3rVbWlGxRxnnxUrCH2WDzDLdgLN1hbA)
 
