@@ -3,6 +3,8 @@ layout: post
 title: XSS at Barlow
 comments: true
 headerLocation: blog
+date: 2016-04-12
+
 ---
 
 ​	My school has a firewall that prevents students from going to potentially distracting or inappropriate websites.  This is the story about how I found an XSS vulnerability in the frontend of the firewall at my highschool.  The adventure begins in middle school when I used to try to get onto gaming websites like [miniclip.com](http://miniclip.com). Miniclip was blocked by the school, so I went to the firewall instead of Miniclip. Here I noticed  some similarities betwee the URL bar and the page below.  For example, I saw that "blocked by the default web CEN filter" was also in the URL.  
