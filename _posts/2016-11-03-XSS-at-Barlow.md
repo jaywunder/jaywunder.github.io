@@ -1,7 +1,7 @@
 ---
 layout: post
 title: XSS at Barlow
-comments: false
+comments: true
 headerLocation: blog
 
 ---
@@ -49,7 +49,7 @@ In order to study it more closely I broke it apart into the different variables 
 - `http://207.210.151.27:8080/ibreports/ibp/bp.html`
 - `fn=RSD9%20Joel%20Barlow%20HS`
 - `fp=22`
--  `ct=You%20are%20being%20blocked%20by%20the%20default%20CEN%20web%20filter.%20%20District%20admins%20please%20contact%20CEN%20tech%20support%20for%20assistance%20using%20our%20current%20escalation%20sheet.`
+- `ct=You%20are%20being%20blocked%20by%20the%20default%20CEN%20web%20filter.%20%20District%20admins%20please%20contact%20CEN%20tech%20support%20for%20assistance%20using%20our%20current%20escalation%20sheet.`
 - `ip=XX.10.105.142` The actual IP address was there though, I crossed out the first two digits on the IP
 - `ibip=207.210.151.27`
 - `ldu=1`
@@ -86,14 +86,14 @@ http://imgur.com/&bc=%3Cimg%20src%3D%22lolnope%22%20onerror%3D%22alert%28%27this
 
 ​I've learned three things from this exploit:
 
- - #### **Always** sanitize user input
+-  #### **Always** sanitize user input
 
 If the firewall had properly escaped the URL it got from the user, there wouldn't be a way to take advantage of the URL.  There would be no way to run code on a client's machine because any text a URL could contain would become actual text on the webpage.  An example of escaping user input is to change the "less than" character (`<`) into its HTML escape code "`&lt;` ".
 
- - #### Be wary of variable placement
+-  #### Be wary of variable placement
 
 I was able to take advantage of the firewall page, in part, because the firewall URL had bad variable placement.  If the  user input was after anything else rendered on the page, it would have been significantly more difficult to take advantage of the page.
 
- -  #### Minify your javascript
+-   #### Minify your javascript
 
 It was extremely easy to read the code that drove this small webpage because the developers weren't serving minified javascript.  Minifying code doesn't make your webpage immune to hackers, but minified code is certainly more difficult to read than plain javascript.
