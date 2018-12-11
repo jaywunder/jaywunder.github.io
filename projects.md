@@ -5,6 +5,24 @@ headerLocation: projects
 permalink: /projects/
 ---
 
+### [Jarsec Verified](https://github.com/jaywunder/jarsec-verified)
+#### Final project for CS 295 Software Verification
+
+### [UVM Schedule Builder](https://jwunder.w3.uvm.edu/schedule-builder/public/index.php/home)
+#### Schedule builder built for UVM CEMS school using react. Previously closed source, now available [here](https://github.com/jaywunder/schedule-builder)
+
+### [Mastermind](/mastermind-front)
+#### Implementation of the mastermind board game using react and rust wasm.  Frontend made by me, [backend by Curtis Wilcox](https://github.com/quillcox/Mastermind)
+
+### [hapi-sleep](https://github.com/jaywunder/hapi-sleep)
+#### plugin for hapi to generate an insomnia workspace at start time. This plugin exposes an endpoint /insomnia that returns an insomnia import/export JSON string. This plugin is meant to be used by importing from a link in insomnia.
+
+### [Sudoku Solver](https://github.com/jaywunder/sudoku)
+#### A sudoku solver using the backtracking algorithm written in rust
+
+### [Crew TV Dash](https://github.com/jaywunder/crew-tv-dash)
+#### Dashboard for the TV in the CS Crew room. Shows CS Crew calendar, the top article on Hacker News for the day, attendance over the past week.
+
 ### [Raycaster](/raycaster)
 
 #### A raycaster is a type of rendering engine that renders a 2D map to look 3D.  I did this project for a physics project to show how models of the real world can sometimes work in completely different ways.
