@@ -1,0 +1,102 @@
+.App {
+  --logo-fill: #2c3e50;
+  color: var(--logo-fill);
+  display: grid;
+  grid-column-gap: 2em;
+}
+
+.App .intro { grid-area: intro }
+.App .nav { grid-area: nav }
+.App .content { grid-area: content }
+
+/* Phone */
+@media (min-width:320px) {
+  .App {
+    margin: 5% auto;
+    grid-template:
+      'intro nav' 150px
+      'content content' auto;
+  }
+
+  .App .intro:first-child {
+    margin: 0 auto;
+  }
+
+  /* .App .nav .socials {
+    display: flex;
+    flex-direction: column;
+    float: right;
+  } */
+}
+
+/* Tablet */
+@media (min-width:640px) {
+  .App {
+    margin: 5% 20%;
+    grid-template:
+      'intro nav' 150px
+      'content content' auto;
+  }
+
+  .App .intro:first-child {
+    margin: 0 auto;
+  }
+}
+
+/* Laptop */
+@media (min-width:1024px) {
+  .App {
+    margin: 5% 15%;
+    grid-template:
+      'intro content' 150px
+      'nav content' auto / 1fr 4fr;
+  }
+
+  .App .intro:first-child {
+    margin: auto auto;
+  }
+}
+
+.App .nav {
+  display: flex;
+  flex-flow: column;
+  align-items: center;
+  font-size: 1.5em;
+}
+
+.App .nav .links {
+  display: flex;
+  flex-flow: column;
+  align-items: flex-start;
+}
+
+.App .nav .socials > * {
+  margin: .4em;
+}
+
+.App .intro {
+  --logo-width: 7em;
+}
+
+.App a {
+  color: var(--logo-fill);
+}
+
+.App .content {
+  max-width: 100%;
+  background: white;
+  border: 1px aliceblue solid;
+  border-radius: .3em;
+  padding: 2em;
+}
+
+#resumeFrame {
+  border: none;
+  height: 1500px;
+}
+
+#koi-canvas {
+  position: fixed;
+  top: 0;
+  z-index: -100;
+}

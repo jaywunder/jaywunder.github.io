@@ -1,0 +1,32 @@
+{
+  "name": "site",
+  "version": "0.1.0",
+  "private": true,
+  "homepage": "jacobwunder.com/",
+  "dependencies": {
+    "marked": "^0.6.0",
+    "react": "^16.7.0-alpha.2",
+    "react-dom": "^16.7.0-alpha.2",
+    "react-router": "^4.4.0-beta.6",
+    "react-router-dom": "^4.4.0-beta.6",
+    "react-scripts": "2.1.2",
+    "react-social-icons": "^4.1.0"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject",
+    "predeploy": "yarn run build",
+    "deploy": "gh-pages -d build"
+  },
+  "eslintConfig": {
+    "extends": "react-app"
+  },
+  "browserslist": [
+    ">0.2%",
+    "not dead",
+    "not ie <= 11",
+    "not op_mini all"
+  ]
+}
