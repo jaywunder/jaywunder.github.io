@@ -21,17 +21,17 @@ function App () {
   return (
     <Router>
       <div className="App">
-        <div className="intro">
+        <div className="logo">
           <Link to="/">
             <Logo/>
           </Link>
         </div>
         <div className="nav">
           <div className="links">
-            <Link to="/">Home</Link>
-            {/* <Link to="/blog/">Blog</Link> */}
-            <Link to="/projects/">Projects</Link>
-            <Link to="/resume/">Resume</Link>
+            <Link to="/">HOME</Link>
+            {/* <Link to="/blog/">BLOG</Link> */}
+            <Link to="/projects/">PROJECTS</Link>
+            <Link to="/resume/">RESUME</Link>
           </div>
           <div className="socials">
             <SocialIcon url="http://github.com/jaywunder" {...socialConfig}/>

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import marked from 'marked'
+import './projects.css'
 
 export default function Projects () {
   const [content, setContent] = useState('loading...')
