@@ -2,7 +2,7 @@
   "name": "site",
   "version": "0.1.0",
   "private": true,
-  "homepage": "jacobwunder.com/",
+  "homepage": "sad-brattain-5dd574.netlify.com/",
   "dependencies": {
     "marked": "^0.6.0",
     "react": "^16.7.0-alpha.2",
