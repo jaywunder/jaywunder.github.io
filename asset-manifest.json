@@ -1,13 +1,13 @@
 {
-  "main.css": "jacobwunder.com/static/css/main.56991f6f.chunk.css",
-  "main.js": "jacobwunder.com/static/js/main.e8832787.chunk.js",
-  "main.js.map": "jacobwunder.com/static/js/main.e8832787.chunk.js.map",
-  "static/js/1.32eda71a.chunk.js": "jacobwunder.com/static/js/1.32eda71a.chunk.js",
-  "static/js/1.32eda71a.chunk.js.map": "jacobwunder.com/static/js/1.32eda71a.chunk.js.map",
-  "runtime~main.js": "jacobwunder.com/static/js/runtime~main.e580ffa6.js",
-  "runtime~main.js.map": "jacobwunder.com/static/js/runtime~main.e580ffa6.js.map",
-  "static/css/main.56991f6f.chunk.css.map": "jacobwunder.com/static/css/main.56991f6f.chunk.css.map",
-  "index.html": "jacobwunder.com/index.html",
-  "precache-manifest.2168d39e7e37fd0ea211ee350a14ed6c.js": "jacobwunder.com/precache-manifest.2168d39e7e37fd0ea211ee350a14ed6c.js",
-  "service-worker.js": "jacobwunder.com/service-worker.js"
+  "main.css": "/static/css/main.56991f6f.chunk.css",
+  "main.js": "/static/js/main.d3fdf5eb.chunk.js",
+  "main.js.map": "/static/js/main.d3fdf5eb.chunk.js.map",
+  "static/js/1.32eda71a.chunk.js": "/static/js/1.32eda71a.chunk.js",
+  "static/js/1.32eda71a.chunk.js.map": "/static/js/1.32eda71a.chunk.js.map",
+  "runtime~main.js": "/static/js/runtime~main.229c360f.js",
+  "runtime~main.js.map": "/static/js/runtime~main.229c360f.js.map",
+  "static/css/main.56991f6f.chunk.css.map": "/static/css/main.56991f6f.chunk.css.map",
+  "index.html": "/index.html",
+  "precache-manifest.a1403d3b067c2863ca5168acc39946a7.js": "/precache-manifest.a1403d3b067c2863ca5168acc39946a7.js",
+  "service-worker.js": "/service-worker.js"
 }
