@@ -3,11 +3,13 @@ import React from 'react'
 export default function Home () {
   return (
     <>
-      <h1>This site is currently under development 🥰 </h1>
-      <h1>
-        <span role="img" aria-label="left arrow">⬅️</span>
-        Feel free to check out my projects, resume, or social links
-      </h1>
+      <h1>Hello! <span role="img" aria-label="hand waving">👋</span></h1>
+      <p>
+        I am a senior at the University of Vermont. I'm interested in programming
+        languages, software verification, data privacy, and frontend web
+        development. Currently looking for research opportunities, job
+        opportunities, and PhD programs.
+      </p>
     < />
   )
 }

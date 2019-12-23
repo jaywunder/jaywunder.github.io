@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Route, Link } from "react-router-dom";
+import { HashRouter as Router, Route, Link } from "react-router-dom";
 
 import { SocialIcon } from 'react-social-icons'
 
@@ -36,14 +36,14 @@ function App () {
           <div className="socials">
             <SocialIcon url="http://github.com/jaywunder" {...socialConfig}/>
             <SocialIcon url="https://www.linkedin.com/in/jacob-wunder-905498128/" {...socialConfig} />
-            <SocialIcon url="https://twitter.com/jacobwunder54" {...socialConfig} />
+            <SocialIcon url="https://twitter.com/wowjacobwunder" {...socialConfig} />
           </div>
         </div>
         <div className="content">
           <Route path="/" exact component={Home} />
-          <Route path="/blog/" component={Home} />
-          <Route path="/projects/" component={Projects} />
-          <Route path="/resume/" component={Resume} />
+          <Route path="/blog/" exact component={Home} />
+          <Route path="/projects/" exact component={Projects} />
+          <Route path="/resume/" exact component={Resume} />
         </div>
       </div>
       <canvas id="koi-canvas" />
