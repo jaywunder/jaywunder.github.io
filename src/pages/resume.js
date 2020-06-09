@@ -10,7 +10,7 @@ export default function Resume () {
         scrolling="no"
         height="1500"
         width="100%"
-        src="https://docs.google.com/document/d/e/2PACX-1vS6egkJ8d1niyLH5alNc3uIvYRGUghQqyQkeX_hHXX3EGDHHDBdIuNo81-SKS33b-Z8UMrfojuO95cI/pub?embedded=true"
+        src="https://docs.google.com/document/d/e/2PACX-1vTtiddhLvBkA_q5pZRSiO5p_o2Zticq37AOZXO5UIUkPyaseiaBPXcLRrQVXpKNuRAdLfid9lbidiYL/pub?embedded=true"
       ></iframe>
     </div>
   )

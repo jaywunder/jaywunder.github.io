@@ -7,7 +7,7 @@ import Home from './pages/home'
 import Resume from './pages/resume'
 import Projects from './pages/projects'
 
-import Logo from './logo/jw-logo.svg.js';
+import Logo from './logo/jw-logo-no-deadname.svg.js';
 import './App.css';
 
 
@@ -34,9 +34,9 @@ function App () {
             <Link to="/resume/">RESUME</Link>
           </div>
           <div className="socials">
-            <SocialIcon url="http://github.com/jaywunder" {...socialConfig}/>
-            <SocialIcon url="https://www.linkedin.com/in/jacob-wunder-905498128/" {...socialConfig} />
-            <SocialIcon url="https://twitter.com/wowjacobwunder" {...socialConfig} />
+            <SocialIcon url="http://github.com/junewunder" {...socialConfig}/>
+            <SocialIcon url="https://www.linkedin.com/in/june-wunder/" {...socialConfig} />
+            <SocialIcon url="https://twitter.com/wowjunewunder" {...socialConfig} />
           </div>
         </div>
         <div className="content">
