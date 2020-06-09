@@ -1,5 +1,11 @@
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
+## June-- how to deply
+1) `npm run build`
+2) switch to master branch
+3) drag all files/folders from `build` into the root directory
+4) `serve -s .` to test
+
 ## Available Scripts
 
 In the project directory, you can run:
