@@ -22,6 +22,11 @@ Wrote proof of correctness in Agda for the type system of differential privacy l
 
 # Personal and School Projects
 
+## [Juniper Programming language](https://github.com/junewunder/juniper-rs)
+
+Juniper is a toy programming language I'm using to add fun features to and generally practice my pl skills. Juniper features a mixfix parser, recursion, mutability, structs, and match/case analysis.
+
+
 ## [CS 275 Statics Simulator](https://github.com/jaywunder/CS-275-Statics-Simulator) – Fall 2019
 
 Semester group project for the Android class at UVM. This in app to help first year statics students gain intuition for how beams bend in different scenarios.
