@@ -10,7 +10,6 @@ export default function Home () {
       </a>. <br/>
       Interested in programming languages, software verification,
       data privacy, and web development. <br/>
-      Currently looking for PhD programs in Boston for Fall 2021
     </p>
   </>
 }
